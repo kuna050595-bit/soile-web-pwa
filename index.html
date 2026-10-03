@@ -1,0 +1,2827 @@
+<meta charset="utf-8">
+<title>Сөйле</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#EF4C82">
+<script src="voice-data.js"></script>
+<script src="voice-data-ru.js"></script>
+<style>
+  :root{
+    --paper:#FFF7E8;
+    --surface:#FFFFFF;
+    --surface-2:#F1F6F4;
+    --ink:#172420;
+    --ink-dim:#5B6B66;
+    --line:#E4ECE9;
+    --accent:#EF4C82;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#FDE1EA;
+    --accent-2:#FFC93C;
+    --danger:#C24B4B;
+
+    --blob-1:#FFC2DC;
+    --blob-2:#FFDD5C;
+    --blob-3:#A8EDC9;
+    --blob-4:#C2CDFB;
+    --blob-5:#FFC896;
+    --dot-color:rgba(239,76,130,.16);
+
+    --cat-people:#E8A93B;
+    --cat-action:#3FA35A;
+    --cat-food:#E07A34;
+    --cat-emotion:#3E7FB0;
+    --cat-place:#8367B8;
+    --cat-core:#2E9C93;
+    --cat-mine:#C9A227;
+    --cat-fav:#F2B705;
+    --cat-toys:#E4527A;
+    --cat-state:#7C9C3F;
+    --cat-number:#C0392B;
+    --cat-animal:#9C6B30;
+    --cat-transport:#2D6CDF;
+    --cat-clothes:#2CA5B0;
+    --cat-health:#C0587A;
+    --cat-home:#8A7357;
+    --cat-shape:#B15EBE;
+    --cat-color:#C77DBB;
+
+    --font-display:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --font-ui:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+
+    --shadow-card:0 1px 2px rgba(23,36,32,.06), 0 8px 20px -10px rgba(23,36,32,.25);
+    --shadow-shell:0 30px 70px -25px rgba(15,30,26,.45);
+    color-scheme: light;
+  }
+  /* Это приложение для детей — оставляем всегда яркую/светлую тему,
+     не подстраиваясь под тёмный режим устройства зрителя (иначе на
+     телефоне с включённой системной тёмной темой всё становится тёмным
+     и теряет весь смысл «яркого и детского» дизайна). Тёмная тема ниже
+     остаётся в коде на будущее, но включается только явно. */
+  @media (prefers-color-scheme: dark){
+    :root[data-theme="dark"]{
+      --paper:#0F1F1B;
+      --surface:#16302A;
+      --surface-2:#1C382F;
+      --ink:#EAF3F0;
+      --ink-dim:#9FB6AF;
+      --line:#274941;
+      --accent:#FF86B2;
+      --accent-ink:#3A0F22;
+      --accent-soft:#3D2430;
+      --accent-2:#FFD873;
+      --danger:#E38080;
+      --blob-1:#4A2536;
+      --blob-2:#453A16;
+      --blob-3:#173D30;
+      --blob-4:#252B49;
+      --blob-5:#452A1B;
+      --dot-color:rgba(255,134,178,.10);
+      --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -10px rgba(0,0,0,.5);
+      --shadow-shell:0 30px 70px -25px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0F1F1B;
+    --surface:#16302A;
+    --surface-2:#1C382F;
+    --ink:#EAF3F0;
+    --ink-dim:#9FB6AF;
+    --line:#274941;
+    --accent:#FF86B2;
+    --accent-ink:#3A0F22;
+    --accent-soft:#3D2430;
+    --accent-2:#FFD873;
+    --blob-1:#4A2536;
+    --blob-2:#453A16;
+    --blob-3:#173D30;
+    --blob-4:#252B49;
+    --blob-5:#452A1B;
+    --dot-color:rgba(255,134,178,.10);
+    --danger:#E38080;
+    --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -10px rgba(0,0,0,.5);
+    --shadow-shell:0 30px 70px -25px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(380px 300px at 8% 0%, var(--blob-1), transparent 76%),
+      radial-gradient(360px 300px at 98% 4%, var(--blob-2), transparent 76%),
+      radial-gradient(400px 340px at 102% 62%, var(--blob-3), transparent 76%),
+      radial-gradient(360px 320px at -2% 68%, var(--blob-4), transparent 76%),
+      radial-gradient(340px 300px at 50% 100%, var(--blob-5), transparent 74%),
+      radial-gradient(circle, var(--dot-color) 5px, transparent 5px) 0 0/34px 34px,
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:var(--font-ui);
+    padding:32px 16px 48px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+  .page-head{
+    width:100%;
+    max-width:520px;
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:5px 12px;
+    border-radius:999px;
+  }
+  .title-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:.5em 0 .15em;
+  }
+  .mascot{ width:40px; height:40px; flex:0 0 auto; }
+  .page-head h1{
+    font-family:var(--font-display);
+    font-weight:900;
+    font-size:clamp(28px,6vw,36px);
+    margin:0;
+    text-wrap:balance;
+  }
+  .page-head p{
+    margin:0;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.55;
+    text-wrap:balance;
+  }
+
+  /* ---------- app shell (phone) ---------- */
+  .shell{
+    width:100%;
+    max-width:400px;
+    background:var(--surface);
+    border-radius:30px;
+    box-shadow:var(--shadow-shell);
+    border:1px solid var(--line);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .shell-header{
+    padding:18px 18px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  .brand-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .wordmark{
+    font-family:var(--font-display);
+    font-weight:900;
+    font-size:21px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .mascot-sm{ width:22px; height:22px; flex:0 0 auto; }
+  .lang-toggle{
+    display:flex;
+    background:var(--surface-2);
+    border-radius:999px;
+    padding:3px;
+    gap:2px;
+  }
+  .lang-toggle button{
+    border:0;
+    background:transparent;
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:12px;
+    padding:6px 12px;
+    border-radius:999px;
+    color:var(--ink-dim);
+    cursor:pointer;
+  }
+  .lang-toggle button[aria-pressed="true"]{
+    background:var(--accent);
+    color:var(--accent-ink);
+  }
+  .mode-toggle{
+    display:flex;
+    background:var(--surface-2);
+    border-radius:12px;
+    padding:3px;
+    gap:2px;
+  }
+  .mode-toggle button{
+    flex:1;
+    border:0;
+    background:transparent;
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:13px;
+    padding:8px 6px;
+    border-radius:9px;
+    color:var(--ink-dim);
+    cursor:pointer;
+  }
+  .mode-toggle button[aria-pressed="true"]{
+    background:var(--surface);
+    color:var(--ink);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+  }
+
+  .level-row{
+    display:flex;
+    background:var(--surface-2);
+    border-radius:12px;
+    padding:3px;
+    gap:2px;
+  }
+  .level-row button{
+    flex:1;
+    min-width:0;
+    border:0;
+    background:transparent;
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:11.5px;
+    line-height:1.2;
+    padding:9px 3px;
+    border-radius:9px;
+    color:var(--ink-dim);
+    cursor:pointer;
+    white-space:normal;
+    overflow-wrap:break-word;
+    text-align:center;
+  }
+  .level-row button[aria-pressed="true"]{
+    background:var(--accent);
+    color:var(--accent-ink);
+  }
+
+  /* ---------- child mode ---------- */
+  .cat-row-wrap{ position:relative; }
+  .cat-row-wrap::after{
+    content:'';
+    position:absolute; top:0; right:0; bottom:0; width:26px;
+    background:linear-gradient(to right, transparent, var(--surface));
+    pointer-events:none;
+  }
+  .cat-row{
+    display:flex;
+    gap:8px;
+    padding:12px 14px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .cat-row::-webkit-scrollbar{display:none;}
+  .cat-pill{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border:2px solid transparent;
+    background:var(--surface-2);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:12.5px;
+    padding:7px 12px 7px 8px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .cat-pill .swatch{
+    width:10px;height:10px;border-radius:50%;
+  }
+  .cat-pill[aria-pressed="true"]{
+    border-color:var(--cat-color, var(--accent));
+    background:color-mix(in srgb, var(--cat-color, var(--accent)) 16%, var(--surface));
+  }
+
+  .phrase-bar{
+    margin:0 14px 12px;
+    min-height:56px;
+    background:var(--surface-2);
+    border-radius:16px;
+    padding:8px 8px 8px 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .phrase-chips{
+    flex:1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    min-height:32px;
+  }
+  .phrase-empty{
+    color:var(--ink-dim);
+    font-size:13px;
+  }
+  .phrase-chip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:5px 10px;
+    font-size:13px;
+    font-weight:700;
+    font-family:var(--font-display);
+  }
+  .phrase-btn{
+    width:40px;height:40px;
+    border-radius:50%;
+    border:0;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .phrase-btn.play{ background:var(--accent); color:var(--accent-ink); }
+  .phrase-btn.clear{ background:transparent; color:var(--ink-dim); }
+  .phrase-btn.play:disabled{ opacity:.4; cursor:default; }
+  .phrase-btn svg{ width:18px; height:18px; }
+
+  .card-grid{
+    padding:2px 14px 88px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .card-tile{
+    aspect-ratio:1/1;
+    min-width:0;
+    border:0;
+    border-radius:22px;
+    background:var(--cat-color);
+    box-shadow:0 10px 20px -10px color-mix(in srgb, var(--cat-color) 65%, transparent), var(--shadow-card);
+    /* На вкладках "Все"/"Мои карточки" одновременно может быть под 250
+       карточек в DOM. content-visibility:auto говорит браузеру не
+       считать раскладку и не рисовать те карточки, что сейчас не видны
+       на экране (ниже/выше прокрутки) — на слабом планшете это заметно
+       снижает нагрузку при скролле и при переключении вкладок.
+       contain-intrinsic-size — примерный размер-заглушка для ещё
+       не отрисованных карточек, чтобы скролл не "прыгал". */
+    content-visibility:auto;
+    contain-intrinsic-size:100px 100px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:8px 4px 7px;
+    cursor:pointer;
+    transition:transform .12s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .card-tile::before{
+    content:'';
+    position:absolute; top:-30%; left:-20%;
+    width:75%; height:60%;
+    background:radial-gradient(closest-side, rgba(255,255,255,.38), transparent 75%);
+    border-radius:50%;
+    pointer-events:none;
+  }
+  .card-tile:active{ transform:scale(.94); }
+  .card-tile svg{ width:56px; height:56px; position:relative; }
+  .card-tile .word, .card-tile .word-sub{
+    position:relative;
+    max-width:100%;
+    overflow-wrap:break-word;
+    word-break:break-word;
+  }
+  .card-tile .word{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:12.5px;
+    color:#fff;
+    text-align:center;
+    line-height:1.15;
+    text-wrap:balance;
+  }
+  .card-tile .word-sub{
+    font-size:9.5px;
+    font-weight:600;
+    color:rgba(255,255,255,.75);
+    text-align:center;
+  }
+  .card-tile.custom img{
+    width:56px;height:56px;object-fit:cover;border-radius:9px;
+    box-shadow:0 0 0 2px rgba(255,255,255,.7);
+  }
+  .add-tile{
+    aspect-ratio:1/1;
+    border-radius:18px;
+    border:2px dashed var(--line);
+    background:transparent;
+    color:var(--ink-dim);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:11px;
+    cursor:pointer;
+  }
+  .add-tile svg{width:22px;height:22px;}
+
+  .voice-note{
+    margin:0 14px 14px;
+    font-size:11px;
+    color:var(--ink-dim);
+    background:var(--surface-2);
+    border-radius:10px;
+    padding:8px 10px;
+    display:none;
+    gap:6px;
+    align-items:flex-start;
+  }
+  .voice-note.show{ display:flex; }
+
+  /* ---------- parent mode ---------- */
+  .parent-view{ padding:16px 16px 20px; display:flex; flex-direction:column; gap:18px; }
+  .p-section h3{
+    font-family:var(--font-ui);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-dim);
+    margin:0 0 8px;
+  }
+  .p-empty{ font-size:13px; color:var(--ink-dim); }
+  .log-list{ display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto; }
+  .log-row{
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; padding:6px 8px; border-radius:10px; background:var(--surface-2);
+  }
+  .log-row .dot{ width:8px;height:8px;border-radius:50%;flex:0 0 auto; }
+  .log-row .t{ margin-left:auto; color:var(--ink-dim); font-size:11px; font-variant-numeric:tabular-nums; }
+  .bars{ display:flex; flex-direction:column; gap:8px; }
+  .bar-row{ display:grid; grid-template-columns:74px 1fr 28px; align-items:center; gap:8px; font-size:12px; }
+  .bar-track{ height:9px; background:var(--surface-2); border-radius:999px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; }
+  .install-banner{
+    max-width:560px; margin:0 auto 14px; padding:12px 14px;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:16px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    font-size:13px; color:var(--ink-dim); box-shadow:var(--shadow-card);
+  }
+  .install-banner span{ flex:1; min-width:180px; }
+  .install-banner .btn{ padding:8px 14px; font-size:13px; }
+  .install-close{
+    background:none; border:none; color:var(--ink-dim); font-size:16px; cursor:pointer;
+    padding:2px 4px; line-height:1;
+  }
+  .voice-picker{ display:flex; gap:8px; align-items:center; }
+  .voice-picker select{
+    flex:1; min-width:0; padding:9px 10px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--ink); font:inherit; font-size:13px;
+  }
+  .voice-check-list{ display:flex; flex-direction:column; gap:6px; max-height:340px; overflow-y:auto; margin-top:10px; }
+  .voice-check-row{
+    display:flex; align-items:center; gap:8px;
+    padding:6px 8px; border-radius:10px; background:var(--surface-2);
+  }
+  .voice-check-row.fixed{ background:color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+  .voice-check-row .vc-play{
+    width:30px; height:30px; border-radius:50%; border:0; flex:0 0 auto;
+    background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .voice-check-row .vc-play svg{ width:13px; height:13px; }
+  .voice-check-row .vc-label{ font-size:12px; font-weight:700; width:78px; flex:0 0 auto; }
+  .voice-check-row select{
+    flex:1; min-width:0; font:inherit; font-size:12px; padding:6px 7px;
+    border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+  }
+  .assign-list{ display:flex; flex-direction:column; gap:8px; }
+  .assign-row{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 10px; border-radius:12px; background:var(--surface-2);
+    font-size:13px; font-weight:700;
+  }
+  .assign-row .swatch{ width:10px;height:10px;border-radius:50%; }
+  .assign-row label{ flex:1; display:flex; align-items:center; gap:8px; cursor:pointer; }
+
+  /* ---------- избранные карточки (выбор специалиста) ---------- */
+  .fav-picker-wrap{ display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto; padding-right:2px; }
+  .fav-group-heading{
+    display:flex; align-items:center; gap:7px;
+    font-size:12.5px; font-weight:800; color:var(--ink-dim);
+    text-transform:uppercase; letter-spacing:.03em;
+  }
+  .fav-group-heading::before{
+    content:''; width:9px; height:9px; border-radius:50%; background:var(--cat-color);
+  }
+  .fav-picker-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(78px, 1fr));
+    gap:7px;
+  }
+  .fav-tile{
+    position:relative;
+    aspect-ratio:1/1;
+    border:0;
+    border-radius:14px;
+    background:var(--cat-color);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; padding:6px 3px 5px;
+    cursor:pointer;
+    overflow:hidden;
+  }
+  .fav-tile img{ width:26px; height:26px; object-fit:cover; border-radius:7px; }
+  .fav-tile svg{ width:26px; height:26px; }
+  .fav-tile .word{
+    font-size:9.5px; font-weight:800; color:#fff; text-align:center; line-height:1.15;
+    max-width:100%; overflow-wrap:break-word; word-break:break-word;
+  }
+  .fav-star{
+    position:absolute; top:4px; right:4px;
+    width:20px; height:20px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.85);
+    border-radius:999px;
+    font-size:12px; line-height:1;
+    color:var(--ink-dim);
+  }
+  .fav-tile[aria-pressed="true"] .fav-star{ background:#FFD54A; color:#7a5b00; }
+  .switch{ position:relative; width:36px; height:20px; flex:0 0 auto; }
+  .switch input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .switch .track{
+    position:absolute; inset:0; background:var(--line); border-radius:999px; transition:background .15s;
+  }
+  .switch .knob{
+    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:left .15s;
+  }
+  .switch input:checked + .track{ background:var(--accent); }
+  .switch input:checked ~ .knob{ left:18px; }
+  .key-note{ font-size:11.5px; color:var(--ink-dim); line-height:1.5; }
+  .key-note b{ color:var(--ink); }
+
+  .fab{
+    /* position:fixed (не absolute) — карточек в сетке может быть больше
+       двухсот, из-за чего .shell становится значительно выше экрана, и
+       кнопка "+", привязанная к его нижнему краю, а не к экрану, могла
+       уехать далеко вниз за пределы видимой области. Fixed держит её
+       всегда в правом нижнем углу ЭКРАНА, независимо от того, насколько
+       длинная сейчас сетка карточек и насколько пролистан список. */
+    position:fixed;
+    right:max(16px, calc((100% - 400px) / 2 + 16px));
+    bottom:16px;
+    width:52px; height:52px;
+    border-radius:50%;
+    border:0;
+    background:var(--accent);
+    color:var(--accent-ink);
+    box-shadow:0 10px 22px -8px color-mix(in srgb, var(--accent) 65%, transparent);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    z-index:4;
+  }
+  .fab svg{ width:22px;height:22px; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    /* position:fixed, не absolute — по той же причине, что и у .fab: при
+       231+ карточках .shell (его позиционированный предок) намного выше
+       экрана, и оверлей/модалка, привязанные к его нижнему краю через
+       absolute+inset:0, могли отрисоваться далеко за пределами видимой
+       области — кнопка "Добавить карточку" физически была на странице,
+       но пролистать до неё было практически невозможно. Fixed всегда
+       привязан к реальному экрану устройства. */
+    position:fixed; inset:0;
+    background:rgba(10,20,17,.55);
+    display:flex; align-items:flex-end; justify-content:center;
+    z-index:5;
+  }
+  .modal{
+    width:100%;
+    max-width:400px;
+    background:var(--surface);
+    border-radius:22px 22px 0 0;
+    padding:18px 18px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal h3{ margin:0; font-family:var(--font-display); font-size:18px; }
+  .field label{ display:block; font-size:11.5px; font-weight:700; color:var(--ink-dim); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em; }
+  .field input[type="text"]{
+    width:100%; border:1px solid var(--line); background:var(--surface-2); color:var(--ink);
+    border-radius:10px; padding:9px 11px; font-family:var(--font-ui); font-size:14px;
+  }
+  .photo-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .photo-preview{
+    width:56px;height:56px;border-radius:12px;background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;
+    border:1px dashed var(--line);
+  }
+  .photo-preview img{ width:100%;height:100%;object-fit:cover; }
+  .btn{
+    border:0; border-radius:12px; padding:10px 14px; font-family:var(--font-ui);
+    font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .btn.ghost{ background:var(--surface-2); color:var(--ink); }
+  .btn.accent{ background:var(--accent); color:var(--accent-ink); }
+  .btn.danger{ background:transparent; color:var(--danger); }
+  .cat-choice{ display:flex; gap:7px; flex-wrap:wrap; }
+  .cat-choice button{
+    border:2px solid transparent; border-radius:999px; padding:6px 12px; font-size:12px;
+    font-weight:700; color:#fff; cursor:pointer;
+  }
+  .cat-choice button[aria-pressed="true"]{ border-color:var(--ink); }
+  .mic-row{ display:flex; align-items:center; gap:10px; }
+  .mic-status{ font-size:12px; color:var(--ink-dim); }
+  .modal-actions{ display:flex; gap:10px; margin-top:4px; }
+  .modal-actions .btn{ flex:1; }
+
+  /* ---------- footer note ---------- */
+  .foot-card{
+    width:100%; max-width:520px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 20px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .foot-card h4{ margin:0; font-size:13px; font-family:var(--font-ui); }
+  .foot-card p{ margin:0; font-size:12.5px; color:var(--ink-dim); line-height:1.6; }
+  .legend-row{ display:flex; flex-wrap:wrap; gap:8px 14px; }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink); }
+  .legend-item .sw{ width:11px;height:11px;border-radius:4px; }
+
+  [hidden]{ display:none !important; }
+
+  @media (max-width:400px){
+    body{ padding:24px 12px 36px; }
+  }
+
+  /* ---------- планшет ----------
+     На телефоне "shell" — это карточка-приложение шириной до 400px,
+     отцентрированная на экране. На планшете (и в установленном
+     Android-приложении, которое занимает весь экран) это же
+     ограничение оставляло игру в 400px на середине огромного 10"
+     экрана — отсюда и жалоба "мелкие иконки". Здесь раздвигаем
+     оболочку вширь и одновременно увеличиваем иконки/фото и шрифт
+     на карточках — иначе те же карточки просто стали бы больше по
+     размеру, но с тем же мелким рисунком и текстом внутри. */
+  @media (min-width:700px){
+    .page-head{ max-width:900px; }
+    .shell{ max-width:900px; }
+    .card-grid{ grid-template-columns:repeat(4,1fr); gap:14px; }
+    .card-tile svg{ width:92px; height:92px; }
+    .card-tile.custom img{ width:92px; height:92px; }
+    .card-tile .word{ font-size:15px; }
+    .card-tile .word-sub{ font-size:11px; }
+    .add-tile svg{ width:32px; height:32px; }
+    .add-tile{ font-size:13px; }
+    .cat-pill{ font-size:14px; padding:9px 16px 9px 10px; }
+    .cat-pill .swatch{ width:12px; height:12px; }
+  }
+</style>
+
+<div class="page-head">
+  <span class="eyebrow">✦ Приложение для общения</span>
+  <div class="title-row">
+    <svg class="mascot" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 4c14 0 26 9 26 24 0 13-10 24-26 28-16-4-26-15-26-28C6 13 18 4 32 4Z" fill="var(--accent)"/>
+      <circle cx="24" cy="29" r="3.6" fill="#fff"/>
+      <circle cx="40" cy="29" r="3.6" fill="#fff"/>
+      <path d="M23 39q9 8 18 0" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+    </svg>
+    <h1>Сөйле — карточки для общения</h1>
+  </div>
+  <p>Ребёнок собирает фразу из карточек, приложение озвучивает её на казахском или русском.</p>
+</div>
+
+<div class="install-banner" id="install-banner" hidden>
+  <span id="install-text">Это можно установить как отдельное приложение — иконка на экране, без адресной строки браузера.</span>
+  <button type="button" class="btn accent" id="install-btn">Установить</button>
+  <button type="button" class="install-close" id="install-close" aria-label="Скрыть">✕</button>
+</div>
+
+<div class="shell" id="shell">
+  <div class="shell-header">
+    <div class="brand-row">
+      <div class="wordmark" id="wordmark">
+        <svg class="mascot-sm" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 4c14 0 26 9 26 24 0 13-10 24-26 28-16-4-26-15-26-28C6 13 18 4 32 4Z" fill="var(--accent)"/>
+          <circle cx="24" cy="29" r="3.6" fill="#fff"/>
+          <circle cx="40" cy="29" r="3.6" fill="#fff"/>
+          <path d="M23 39q9 8 18 0" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+        </svg>
+        Сөйле
+        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 30.09-license</span>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Язык озвучки">
+        <button type="button" id="lang-kk" aria-pressed="true">ҚАЗ</button>
+        <button type="button" id="lang-ru" aria-pressed="false">РУС</button>
+      </div>
+    </div>
+    <div class="mode-toggle" role="group" aria-label="Режим">
+      <button type="button" id="mode-child" aria-pressed="true">Ребёнок</button>
+      <button type="button" id="mode-parent" aria-pressed="false">Родитель / специалист</button>
+    </div>
+  </div>
+
+  <div id="view-child">
+    <div class="cat-row-wrap"><div class="cat-row" id="cat-row"></div></div>
+
+    <div class="phrase-bar">
+      <div class="phrase-chips" id="phrase-chips">
+        <span class="phrase-empty" id="phrase-empty">Соберите фразу — нажимайте на карточки</span>
+      </div>
+      <button class="phrase-btn clear" id="phrase-clear" title="Очистить" aria-label="Очистить фразу">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <button class="phrase-btn play" id="phrase-play" title="Озвучить фразу" aria-label="Озвучить фразу" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <div class="voice-note" id="voice-note">
+      <span>⚠️</span>
+      <span>Голос для казахского языка не найден в этом браузере — это влияет только на карточки без заранее записанного голоса (например, добавленные вручную). Базовый словарь уже озвучен записанным голосом и работает без этого ограничения.</span>
+    </div>
+
+    <div class="card-grid" id="card-grid"></div>
+  </div>
+
+  <div id="view-parent" hidden>
+    <div class="parent-view">
+      <div class="p-section" id="voice-check-section" hidden>
+        <h3>⚠️ Проверка озвучки слов</h3>
+        <p class="key-note">Автоматическая нарезка записи иногда сдвигает дорожку на соседнее слово. Нажмите ▶ у каждой карточки — если звучит не то слово, выберите в списке справа то, что вы на самом деле услышали. Исправления сохранятся сразу.</p>
+        <div class="lang-toggle" id="voice-check-lang-row" role="group" aria-label="Язык записи" style="margin-top:8px" hidden></div>
+        <div id="voice-check-list" class="voice-check-list"></div>
+      </div>
+      <div class="p-section">
+        <h3>Уровень поддержки</h3>
+        <div class="level-row" id="level-row"></div>
+        <p class="key-note" id="level-hint" style="margin-top:10px"></p>
+      </div>
+      <div class="p-section">
+        <h3>Сегодняшняя активность</h3>
+        <div id="log-list" class="log-list"></div>
+      </div>
+      <div class="p-section">
+        <h3>Что использует чаще всего</h3>
+        <div id="bars" class="bars"></div>
+      </div>
+      <div class="p-section">
+        <h3>Назначенные категории</h3>
+        <div id="assign-list" class="assign-list"></div>
+        <p class="key-note" style="margin-top:10px">Так специалист включает или временно убирает категории карточек у ребёнка — например, оставить только «Еда» и «Действия» на первую неделю.</p>
+      </div>
+      <div class="p-section">
+        <h3>Избранные карточки</h3>
+        <p class="key-note">Отметьте карточки ★ — они соберутся во вкладке «Избранное» у ребёнка отдельным быстрым доступом, независимо от категории и уровня поддержки. Удобно, когда специалист хочет вынести на первый экран 8-10 конкретных слов под текущую цель занятия.</p>
+        <div id="fav-picker" class="fav-picker-wrap" style="margin-top:10px"></div>
+      </div>
+      <div class="p-section">
+        <h3>Голос озвучки</h3>
+        <p class="key-note">Список голосов даёт браузер/устройство — их качество и «живость» зависит от системы, не от приложения. Выберите тот, что звучит естественнее, и проверьте кнопкой ниже.</p>
+        <div class="voice-picker">
+          <select id="voice-select"></select>
+          <button type="button" class="btn ghost" id="voice-test">▶ Проверить</button>
+        </div>
+        <p class="key-note" id="voice-count-note" style="margin-top:8px"></p>
+      </div>
+      <div class="p-section">
+        <h3>Цветовой ключ карточек</h3>
+        <p class="key-note">Цвета фона карточек — по принятой в AAC-методиках раскладке (ключ Фицджеральд): <b>жёлтый</b> — люди, <b>зелёный</b> — действия, <b>оранжевый</b> — еда и предметы, <b>синий</b> — чувства и описания, <b>фиолетовый</b> — места, <b>бирюзовый</b> — основные слова (да/нет/хочу/помощь и т.п.). Один и тот же цвет — одна и та же роль слова на любой карточке.</p>
+      </div>
+      <div class="p-section">
+        <h3>🔒 Защита от выхода</h3>
+        <p class="key-note">Закрепляет приложение на экране: ребёнок не сможет случайно нажать «Домой»/«Недавние» и выйти, и не сможет открыть раздел «Родитель/специалист» без кода. Экран при этом НЕ блокируется и не гаснет — это защита только от выхода из приложения, а не блокировка устройства. Чтобы выйти самим — зажмите логотип «Сөйле» в шапке (2 секунды) и введите код.</p>
+        <div class="field" id="kiosk-pin-field" style="margin-top:10px">
+          <label>Код для выхода (4 цифры)</label>
+          <input type="text" id="kiosk-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Например: 1234" style="max-width:160px">
+        </div>
+        <div id="kiosk-toggle-row" style="display:flex;align-items:center;gap:10px;margin-top:12px">
+          <span class="switch">
+            <input type="checkbox" id="kiosk-toggle">
+            <span class="track"></span><span class="knob"></span>
+          </span>
+          <label for="kiosk-toggle" style="font-weight:700">Закрепить приложение</label>
+        </div>
+        <p class="key-note" id="kiosk-status-note" style="margin-top:8px"></p>
+        <button type="button" class="btn ghost" id="kiosk-open-settings-btn" hidden style="margin-top:8px">Открыть настройки Android</button>
+        <div id="ios-guided-access-block" hidden style="margin-top:8px">
+          <p class="key-note">На iPhone/iPad наше закрепление недоступно — ни один сайт в Safari не может сам заблокировать телефон на одном приложении, это ограничение Apple. Но у Apple есть для этого собственная функция — «Доступ» (Guided Access), она отлично подходит:</p>
+          <p class="key-note">1) Настройки → Универсальный доступ → Доступ (на части версий iOS: Настройки → Экранное время → Доступ). Включите переключатель и в пункте «Код-пароль» задайте 4-значный код — он понадобится, чтобы выйти.</p>
+          <p class="key-note">2) Откройте «Сөйле» с экрана «Домой», как обычное приложение.</p>
+          <p class="key-note">3) Быстро нажмите боковую кнопку трижды подряд (на iPhone с кнопкой «Домой» — трижды саму кнопку «Домой»). Появится экран «Доступ» — нажмите «Начать».</p>
+          <p class="key-note">4) Теперь ребёнок не выйдет из приложения. Чтобы выйти самим — снова трижды нажмите ту же кнопку и введите код.</p>
+        </div>
+      </div>
+      <div class="p-section">
+        <h3>💳 Подписка</h3>
+        <p class="key-note" id="license-status-note">Подписка не активирована.</p>
+        <div class="field" style="margin-top:10px">
+          <label>Код активации / продления</label>
+          <input type="text" id="license-parent-input" placeholder="Например: XXXX-XXXX" style="max-width:220px; text-transform:uppercase">
+        </div>
+        <button type="button" class="btn accent" id="license-parent-submit" style="margin-top:10px">Активировать</button>
+        <p class="key-note" id="license-parent-error" style="color:var(--danger); min-height:1.2em; margin-top:8px"></p>
+      </div>
+      <div class="p-section">
+        <h3>Перед новым ребёнком</h3>
+        <p class="key-note">Если это общий планшет на несколько детей в кабинете — очистите историю и добавленные фото/карточки предыдущего ребёнка перед новым занятием. Сами карточки-слова из базового словаря и уровень поддержки не удаляются.</p>
+        <button type="button" class="btn ghost" id="reset-btn" style="margin-top:10px; color:var(--danger); border-color:var(--danger)">Очистить историю и свои карточки</button>
+        <div id="reset-confirm" hidden style="margin-top:10px">
+          <p class="key-note" style="color:var(--danger); font-weight:700">Точно удалить историю занятий и все свои карточки с этого устройства? Это нельзя отменить.</p>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="reset-cancel">Отмена</button>
+            <button type="button" class="btn accent" id="reset-confirm-btn" style="background:var(--danger)">Да, очистить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab-add" title="Добавить свою карточку" aria-label="Добавить свою карточку">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <div class="modal-overlay" id="exit-pin-overlay" hidden>
+    <div class="modal">
+      <h3 id="exit-pin-title">Код для выхода</h3>
+      <div class="field">
+        <input type="text" id="exit-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+          placeholder="••••" style="font-size:24px; text-align:center; letter-spacing:10px">
+      </div>
+      <p class="key-note" id="exit-pin-error" style="color:var(--danger); min-height:1.2em"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="exit-pin-cancel">Отмена</button>
+        <button type="button" class="btn accent" id="exit-pin-submit">Готово</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="license-lock-overlay" hidden>
+    <div class="modal">
+      <h3 id="license-lock-title">Нужна активация</h3>
+      <p class="key-note">Чтобы пользоваться карточками, введите код активации подписки. Если подписка закончилась или код ещё не выдан — напишите нам в WhatsApp: 8 707 776 03 27.</p>
+      <div class="field" style="margin-top:10px">
+        <input type="text" id="license-lock-input" placeholder="XXXX-XXXX"
+          style="font-size:22px; text-align:center; letter-spacing:2px; text-transform:uppercase">
+      </div>
+      <p class="key-note" id="license-lock-error" style="color:var(--danger); min-height:1.2em"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn accent" id="license-lock-submit">Активировать</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal">
+      <h3>Новая карточка</h3>
+      <div class="field">
+        <label>Фото</label>
+        <div class="photo-row">
+          <div class="photo-preview" id="photo-preview">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.6-2h4.8L16 6"/></svg>
+          </div>
+          <input type="file" id="photo-input-camera" accept="image/*" capture="environment" style="display:none">
+          <input type="file" id="photo-input" accept="image/*" style="display:none">
+          <button type="button" class="btn ghost" id="photo-camera-btn">📷 Сфотографировать</button>
+          <button type="button" class="btn ghost" id="photo-btn">🖼 Из галереи</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Слово (родной язык ребёнка)</label>
+        <input type="text" id="word-input" placeholder="Например: печенье">
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <div class="cat-choice" id="cat-choice"></div>
+      </div>
+      <div class="field">
+        <label>Голос</label>
+        <div class="mic-row">
+          <button type="button" class="btn ghost" id="mic-btn">🎙️ Записать голос</button>
+          <span class="mic-status" id="mic-status">не записано — сработает озвучка по тексту</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modal-cancel">Отмена</button>
+        <button type="button" class="btn accent" id="modal-save">Добавить карточку</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot-card">
+  <h4>Категории карточек</h4>
+  <div class="legend-row">
+    <span class="legend-item"><span class="sw" style="background:var(--cat-people)"></span>Люди</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-action)"></span>Действия</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-food)"></span>Еда / предметы</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-emotion)"></span>Чувства</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-place)"></span>Места</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-core)"></span>Основные слова</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-toys)"></span>Игрушки</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-state)"></span>Состояния</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-number)"></span>Числа</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-animal)"></span>Животные</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-transport)"></span>Транспорт</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-clothes)"></span>Одежда</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-health)"></span>Здоровье</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-home)"></span>Дом и вещи</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-shape)"></span>Формы</span>
+    <span class="legend-item"><span class="sw" style="background:var(--cat-color)"></span>Цвета</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ICONS = {
+    water:'<path d="M20 14h24l-3 34a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4L20 14Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M22 26q4-3 8 0t8 0t8 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    bread:'<path d="M10 40c0-14 10-24 22-24s22 10 22 24" fill="none" stroke="#fff" stroke-width="3"/><path d="M8 40h48v6a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-6Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M24 20v14M32 16v18M40 20v14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    apple:'<circle cx="30" cy="36" r="16" fill="none" stroke="#fff" stroke-width="3"/><path d="M30 20v-5" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M30 18c4-7 13-4 10 3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    milk:'<path d="M20 12h16l4 8v28a2 2 0 0 1-2 2H18a2 2 0 0 1-2-2V20l4-8Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M16 22h24" stroke="#fff" stroke-width="3"/>',
+    eat:'<ellipse cx="32" cy="42" rx="18" ry="6" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 12v16M24 12v10a4 4 0 0 1-8 0V12M34 12v22" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    drink:'<path d="M22 18h20l-2 28a4 4 0 0 1-4 4H28a4 4 0 0 1-4-4l-2-28Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M34 9l4 9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    play:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M32 14v36M14 32h36M19 19c8 6 18 6 26 0M19 45c8-6 18-6 26 0" fill="none" stroke="#fff" stroke-width="2.3"/>',
+    sleep:'<path d="M40 12a18 18 0 1 0 12 30A14 14 0 0 1 40 12Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M18 16h9l-9 8h9" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/>',
+    me:'<circle cx="32" cy="20" r="8" fill="none" stroke="#fff" stroke-width="3"/><path d="M18 50c0-10 6-16 14-16s14 6 14 16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    mom:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 50l6-20h12l6 20" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    dad:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M22 50V32a10 10 0 0 1 20 0v18" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    friend:'<circle cx="21" cy="19" r="6" fill="none" stroke="#fff" stroke-width="2.3"/><path d="M11 46c0-8 4.5-13 10-13s10 5 10 13" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/><circle cx="43" cy="19" r="6" fill="none" stroke="#fff" stroke-width="2.3"/><path d="M33 46c0-8 4.5-13 10-13s10 5 10 13" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>',
+    happy:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><circle cx="25" cy="28" r="2.6" fill="#fff"/><circle cx="39" cy="28" r="2.6" fill="#fff"/><path d="M22 38q10 10 20 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    angry:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M21 24l7 4M43 24l-7 4" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="25" cy="30" r="2" fill="#fff"/><circle cx="39" cy="30" r="2" fill="#fff"/><path d="M23 42q9-6 18 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    tired:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M21 28h8M35 28h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M23 41q9 4 18 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    scared:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><circle cx="25" cy="28" r="3.6" fill="#fff"/><circle cx="39" cy="28" r="3.6" fill="#fff"/><ellipse cx="32" cy="41" rx="5.5" ry="4.5" fill="#fff"/>',
+    house:'<path d="M11 32L32 13l21 19" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M17 29v22a2 2 0 0 0 2 2h26a2 2 0 0 0 2-2V29" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><rect x="27" y="38" width="9" height="15" fill="none" stroke="#fff" stroke-width="2.3"/>',
+    school:'<rect x="13" y="24" width="30" height="28" fill="none" stroke="#fff" stroke-width="3"/><path d="M43 24V11l9 4.5-9 4.5" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/><rect x="23" y="34" width="8" height="8" fill="none" stroke="#fff" stroke-width="2.3"/><rect x="33" y="34" width="6" height="18" fill="none" stroke="#fff" stroke-width="2.3"/>',
+    playground:'<path d="M14 14v38M50 14v38M14 14h36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M26 14l4 20M38 14l-4 20" stroke="#fff" stroke-width="2.3"/><rect x="26" y="34" width="12" height="4" rx="1" fill="#fff"/>',
+    shop:'<path d="M18 22h28l-3 26a4 4 0 0 1-4 4H25a4 4 0 0 1-4-4l-3-26Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M24 22v-4a8 8 0 0 1 16 0v4" fill="none" stroke="#fff" stroke-width="3"/>',
+
+    yes:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M24 33l6 6 12-14" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    no:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M25 25l14 14M39 25L25 39" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>',
+    want:'<path d="M18 46c0-11 6-19 14-19s14 8 14 19" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M32 24v6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>',
+    more:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><path d="M32 22v20M22 32h20" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>',
+    stop:'<path d="M20 12h24l10 10v20l-10 10H20L10 32V22Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M20 32h24" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+    help:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="7" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M32 14v11M32 39v11M14 32h11M39 32h11" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>',
+    please:'<path d="M32 47S13 34 13 21a10 10 0 0 1 19-4 10 10 0 0 1 19 4c0 13-19 26-19 26Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    thanks:'<path d="M32 12l5 12 13 1-10 9 3 13-11-7-11 7 3-13-10-9 13-1Z" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/>',
+
+    banana:'<path d="M18 44c14 6 27-3 31-19 1-4-2-7-6-6-9 13-16 17-25 17-4 0-4 5 0 8Z" fill="none" stroke="#fff" stroke-width="2.8" stroke-linejoin="round"/>',
+    candy:'<rect x="23" y="22" width="18" height="20" rx="4" fill="none" stroke="#fff" stroke-width="2.8"/><path d="M23 26l-11-6v26l11-6M41 26l11-6v26l-11-6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/>',
+    soup:'<path d="M14 30h36" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M16 30c0 10 7 18 16 18s16-8 16-18" fill="none" stroke="#fff" stroke-width="3"/><path d="M26 13q3 4 0 8M35 11q3 4 0 8" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>',
+    tea:'<path d="M16 26h28v10a10 10 0 0 1-10 10H26a10 10 0 0 1-10-10V26Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M44 30h4a5 5 0 0 1 0 10h-4" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M24 14q3 4 0 8M32 12q3 4 0 8" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>',
+
+    go:'<path d="M12 32h32" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M36 21l13 11-13 11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    give:'<path d="M14 46c0-10 7-18 18-18s18 8 18 18" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="17" r="6" fill="none" stroke="#fff" stroke-width="3"/>',
+    open:'<path d="M14 26l18-10 18 10v20l-18 10-18-10Z" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M14 26l18 10 18-10" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/>',
+    look:'<path d="M10 32s9-14 22-14 22 14 22 14-9 14-22 14-22-14-22-14Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="32" r="7" fill="none" stroke="#fff" stroke-width="3"/>',
+    washhands:'<path d="M32 11c6 8 11 15 11 21a11 11 0 1 1-22 0c0-6 5-13 11-21Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+
+    sister:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M27 11q5-4 10 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M20 50l6-20h12l6 20" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    brother:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M22 50V33a10 10 0 0 1 20 0v17" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    grandma:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 50l6-20h12l6 20" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M13 50l5-17" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>',
+    grandpa:'<circle cx="32" cy="17" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M22 50V32a10 10 0 0 1 20 0v18" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M51 50l-5-17" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>',
+    teacher:'<circle cx="32" cy="15" r="6" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 46V31a12 12 0 0 1 24 0v15" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="39" width="16" height="10" rx="1.5" fill="none" stroke="#fff" stroke-width="2.3"/>',
+
+    hurt:'<path d="M32 12l4 10 10-4-5 9 9 6-10 3 2 10-8-6-8 6 2-10-10-3 9-6-5-9 10 4Z" fill="none" stroke="#fff" stroke-width="2.3" stroke-linejoin="round"/>',
+    like:'<path d="M32 46S15 35 15 23a9 9 0 0 1 17-4 9 9 0 0 1 17 4c0 12-17 23-17 23Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    sad:'<circle cx="32" cy="32" r="18" fill="none" stroke="#fff" stroke-width="3"/><circle cx="25" cy="28" r="2.4" fill="#fff"/><circle cx="39" cy="28" r="2.4" fill="#fff"/><path d="M23 44q9-6 18 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M24 32q1 5-1 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+
+    bathroom:'<path d="M20 20h24v4H20Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M24 24v22a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V24" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+    street:'<path d="M23 12L14 52M41 12l9 40" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M32 17v6M32 29v6M32 41v6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>',
+    car:'<path d="M10 38l4-12a4 4 0 0 1 4-3h28a4 4 0 0 1 4 3l4 12" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><rect x="8" y="38" width="48" height="8" rx="3" fill="none" stroke="#fff" stroke-width="3"/><circle cx="19" cy="48" r="4" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="45" cy="48" r="4" fill="none" stroke="#fff" stroke-width="2.6"/>'
+  };
+
+  var CATEGORIES = [
+    { key:'core',    kk:'Негізгі',  ru:'Основные',color:'var(--cat-core)'   },
+    { key:'people',  kk:'Адамдар', ru:'Люди',    color:'var(--cat-people)'  },
+    { key:'action',  kk:'Әрекет',  ru:'Действия',color:'var(--cat-action)' },
+    { key:'food',    kk:'Тағам',   ru:'Еда',     color:'var(--cat-food)'   },
+    { key:'emotion', kk:'Көңіл',   ru:'Чувства', color:'var(--cat-emotion)'},
+    { key:'place',   kk:'Орын',    ru:'Места',   color:'var(--cat-place)'  },
+    { key:'toys', kk:'Ойыншықтар', ru:'Игрушки', color:'var(--cat-toys)' },
+    { key:'state', kk:'Күй-жағдай', ru:'Состояния', color:'var(--cat-state)' },
+    { key:'number', kk:'Сандар', ru:'Числа', color:'var(--cat-number)' },
+    { key:'animal', kk:'Жануарлар', ru:'Животные', color:'var(--cat-animal)' },
+    { key:'transport', kk:'Көлік', ru:'Транспорт', color:'var(--cat-transport)' },
+    { key:'clothes', kk:'Киім', ru:'Одежда', color:'var(--cat-clothes)' },
+    { key:'health', kk:'Денсаулық', ru:'Здоровье', color:'var(--cat-health)' },
+    { key:'home', kk:'Үй заттары', ru:'Дом и вещи', color:'var(--cat-home)' },
+    { key:'shape', kk:'Пішіндер', ru:'Формы', color:'var(--cat-shape)' },
+    { key:'color', kk:'Түстер', ru:'Цвета', color:'var(--cat-color)' },
+  ];
+
+  // Уровни поддержки — не привязаны к конкретному диагнозу (аутизм / ЗПРР /
+  // другое), а к тому, сколько сейчас нужно ребёнку для самостоятельного
+  // общения. Это тот же принцип, на котором строятся профессиональные AAC-
+  // системы (LAMP, TouchChat и т.п.) — один движок, разный набор слов и
+  // сложность экрана под конкретного пользователя, а не под ярлык диагноза.
+  var LEVELS = [
+    { key:'1', ru:'Базовый',    kk:'Негізгі',  hint:'Минимум слов, только самое необходимое — для тех, кто только начинает пользоваться карточками и почти не говорит сам.' },
+    { key:'2', ru:'Стандартный',kk:'Стандартты', hint:'Полный словарь текущей версии — подходит большинству детей на карточках.' },
+    { key:'3', ru:'Расширенный',kk:'Кеңейтілген', hint:'Полный словарь + акцент на составление фраз из нескольких карточек — для тех, кто уже что-то говорит сам и использует карточки как поддержку, а не единственный канал общения.' }
+  ];
+  // Ядро для базового уровня — по сути стартовый PECS-набор: да/нет и
+  // основные просьбы, плюс самое необходимое (еда, люди, туалет, боль).
+  var LEVEL1_IDS = ['yes','no','want','more','stop','help','please','thanks','water','eat','drink','mom','dad','house','hurt','bathroom'];
+  // Карточки, которые показываются только на уровне 3 (Расширенный) — тонкие
+  // эмоции, отвлечённые формы/цвета и редкие бытовые слова, чтобы не
+  // перегружать уровень 2 (Стандартный) для большинства детей.
+  var LEVEL3_ONLY_IDS = ['giveback','goaway','stand','rest','pour','kiss','tickle','worry','embarrassed','bored','offended','surprised','calm','guilty','proud','pity','envy','funmood','longing','love','hope','loud','yourturn','myname','orangejuice','soda','applejuice','tabletdevice','toyshovel','music','rooster','sheep','pig','duck','firetruck','policecar','taxi','truck','wheel','facemask','hood','cap','cardigan','tanktop','clothesdirty','clotheswet','clothesdry','clothesclean','underwear','hoodie','tracksuit','shirt','injection','diarrhea','dentist','vomit','bottle','bucket','sofa','box','knife','bag','floor','socket','wall','cupboard','handbag','bell','computer','wardrobe','star','heart','square','circle','triangle','cube','rectangle','colorbeige','colorturquoise','colorsilver','colorgold','colorgray'];
+
+  var DEFAULT_CARDS = [
+    { id:'water', cat:'food', icon:'water', photo:'icons/pecs/water.jpeg', kk:'Су', ru:'Вода' },
+    { id:'bread', cat:'food', icon:'bread', photo:'icons/pecs/bread.jpeg', kk:'Нан', ru:'Хлеб' },
+    { id:'apple', cat:'food', icon:'apple', photo:'icons/pecs/apple.jpeg', kk:'Алма', ru:'Яблоко' },
+    { id:'milk',  cat:'food', icon:'milk', photo:'icons/pecs/milk.jpeg',  kk:'Сүт', ru:'Молоко' },
+
+    { id:'eat',   cat:'action', icon:'eat', photo:'icons/pecs/eat.jpeg',   kk:'Же', ru:'Ешь' },
+    { id:'drink', cat:'action', icon:'drink', photo:'icons/pecs/drink.jpeg', kk:'Іш', ru:'Пей' },
+    { id:'play',  cat:'action', icon:'play', photo:'icons/pecs/play.jpeg',  kk:'Ойна', ru:'Играй' },
+    { id:'sleep', cat:'action', icon:'sleep', photo:'icons/pecs/sleep.jpeg', kk:'Ұйықта', ru:'Спи' },
+
+    { id:'me',     cat:'people', icon:'me',     kk:'Мен', ru:'Я' },
+    { id:'mom',    cat:'people', icon:'mom', photo:'icons/pecs/mom.jpeg',    kk:'Мама', ru:'Мама' },
+    { id:'dad',    cat:'people', icon:'dad', photo:'icons/pecs/dad.jpeg',    kk:'Папа', ru:'Папа' },
+    { id:'friend', cat:'people', icon:'friend', photo:'icons/pecs/friend.jpeg', kk:'Дос', ru:'Друг' },
+
+    { id:'happy',  cat:'emotion', icon:'happy', photo:'icons/pecs/happy.jpeg',  kk:'Қуаныш', ru:'Радость' },
+    { id:'angry',  cat:'emotion', icon:'angry', photo:'icons/pecs/angry.jpeg',  kk:'Ашулы', ru:'Злость' },
+    { id:'tired',  cat:'emotion', icon:'tired', photo:'icons/pecs/tired.jpeg',  kk:'Шаршау', ru:'Устал' },
+    { id:'scared', cat:'emotion', icon:'scared', photo:'icons/pecs/scared.jpeg', kk:'Қорқу', ru:'Страх' },
+
+    { id:'house',      cat:'place', icon:'house', photo:'icons/pecs/house.jpeg',      kk:'Үй', ru:'Дом' },
+    { id:'school',     cat:'place', icon:'school',     kk:'Мектеп', ru:'Школа' },
+    { id:'playground', cat:'place', icon:'playground', kk:'Ойын алаңы', ru:'Площадка' },
+    { id:'shop',       cat:'place', icon:'shop',       kk:'Дүкен', ru:'Магазин' },
+    { id:'bathroom',   cat:'place', icon:'bathroom', photo:'icons/pecs/bathroom.jpeg',   kk:'Дәретхана', ru:'Туалет' },
+    { id:'street',     cat:'place', icon:'street',     kk:'Көше', ru:'Улица' },
+    { id:'car',        cat:'place', icon:'car', photo:'icons/pecs/car.jpeg',        kk:'Көлік', ru:'Машина' },
+
+    { id:'yes',    cat:'core', icon:'yes', photo:'icons/pecs/yes.jpeg',    kk:'Иә', ru:'Да' },
+    { id:'no',     cat:'core', icon:'no', photo:'icons/pecs/no.jpeg',     kk:'Жоқ', ru:'Нет' },
+    { id:'want',   cat:'core', icon:'want', photo:'icons/pecs/want.jpeg',   kk:'Керек', ru:'Хочу' },
+    { id:'more',   cat:'core', icon:'more', photo:'icons/pecs/more.jpeg',   kk:'Тағы', ru:'Ещё' },
+    { id:'stop',   cat:'core', icon:'stop', photo:'icons/pecs/stop.jpeg',   kk:'Тоқта', ru:'Стоп' },
+    { id:'help',   cat:'core', icon:'help', photo:'icons/pecs/help.jpeg',   kk:'Көмек', ru:'Помощь' },
+    { id:'please', cat:'core', icon:'please', photo:'icons/pecs/please.jpeg', kk:'Өтінемін', ru:'Пожалуйста' },
+    { id:'thanks', cat:'core', icon:'thanks', photo:'icons/pecs/thanks.jpeg', kk:'Рахмет', ru:'Спасибо' },
+
+    { id:'banana', cat:'food', icon:'banana', photo:'icons/pecs/banana.jpeg', kk:'Банан', ru:'Банан' },
+    { id:'candy',  cat:'food', icon:'candy', photo:'icons/pecs/candy.jpeg',  kk:'Кәмпит', ru:'Конфета' },
+    { id:'soup',   cat:'food', icon:'soup', photo:'icons/pecs/soup.jpeg',   kk:'Сорпа', ru:'Суп' },
+    { id:'tea',    cat:'food', icon:'tea',    kk:'Шай', ru:'Чай' },
+
+    { id:'go',        cat:'action', icon:'go',        kk:'Жүр', ru:'Иди' },
+    { id:'give',      cat:'action', icon:'give', photo:'icons/pecs/give.jpeg',      kk:'Бер', ru:'Дай' },
+    { id:'open',      cat:'action', icon:'open', photo:'icons/pecs/open.jpeg',      kk:'Аш', ru:'Открой' },
+    { id:'look',      cat:'action', icon:'look', photo:'icons/pecs/look.jpeg',      kk:'Қара', ru:'Смотри' },
+    { id:'washhands', cat:'action', icon:'washhands', kk:'Қолыңды жу', ru:'Помой руки' },
+
+    { id:'sister',  cat:'people', icon:'sister', photo:'icons/pecs/sister.jpeg',  kk:'Қарындас', ru:'Сестра' },
+    { id:'brother', cat:'people', icon:'brother', photo:'icons/pecs/brother.jpeg', kk:'Аға', ru:'Брат' },
+    { id:'grandma', cat:'people', icon:'grandma', photo:'icons/pecs/grandma.jpeg', kk:'Апа', ru:'Бабушка' },
+    { id:'grandpa', cat:'people', icon:'grandpa', photo:'icons/pecs/grandpa.jpeg', kk:'Ата', ru:'Дедушка' },
+    { id:'teacher', cat:'people', icon:'teacher', kk:'Мұғалім', ru:'Воспитатель' },
+
+    { id:'hurt', cat:'emotion', icon:'hurt', photo:'icons/pecs/hurt.jpeg', kk:'Ауырады', ru:'Больно' },
+    { id:'like', cat:'emotion', icon:'like', photo:'icons/pecs/like.jpeg', kk:'Ұнайды', ru:'Нравится' },
+    { id:'sad',  cat:'emotion', icon:'sad', photo:'icons/pecs/sad.jpeg',  kk:'Мұңды', ru:'Грустно' },
+    // --- PECS-стиль карточки (добавлено) ---
+    { id:'children', cat:'people', photo:'icons/pecs/children.jpeg', kk:'Балалар', ru:'Дети' },
+    { id:'girl', cat:'people', photo:'icons/pecs/girl.jpeg', kk:'Қыз', ru:'Девочка' },
+    { id:'doctor', cat:'people', photo:'icons/pecs/doctor.jpeg', kk:'Дәрігер', ru:'Врач' },
+    { id:'boy', cat:'people', photo:'icons/pecs/boy.jpeg', kk:'Ұл бала', ru:'Мальчик' },
+    { id:'child', cat:'people', photo:'icons/pecs/child.jpeg', kk:'Бала', ru:'Ребенок' },
+    { id:'baby', cat:'people', photo:'icons/pecs/baby.jpeg', kk:'Сәби', ru:'Малыш' },
+    { id:'close', cat:'action', photo:'icons/pecs/close.jpeg', kk:'Жап', ru:'Закрой' },
+    { id:'walk', cat:'action', photo:'icons/pecs/walk.jpeg', kk:'Серуенде', ru:'Гуляй' },
+    { id:'waitfor', cat:'action', photo:'icons/pecs/waitfor.jpeg', kk:'Күте тұр', ru:'Жди' },
+    { id:'show', cat:'action', photo:'icons/pecs/show.jpeg', kk:'Көрсет', ru:'Покажи' },
+    { id:'take', cat:'action', photo:'icons/pecs/take.jpeg', kk:'Ал', ru:'Возьми' },
+    { id:'listen', cat:'action', photo:'icons/pecs/listen.jpeg', kk:'Тыңда', ru:'Слушай' },
+    { id:'giveback', cat:'action', photo:'icons/pecs/giveback.jpeg', kk:'Қайтар', ru:'Отдай' },
+    { id:'goaway', cat:'action', photo:'icons/pecs/goaway.jpeg', kk:'Кет', ru:'Уйди' },
+    { id:'stand', cat:'action', photo:'icons/pecs/stand.jpeg', kk:'Тұр', ru:'Стой' },
+    { id:'comehere', cat:'action', photo:'icons/pecs/comehere.jpeg', kk:'Осында кел', ru:'Иди сюда' },
+    { id:'sit', cat:'action', photo:'icons/pecs/sit.jpeg', kk:'Отыр', ru:'Сиди' },
+    { id:'bathe', cat:'action', photo:'icons/pecs/bathe.jpeg', kk:'Жуын', ru:'Купайся' },
+    { id:'rest', cat:'action', photo:'icons/pecs/rest.jpeg', kk:'Демал', ru:'Отдыхай' },
+    { id:'pour', cat:'action', photo:'icons/pecs/pour.jpeg', kk:'Құй', ru:'Налей' },
+    { id:'kiss', cat:'action', photo:'icons/pecs/kiss.jpeg', kk:'Сүй', ru:'Поцелуй' },
+    { id:'tickle', cat:'action', photo:'icons/pecs/tickle.jpeg', kk:'Қытықта', ru:'Пощекочи' },
+    { id:'putclothes', cat:'action', photo:'icons/pecs/putclothes.jpeg', kk:'Ки', ru:'Надень' },
+    { id:'takeoffclothes', cat:'action', photo:'icons/pecs/takeoffclothes.jpeg', kk:'Шеш', ru:'Сними' },
+    { id:'dislike', cat:'emotion', photo:'icons/pecs/dislike.jpeg', kk:'Ұнамайды', ru:'Мне не нравится' },
+    { id:'wanttocry', cat:'emotion', photo:'icons/pecs/wanttocry.jpeg', kk:'Жылағым келеді', ru:'Хочу плакать' },
+    { id:'wanthug', cat:'emotion', photo:'icons/pecs/wanthug.jpeg', kk:'Құшақтағым келеді', ru:'Хочу обнять' },
+    { id:'worry', cat:'emotion', photo:'icons/pecs/worry.jpeg', kk:'Уайым', ru:'Беспокойство' },
+    { id:'embarrassed', cat:'emotion', photo:'icons/pecs/embarrassed.jpeg', kk:'Ұялу', ru:'Смущение' },
+    { id:'bored', cat:'emotion', photo:'icons/pecs/bored.jpeg', kk:'Зерігу', ru:'Скука' },
+    { id:'offended', cat:'emotion', photo:'icons/pecs/offended.jpeg', kk:'Өкпе', ru:'Обида' },
+    { id:'surprised', cat:'emotion', photo:'icons/pecs/surprised.jpeg', kk:'Таңғалу', ru:'Удивление' },
+    { id:'calm', cat:'emotion', photo:'icons/pecs/calm.jpeg', kk:'Тыныштық', ru:'Спокойствие' },
+    { id:'guilty', cat:'emotion', photo:'icons/pecs/guilty.jpeg', kk:'Кінәлі', ru:'Вина' },
+    { id:'proud', cat:'emotion', photo:'icons/pecs/proud.jpeg', kk:'Мақтаныш', ru:'Гордость' },
+    { id:'pity', cat:'emotion', photo:'icons/pecs/pity.jpeg', kk:'Аяу', ru:'Жалость' },
+    { id:'envy', cat:'emotion', photo:'icons/pecs/envy.jpeg', kk:'Қызғаныш', ru:'Зависть' },
+    { id:'funmood', cat:'emotion', photo:'icons/pecs/funmood.jpeg', kk:'Көңілді', ru:'Веселье' },
+    { id:'longing', cat:'emotion', photo:'icons/pecs/longing.jpeg', kk:'Сағыныш', ru:'Тоска' },
+    { id:'love', cat:'emotion', photo:'icons/pecs/love.jpeg', kk:'Махаббат', ru:'Любовь' },
+    { id:'hope', cat:'emotion', photo:'icons/pecs/hope.jpeg', kk:'Үміт', ru:'Надежда' },
+    { id:'loud', cat:'state', photo:'icons/pecs/loud.jpeg', kk:'Қатты дауыс', ru:'Громко' },
+    { id:'myself', cat:'core', photo:'icons/pecs/myself.jpeg', kk:'Мен өзім', ru:'Я сам' },
+    { id:'notallowed', cat:'core', photo:'icons/pecs/notallowed.jpeg', kk:'Болмайды', ru:'Нельзя' },
+    { id:'dontwant', cat:'core', photo:'icons/pecs/dontwant.jpeg', kk:'Қаламаймын', ru:'Не хочу' },
+    { id:'hi', cat:'core', photo:'icons/pecs/hi.jpeg', kk:'Сәлем', ru:'Привет' },
+    { id:'may', cat:'core', photo:'icons/pecs/may.jpeg', kk:'Болады', ru:'Можно' },
+    { id:'bye', cat:'core', photo:'icons/pecs/bye.jpeg', kk:'Сау бол', ru:'Пока' },
+    { id:'yourturn', cat:'core', photo:'icons/pecs/yourturn.jpeg', kk:'Кезегің', ru:'Твоя очередь' },
+    { id:'myname', cat:'core', photo:'icons/pecs/myname.jpeg', kk:'Атың', ru:'Имя' },
+    { id:'juice', cat:'food', photo:'icons/pecs/juice.jpeg', kk:'Шырын', ru:'Сок' },
+    { id:'yogurt', cat:'food', photo:'icons/pecs/yogurt.jpeg', kk:'Йогурт', ru:'Йогурт' },
+    { id:'orangejuice', cat:'food', photo:'icons/pecs/orangejuice.jpeg', kk:'Апельсин шырыны', ru:'Апельсиновый сок' },
+    { id:'soda', cat:'food', photo:'icons/pecs/soda.jpeg', kk:'Газдалған су', ru:'Газировка' },
+    { id:'applejuice', cat:'food', photo:'icons/pecs/applejuice.jpeg', kk:'Алма шырыны', ru:'Яблочный сок' },
+    { id:'cookie', cat:'food', photo:'icons/pecs/cookie.jpeg', kk:'Печенье', ru:'Печенье' },
+    { id:'porridge', cat:'food', photo:'icons/pecs/porridge.jpeg', kk:'Ботқа', ru:'Каша' },
+    { id:'chocolate', cat:'food', photo:'icons/pecs/chocolate.jpeg', kk:'Шоколад', ru:'Шоколад' },
+    { id:'pizza', cat:'food', photo:'icons/pecs/pizza.jpeg', kk:'Пицца', ru:'Пицца' },
+    { id:'egg', cat:'food', photo:'icons/pecs/egg.jpeg', kk:'Жұмыртқа', ru:'Яйцо' },
+    { id:'toycar', cat:'toys', photo:'icons/pecs/toycar.jpeg', kk:'Көлікше', ru:'Машинка' },
+    { id:'ball', cat:'toys', photo:'icons/pecs/ball.jpeg', kk:'Доп', ru:'Мяч' },
+    { id:'doll', cat:'toys', photo:'icons/pecs/doll.jpeg', kk:'Қуыршақ', ru:'Кукла' },
+    { id:'blocks', cat:'toys', photo:'icons/pecs/blocks.jpeg', kk:'Текшелер', ru:'Кубики' },
+    { id:'tabletdevice', cat:'toys', photo:'icons/pecs/tabletdevice.jpeg', kk:'Планшет', ru:'Планшет' },
+    { id:'teddybear', cat:'toys', photo:'icons/pecs/teddybear.jpeg', kk:'Аюшық', ru:'Мишка' },
+    { id:'toyshovel', cat:'toys', photo:'icons/pecs/toyshovel.jpeg', kk:'Күрекше', ru:'Лопатка' },
+    { id:'music', cat:'toys', photo:'icons/pecs/music.jpeg', kk:'Музыка', ru:'Музыка' },
+    { id:'hot', cat:'state', photo:'icons/pecs/hot.jpeg', kk:'Ыстық', ru:'Жарко' },
+    { id:'cold', cat:'state', photo:'icons/pecs/cold.jpeg', kk:'Суық', ru:'Холодно' },
+    { id:'dirty', cat:'state', photo:'icons/pecs/dirty.jpeg', kk:'Лас', ru:'Грязно' },
+    { id:'wet', cat:'state', photo:'icons/pecs/wet.jpeg', kk:'Дымқыл', ru:'Мокро' },
+    { id:'clean', cat:'state', photo:'icons/pecs/clean.jpeg', kk:'Таза', ru:'Чисто' },
+    { id:'ready', cat:'state', photo:'icons/pecs/ready.jpeg', kk:'Дайын', ru:'Готово' },
+    { id:'num0', cat:'number', photo:'icons/pecs/num0.jpeg', kk:'Нөл', ru:'0' },
+    { id:'num1', cat:'number', photo:'icons/pecs/num1.jpeg', kk:'Бір', ru:'1' },
+    { id:'num2', cat:'number', photo:'icons/pecs/num2.jpeg', kk:'Екі', ru:'2' },
+    { id:'num3', cat:'number', photo:'icons/pecs/num3.jpeg', kk:'Үш', ru:'3' },
+    { id:'num4', cat:'number', photo:'icons/pecs/num4.jpeg', kk:'Төрт', ru:'4' },
+    { id:'num5', cat:'number', photo:'icons/pecs/num5.jpeg', kk:'Бес', ru:'5' },
+    { id:'num6', cat:'number', photo:'icons/pecs/num6.jpeg', kk:'Алты', ru:'6' },
+    { id:'num7', cat:'number', photo:'icons/pecs/num7.jpeg', kk:'Жеті', ru:'7' },
+    { id:'num8', cat:'number', photo:'icons/pecs/num8.jpeg', kk:'Сегіз', ru:'8' },
+    { id:'num9', cat:'number', photo:'icons/pecs/num9.jpeg', kk:'Тоғыз', ru:'9' },
+    { id:'cat', cat:'animal', photo:'icons/pecs/cat.jpeg', kk:'Мысық', ru:'Кошка' },
+    { id:'dog', cat:'animal', photo:'icons/pecs/dog.jpeg', kk:'Ит', ru:'Собака' },
+    { id:'rooster', cat:'animal', photo:'icons/pecs/rooster.jpeg', kk:'Әтеш', ru:'Петух' },
+    { id:'sheep', cat:'animal', photo:'icons/pecs/sheep.jpeg', kk:'Қой', ru:'Овца' },
+    { id:'horse', cat:'animal', photo:'icons/pecs/horse.jpeg', kk:'Жылқы', ru:'Лошадь' },
+    { id:'pig', cat:'animal', photo:'icons/pecs/pig.jpeg', kk:'Шошқа', ru:'Свинья' },
+    { id:'duck', cat:'animal', photo:'icons/pecs/duck.jpeg', kk:'Үйрек', ru:'Утка' },
+    { id:'tiger', cat:'animal', photo:'icons/pecs/tiger.jpeg', kk:'Жолбарыс', ru:'Тигр' },
+    { id:'lion', cat:'animal', photo:'icons/pecs/lion.jpeg', kk:'Арыстан', ru:'Лев' },
+    { id:'bear', cat:'animal', photo:'icons/pecs/bear.jpeg', kk:'Аю', ru:'Медведь' },
+    { id:'fox', cat:'animal', photo:'icons/pecs/fox.jpeg', kk:'Түлкі', ru:'Лиса' },
+    { id:'whale', cat:'animal', photo:'icons/pecs/whale.jpeg', kk:'Кит', ru:'Кит' },
+    { id:'shark', cat:'animal', photo:'icons/pecs/shark.jpeg', kk:'Акула', ru:'Акула' },
+    { id:'octopus', cat:'animal', photo:'icons/pecs/octopus.jpeg', kk:'Сегізаяқ', ru:'Осьминог' },
+    { id:'wolf', cat:'animal', photo:'icons/pecs/wolf.jpeg', kk:'Қасқыр', ru:'Волк' },
+    { id:'deer', cat:'animal', photo:'icons/pecs/deer.jpeg', kk:'Бұғы', ru:'Олень' },
+    { id:'cheetah', cat:'animal', photo:'icons/pecs/cheetah.jpeg', kk:'Гепард', ru:'Гепард' },
+    { id:'starfish', cat:'animal', photo:'icons/pecs/starfish.jpeg', kk:'Теңіз жұлдызы', ru:'Морская звезда' },
+    { id:'elephant', cat:'animal', photo:'icons/pecs/elephant.jpeg', kk:'Піл', ru:'Слон' },
+    { id:'dolphin', cat:'animal', photo:'icons/pecs/dolphin.jpeg', kk:'Дельфин', ru:'Дельфин' },
+    { id:'crab', cat:'animal', photo:'icons/pecs/crab.jpeg', kk:'Шаян', ru:'Краб' },
+    { id:'seaturtle', cat:'animal', photo:'icons/pecs/seaturtle.jpeg', kk:'Теңіз тасбақасы', ru:'Морская черепаха' },
+    { id:'bus', cat:'transport', photo:'icons/pecs/bus.jpeg', kk:'Автобус', ru:'Автобус' },
+    { id:'bike', cat:'transport', photo:'icons/pecs/bike.jpeg', kk:'Велосипед', ru:'Велосипед' },
+    { id:'plane', cat:'transport', photo:'icons/pecs/plane.jpeg', kk:'Ұшақ', ru:'Самолет' },
+    { id:'train', cat:'transport', photo:'icons/pecs/train.jpeg', kk:'Пойыз', ru:'Поезд' },
+    { id:'firetruck', cat:'transport', photo:'icons/pecs/firetruck.jpeg', kk:'Өрт сөндіруші машина', ru:'Пожарная машина' },
+    { id:'policecar', cat:'transport', photo:'icons/pecs/policecar.jpeg', kk:'Полиция машинасы', ru:'Полицейская машина' },
+    { id:'ambulance', cat:'transport', photo:'icons/pecs/ambulance.jpeg', kk:'Жедел жәрдем', ru:'Скорая помощь' },
+    { id:'emergencytruck', cat:'transport', photo:'icons/pecs/emergencytruck.jpeg', kk:'Апаттық машина', ru:'Аварийная машина' },
+    { id:'yacht', cat:'transport', photo:'icons/pecs/yacht.jpeg', kk:'Яхта', ru:'Яхта' },
+    { id:'sailboat', cat:'transport', photo:'icons/pecs/sailboat.jpeg', kk:'Желкенді қайық', ru:'Парусник' },
+    { id:'barge', cat:'transport', photo:'icons/pecs/barge.jpeg', kk:'Баржа', ru:'Баржа' },
+    { id:'taxi', cat:'transport', photo:'icons/pecs/taxi.jpeg', kk:'Такси', ru:'Такси' },
+    { id:'truck', cat:'transport', photo:'icons/pecs/truck.jpeg', kk:'Жүк көлігі', ru:'Грузовик' },
+    { id:'wheel', cat:'transport', photo:'icons/pecs/wheel.jpeg', kk:'Дөңгелек', ru:'Колесо' },
+    { id:'boots', cat:'clothes', photo:'icons/pecs/boots.jpeg', kk:'Бәтіңке', ru:'Ботинки' },
+    { id:'pants', cat:'clothes', photo:'icons/pecs/pants.jpeg', kk:'Шалбар', ru:'Брюки' },
+    { id:'jacket', cat:'clothes', photo:'icons/pecs/jacket.jpeg', kk:'Күртеше', ru:'Куртка' },
+    { id:'socks', cat:'clothes', photo:'icons/pecs/socks.jpeg', kk:'Шұлық', ru:'Носки' },
+    { id:'dress', cat:'clothes', photo:'icons/pecs/dress.jpeg', kk:'Көйлек', ru:'Платье' },
+    { id:'shoes', cat:'clothes', photo:'icons/pecs/shoes.jpeg', kk:'Туфли', ru:'Туфли' },
+    { id:'tshirt', cat:'clothes', photo:'icons/pecs/tshirt.jpeg', kk:'Футболка', ru:'Футболка' },
+    { id:'hat', cat:'clothes', photo:'icons/pecs/hat.jpeg', kk:'Бөрік', ru:'Шапка' },
+    { id:'backpack', cat:'clothes', photo:'icons/pecs/backpack.jpeg', kk:'Рюкзак', ru:'Рюкзак' },
+    { id:'facemask', cat:'clothes', photo:'icons/pecs/facemask.jpeg', kk:'Маска', ru:'Маска' },
+    { id:'hood', cat:'clothes', photo:'icons/pecs/hood.jpeg', kk:'Капюшон', ru:'Капюшон' },
+    { id:'jeans', cat:'clothes', photo:'icons/pecs/jeans.jpeg', kk:'Джинсы', ru:'Джинсы' },
+    { id:'cap', cat:'clothes', photo:'icons/pecs/cap.jpeg', kk:'Кепка', ru:'Кепка' },
+    { id:'cardigan', cat:'clothes', photo:'icons/pecs/cardigan.jpeg', kk:'Кофта', ru:'Кофта' },
+    { id:'sneakers', cat:'clothes', photo:'icons/pecs/sneakers.jpeg', kk:'Кроссовка', ru:'Кроссовки' },
+    { id:'tanktop', cat:'clothes', photo:'icons/pecs/tanktop.jpeg', kk:'Майка', ru:'Майка' },
+    { id:'clothesdirty', cat:'clothes', photo:'icons/pecs/clothesdirty.jpeg', kk:'Лас киім', ru:'Одежда грязная' },
+    { id:'clotheswet', cat:'clothes', photo:'icons/pecs/clotheswet.jpeg', kk:'Дымқыл киім', ru:'Одежда мокрая' },
+    { id:'clothesdry', cat:'clothes', photo:'icons/pecs/clothesdry.jpeg', kk:'Құрғақ киім', ru:'Одежда сухая' },
+    { id:'clothesclean', cat:'clothes', photo:'icons/pecs/clothesclean.jpeg', kk:'Таза киім', ru:'Одежда чистая' },
+    { id:'gloves', cat:'clothes', photo:'icons/pecs/gloves.jpeg', kk:'Қолғап', ru:'Перчатки' },
+    { id:'underwear', cat:'clothes', photo:'icons/pecs/underwear.jpeg', kk:'Ішкиім', ru:'Трусы' },
+    { id:'hoodie', cat:'clothes', photo:'icons/pecs/hoodie.jpeg', kk:'Толстовка', ru:'Толстовка' },
+    { id:'tracksuit', cat:'clothes', photo:'icons/pecs/tracksuit.jpeg', kk:'Спорт костюмі', ru:'Спортивный костюм' },
+    { id:'shirt', cat:'clothes', photo:'icons/pecs/shirt.jpeg', kk:'Жейде', ru:'Рубашка' },
+    { id:'headache', cat:'health', photo:'icons/pecs/headache.jpeg', kk:'Бас ауырады', ru:'Боль в голове' },
+    { id:'sorethroat', cat:'health', photo:'icons/pecs/sorethroat.jpeg', kk:'Тамағы ауырады', ru:'Боль в горле' },
+    { id:'stomachache', cat:'health', photo:'icons/pecs/stomachache.jpeg', kk:'Іші ауырады', ru:'Боль в животе' },
+    { id:'cough', cat:'health', photo:'icons/pecs/cough.jpeg', kk:'Жөтел', ru:'Кашель' },
+    { id:'earache', cat:'health', photo:'icons/pecs/earache.jpeg', kk:'Құлағы ауырады', ru:'Боль в ухе' },
+    { id:'runnynose', cat:'health', photo:'icons/pecs/runnynose.jpeg', kk:'Тұмау', ru:'Насморк' },
+    { id:'injection', cat:'health', photo:'icons/pecs/injection.jpeg', kk:'Ине', ru:'Укол' },
+    { id:'fever', cat:'health', photo:'icons/pecs/fever.jpeg', kk:'Температура', ru:'Температура' },
+    { id:'diarrhea', cat:'health', photo:'icons/pecs/diarrhea.jpeg', kk:'Іш өту', ru:'Понос' },
+    { id:'dentist', cat:'health', photo:'icons/pecs/dentist.jpeg', kk:'Тіс дәрігері', ru:'Стоматолог' },
+    { id:'vomit', cat:'health', photo:'icons/pecs/vomit.jpeg', kk:'Құсу', ru:'Рвота' },
+    { id:'room', cat:'place', photo:'icons/pecs/room.jpeg', kk:'Бөлме', ru:'Комната' },
+    { id:'soap', cat:'home', photo:'icons/pecs/soap.jpeg', kk:'Сабын', ru:'Мыло' },
+    { id:'towel', cat:'home', photo:'icons/pecs/towel.jpeg', kk:'Сүлгі', ru:'Полотенце' },
+    { id:'door', cat:'home', photo:'icons/pecs/door.jpeg', kk:'Есік', ru:'Дверь' },
+    { id:'bed', cat:'home', photo:'icons/pecs/bed.jpeg', kk:'Төсек', ru:'Кровать' },
+    { id:'table', cat:'home', photo:'icons/pecs/table.jpeg', kk:'Үстел', ru:'Стол' },
+    { id:'pillow', cat:'home', photo:'icons/pecs/pillow.jpeg', kk:'Жастық', ru:'Подушка' },
+    { id:'window', cat:'home', photo:'icons/pecs/window.jpeg', kk:'Терезе', ru:'Окно' },
+    { id:'blanket', cat:'home', photo:'icons/pecs/blanket.jpeg', kk:'Көрпе', ru:'Одеяло' },
+    { id:'spoon', cat:'home', photo:'icons/pecs/spoon.jpeg', kk:'Қасық', ru:'Ложка' },
+    { id:'chair', cat:'home', photo:'icons/pecs/chair.jpeg', kk:'Орындық', ru:'Стул' },
+    { id:'plate', cat:'home', photo:'icons/pecs/plate.jpeg', kk:'Тәрелке', ru:'Тарелка' },
+    { id:'cup', cat:'home', photo:'icons/pecs/cup.jpeg', kk:'Кесе', ru:'Чашка' },
+    { id:'bottle', cat:'home', photo:'icons/pecs/bottle.jpeg', kk:'Бөтелке', ru:'Бутылка' },
+    { id:'bucket', cat:'home', photo:'icons/pecs/bucket.jpeg', kk:'Шелек', ru:'Ведерко' },
+    { id:'mirror', cat:'home', photo:'icons/pecs/mirror.jpeg', kk:'Айна', ru:'Зеркало' },
+    { id:'sofa', cat:'home', photo:'icons/pecs/sofa.jpeg', kk:'Диван', ru:'Диван' },
+    { id:'fork', cat:'home', photo:'icons/pecs/fork.jpeg', kk:'Шанышқы', ru:'Вилка' },
+    { id:'key', cat:'home', photo:'icons/pecs/key.jpeg', kk:'Кілт', ru:'Ключ' },
+    { id:'box', cat:'home', photo:'icons/pecs/box.jpeg', kk:'Қорап', ru:'Коробка' },
+    { id:'knife', cat:'home', photo:'icons/pecs/knife.jpeg', kk:'Пышақ', ru:'Нож' },
+    { id:'bag', cat:'home', photo:'icons/pecs/bag.jpeg', kk:'Пакет', ru:'Пакет' },
+    { id:'floor', cat:'home', photo:'icons/pecs/floor.jpeg', kk:'Еден', ru:'Пол' },
+    { id:'socket', cat:'home', photo:'icons/pecs/socket.jpeg', kk:'Розетка', ru:'Розетка' },
+    { id:'wall', cat:'home', photo:'icons/pecs/wall.jpeg', kk:'Қабырға', ru:'Стена' },
+    { id:'cupboard', cat:'home', photo:'icons/pecs/cupboard.jpeg', kk:'Шкаф', ru:'Шкаф' },
+    { id:'handbag', cat:'home', photo:'icons/pecs/handbag.jpeg', kk:'Сөмке', ru:'Сумка' },
+    { id:'tv', cat:'home', photo:'icons/pecs/tv.jpeg', kk:'Теледидар', ru:'Телевизор' },
+    { id:'clock', cat:'home', photo:'icons/pecs/clock.jpeg', kk:'Сағат', ru:'Часы' },
+    { id:'toothbrush', cat:'home', photo:'icons/pecs/toothbrush.jpeg', kk:'Тіс щеткасы', ru:'Зубная щетка' },
+    { id:'bell', cat:'home', photo:'icons/pecs/bell.jpeg', kk:'Қоңырау', ru:'Звонок' },
+    { id:'computer', cat:'home', photo:'icons/pecs/computer.jpeg', kk:'Компьютер', ru:'Компьютер' },
+    { id:'wardrobe', cat:'home', photo:'icons/pecs/wardrobe.jpeg', kk:'Гардероб', ru:'Гардероб' },
+    { id:'star', cat:'shape', photo:'icons/pecs/star.jpeg', kk:'Жұлдыз', ru:'Звезда' },
+    { id:'heart', cat:'shape', photo:'icons/pecs/heart.jpeg', kk:'Жүрек', ru:'Сердце' },
+    { id:'square', cat:'shape', photo:'icons/pecs/square.jpeg', kk:'Шаршы', ru:'Квадрат' },
+    { id:'circle', cat:'shape', photo:'icons/pecs/circle.jpeg', kk:'Шеңбер', ru:'Круг' },
+    { id:'triangle', cat:'shape', photo:'icons/pecs/triangle.jpeg', kk:'Үшбұрыш', ru:'Треугольник' },
+    { id:'cube', cat:'shape', photo:'icons/pecs/cube.jpeg', kk:'Куб', ru:'Куб' },
+    { id:'rectangle', cat:'shape', photo:'icons/pecs/rectangle.jpeg', kk:'Тіктөртбұрыш', ru:'Прямоугольник' },
+    { id:'colorwhite', cat:'color', photo:'icons/pecs/colorwhite.jpeg', kk:'Ақ түс', ru:'Белый' },
+    { id:'colorblack', cat:'color', photo:'icons/pecs/colorblack.jpeg', kk:'Қара түс', ru:'Черный' },
+    { id:'colorbrown', cat:'color', photo:'icons/pecs/colorbrown.jpeg', kk:'Қоңыр түс', ru:'Коричневый' },
+    { id:'colorpurple', cat:'color', photo:'icons/pecs/colorpurple.jpeg', kk:'Күлгін түс', ru:'Фиолетовый' },
+    { id:'colororange', cat:'color', photo:'icons/pecs/colororange.jpeg', kk:'Қызғылт сары түс', ru:'Оранжевый' },
+    { id:'coloryellow', cat:'color', photo:'icons/pecs/coloryellow.jpeg', kk:'Сары түс', ru:'Желтый' },
+    { id:'colorgreen', cat:'color', photo:'icons/pecs/colorgreen.jpeg', kk:'Жасыл түс', ru:'Зеленый' },
+    { id:'colorpink', cat:'color', photo:'icons/pecs/colorpink.jpeg', kk:'Қызғылт түс', ru:'Розовый' },
+    { id:'colorlightblue', cat:'color', photo:'icons/pecs/colorlightblue.jpeg', kk:'Көгілдір түс', ru:'Голубой' },
+    { id:'colorred', cat:'color', photo:'icons/pecs/colorred.jpeg', kk:'Қызыл түс', ru:'Красный' },
+    { id:'colorblue', cat:'color', photo:'icons/pecs/colorblue.jpeg', kk:'Көк түс', ru:'Синий' },
+    { id:'colorbeige', cat:'color', photo:'icons/pecs/colorbeige.jpeg', kk:'Бежевый түс', ru:'Бежевый' },
+    { id:'colorturquoise', cat:'color', photo:'icons/pecs/colorturquoise.jpeg', kk:'Бирюза түс', ru:'Бирюзовый' },
+    { id:'colorsilver', cat:'color', photo:'icons/pecs/colorsilver.jpeg', kk:'Күміс түс', ru:'Серебряный' },
+    { id:'colorgold', cat:'color', photo:'icons/pecs/colorgold.jpeg', kk:'Алтын түс', ru:'Золотой' },
+    { id:'colorgray', cat:'color', photo:'icons/pecs/colorgray.jpeg', kk:'Сұр түс', ru:'Серый' },
+  ];
+
+  function catByKey(k){ for (var i=0;i<CATEGORIES.length;i++){ if (CATEGORIES[i].key===k) return CATEGORIES[i]; } return CATEGORIES[0]; }
+
+  function isFavoriteCard(id){ return state.favoriteCards.indexOf(id) !== -1; }
+  function toggleFavoriteCard(id){
+    var idx = state.favoriteCards.indexOf(id);
+    if (idx === -1) state.favoriteCards.push(id); else state.favoriteCards.splice(idx, 1);
+    saveJSON('soile_favorite_cards', state.favoriteCards);
+  }
+
+  function loadJSON(key, fallback){
+    try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
+  }
+  function saveJSON(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+
+  // Свои карточки (фото+запись голоса) храним в IndexedDB, а не в
+  // localStorage: там лимит обычно всего 5-10 МБ на весь сайт, и после
+  // десятка карточек с фото/голосом сохранение начнёт молча не срабатывать.
+  // IndexedDB на порядки просторнее — практически не ограничена для наших
+  // задач даже на бюджетном планшете.
+  var DB_NAME = 'soile_aac_db', DB_STORE = 'cards';
+  function openDB(){
+    return new Promise(function(resolve, reject){
+      if (!('indexedDB' in window)){ reject(new Error('no-idb')); return; }
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function(){
+        req.result.createObjectStore(DB_STORE, { keyPath:'id' });
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  }
+  function idbGetAll(){
+    return openDB().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(DB_STORE, 'readonly');
+        var req = tx.objectStore(DB_STORE).getAll();
+        req.onsuccess = function(){ resolve(req.result || []); };
+        req.onerror = function(){ resolve([]); };
+      });
+    }).catch(function(){ return []; });
+  }
+  function idbPut(card){
+    return openDB().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(card);
+        tx.oncomplete = function(){ resolve(true); };
+        tx.onerror = function(){ resolve(false); };
+      });
+    }).catch(function(){ return false; });
+  }
+  function idbClear(){
+    return openDB().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).clear();
+        tx.oncomplete = function(){ resolve(true); };
+        tx.onerror = function(){ resolve(false); };
+      });
+    }).catch(function(){ return false; });
+  }
+
+  var state = {
+    lang: 'kk',
+    mode: 'child',
+    activeCat: 'all',
+    phrase: [],
+    customCards: [],
+    log: loadJSON('soile_log', []),
+    // Карточки, которые специалист/родитель вручную отметил как избранные
+    // для конкретного ребёнка — собираются во вкладке "Избранное" у
+    // ребёнка, независимо от категории и текущего уровня поддержки.
+    favoriteCards: loadJSON('soile_favorite_cards', []),
+    visibleCats: loadJSON('soile_visible_cats', CATEGORIES.map(function(c){return c.key;})),
+    voiceURI: loadJSON('soile_voice_uri', ''),
+    level: loadJSON('soile_level', '2'),
+    // "Режим для ребёнка": приложение закреплено на экране (штатный
+    // Android screen pinning), выйти можно только зажав логотип и введя
+    // PIN. kioskEnabled — хочет ли родитель, чтобы это было включено;
+    // exitPin — код для выхода (пусто, пока родитель его не задал).
+    kioskEnabled: loadJSON('soile_kiosk_enabled', false),
+    exitPin: loadJSON('soile_exit_pin', ''),
+    // Автоматическая нарезка записанного файла на слова по паузам иногда
+    // ошибается на 1 слово (обычный дефект такой нарезки) — тогда карточка
+    // играет соседнее слово. Тут храним ручные исправления "эта звуковая
+    // дорожка на самом деле — вот это слово", сделанные в разделе "Проверка
+    // озвучки" у родителя/специалиста. Отдельно для казахской и для русской
+    // записи — это две независимые нарезки, ошибки в одной не связаны с
+    // другой. Ключ — исходная дорожка (id карточки, под которым её нарезали),
+    // значение — настоящее слово в ней.
+    voiceSlotLabels: (function(){
+      var raw = loadJSON('soile_voice_slot_labels', null);
+      if (!raw) return { kk:{}, ru:{} };
+      if (!raw.kk && !raw.ru) return { kk: raw, ru: {} }; // миграция старого плоского формата (только kk)
+      return { kk: raw.kk || {}, ru: raw.ru || {} };
+    })(),
+    voiceCheckLang: 'kk',
+    draft: { photo:null, cat:'food', audio:null }
+  };
+
+  // На случай, если в localStorage сохранён более старый список категорий
+  // (без "core") — новая категория не должна оказаться скрытой по умолчанию.
+  (function backfillVisibleCats(){
+    var changed = false;
+    CATEGORIES.forEach(function(c){
+      if (state.visibleCats.indexOf(c.key) === -1){ state.visibleCats.push(c.key); changed = true; }
+    });
+    if (changed) saveJSON('soile_visible_cats', state.visibleCats);
+  })();
+
+  // Настоящая озвучка (записанная папой ребёнка), отдельно для казахского и
+  // для русского языка. window.SOILE_VOICE_KK / window.SOILE_VOICE_RU хранят
+  // нарезанные по паузам звуковые дорожки, ключ — то слово, под которым
+  // дорожку нарезали изначально ("дорожка"). Из-за автонарезки дорожка иногда
+  // на самом деле содержит соседнее слово — тогда в "Проверке озвучки"
+  // родитель указывает настоящее слово, и это сохраняется в
+  // state.voiceSlotLabels[lang]. applyVoiceMap пересобирает card.audioKk /
+  // card.audioRu у каждой карточки с учётом этих исправлений, а не напрямую
+  // по SOILE_VOICE_*[card.id].
+  function voiceRawMap(lang){ return lang === 'kk' ? window.SOILE_VOICE_KK : window.SOILE_VOICE_RU; }
+  function trueLabelForSlot(lang, slotId){
+    var labels = state.voiceSlotLabels[lang] || {};
+    return labels[slotId] || slotId;
+  }
+  // Уже подтверждённые на слух ошибки нарезки записей (по обратной связи
+  // родителя): автонарезка сдвинула слова в "Негізгі"/"Основные" на другую
+  // позицию. Применяются по умолчанию, но не мешают собственным правкам —
+  // если родитель уже что-то поменял в "Проверке озвучки", его выбор в
+  // приоритете (см. применение ниже, в applyVoiceMap).
+  (function seedKnownVoiceFixes(){
+    var knownKk = {
+      yes: 'bathroom',
+      no: 'yes',
+      want: 'no',
+      more: 'want',
+      stop: 'more',
+      help: 'stop',
+      please: 'help',
+      thanks: 'please',
+      hurt: 'thanks'
+    };
+    // Русская запись: подтверждена полная цепочка (замкнутый цикл) на все
+    // 16 слов уровня 1 — родитель прослушал и сверил каждую карточку.
+    var knownRu = {
+      water: 'no',
+      no: 'eat',
+      eat: 'want',
+      want: 'drink',
+      drink: 'more',
+      more: 'mom',
+      mom: 'stop',
+      stop: 'dad',
+      dad: 'help',
+      help: 'house',
+      house: 'please',
+      please: 'bathroom',
+      bathroom: 'hurt',
+      hurt: 'thanks',
+      thanks: 'yes',
+      yes: 'water'
+    };
+    var labelsKk = state.voiceSlotLabels.kk;
+    for (var k in knownKk){
+      if (!(k in labelsKk)) labelsKk[k] = knownKk[k];
+    }
+    var labelsRu = state.voiceSlotLabels.ru;
+    for (var k2 in knownRu){
+      if (!(k2 in labelsRu)) labelsRu[k2] = knownRu[k2];
+    }
+  })();
+  function applyVoiceMapForLang(lang){
+    var raw = voiceRawMap(lang);
+    if (!raw) return;
+    var labels = state.voiceSlotLabels[lang] || (state.voiceSlotLabels[lang] = {});
+    var byWord = {};
+    // 1) базовая раскладка — дорожка озвучивает саму себя, если для неё нет
+    //    явного исправления (иначе она "отдаёт" свою настоящую метку ниже).
+    Object.keys(raw).forEach(function(slotId){
+      if (!labels[slotId]) byWord[slotId] = raw[slotId];
+    });
+    // 2) явные/известные исправления — всегда перекрывают базовую раскладку,
+    //    независимо от порядка ключей в объекте с дорожками.
+    Object.keys(labels).forEach(function(slotId){
+      if (raw[slotId]) byWord[labels[slotId]] = raw[slotId];
+    });
+    var field = lang === 'kk' ? 'audioKk' : 'audioRu';
+    DEFAULT_CARDS.forEach(function(c){
+      if (byWord[c.id]) c[field] = byWord[c.id]; else delete c[field];
+    });
+  }
+  function applyVoiceMap(){
+    applyVoiceMapForLang('kk');
+    applyVoiceMapForLang('ru');
+  }
+  applyVoiceMap();
+
+  // Подхватываем свои карточки из IndexedDB при старте; если на этом
+  // устройстве ещё остались карточки со старой (localStorage) версии —
+  // переносим их один раз и чистим старое место.
+  function loadCustomCards(){
+    idbGetAll().then(function(cards){
+      if (!cards.length){
+        var legacy = loadJSON('soile_custom_cards', []);
+        if (legacy.length){
+          return Promise.all(legacy.map(function(c){ return idbPut(c); })).then(function(){
+            try{ localStorage.removeItem('soile_custom_cards'); }catch(e){}
+            state.customCards = legacy;
+            render();
+          });
+        }
+      }
+      state.customCards = cards;
+      render();
+    });
+  }
+
+  var els = {
+    langKk: document.getElementById('lang-kk'),
+    langRu: document.getElementById('lang-ru'),
+    modeChild: document.getElementById('mode-child'),
+    modeParent: document.getElementById('mode-parent'),
+    viewChild: document.getElementById('view-child'),
+    viewParent: document.getElementById('view-parent'),
+    catRow: document.getElementById('cat-row'),
+    cardGrid: document.getElementById('card-grid'),
+    phraseChips: document.getElementById('phrase-chips'),
+    phraseEmpty: document.getElementById('phrase-empty'),
+    phrasePlay: document.getElementById('phrase-play'),
+    phraseClear: document.getElementById('phrase-clear'),
+    voiceNote: document.getElementById('voice-note'),
+    fabAdd: document.getElementById('fab-add'),
+    modalOverlay: document.getElementById('modal-overlay'),
+    modalCancel: document.getElementById('modal-cancel'),
+    modalSave: document.getElementById('modal-save'),
+    photoBtn: document.getElementById('photo-btn'),
+    photoInput: document.getElementById('photo-input'),
+    photoCameraBtn: document.getElementById('photo-camera-btn'),
+    photoInputCamera: document.getElementById('photo-input-camera'),
+    photoPreview: document.getElementById('photo-preview'),
+    wordInput: document.getElementById('word-input'),
+    catChoice: document.getElementById('cat-choice'),
+    micBtn: document.getElementById('mic-btn'),
+    micStatus: document.getElementById('mic-status'),
+    logList: document.getElementById('log-list'),
+    bars: document.getElementById('bars'),
+    assignList: document.getElementById('assign-list'),
+    favPicker: document.getElementById('fav-picker'),
+    voiceCheckSection: document.getElementById('voice-check-section'),
+    voiceCheckLangRow: document.getElementById('voice-check-lang-row'),
+    voiceCheckList: document.getElementById('voice-check-list'),
+    levelRow: document.getElementById('level-row'),
+    levelHint: document.getElementById('level-hint'),
+    voiceSelect: document.getElementById('voice-select'),
+    voiceTest: document.getElementById('voice-test'),
+    voiceCountNote: document.getElementById('voice-count-note'),
+    installBanner: document.getElementById('install-banner'),
+    installBtn: document.getElementById('install-btn'),
+    installClose: document.getElementById('install-close'),
+    installText: document.getElementById('install-text'),
+    resetBtn: document.getElementById('reset-btn'),
+    resetConfirm: document.getElementById('reset-confirm'),
+    resetCancel: document.getElementById('reset-cancel'),
+    resetConfirmBtn: document.getElementById('reset-confirm-btn'),
+    wordmark: document.getElementById('wordmark'),
+    kioskPinInput: document.getElementById('kiosk-pin-input'),
+    kioskToggle: document.getElementById('kiosk-toggle'),
+    kioskStatusNote: document.getElementById('kiosk-status-note'),
+    kioskOpenSettingsBtn: document.getElementById('kiosk-open-settings-btn'),
+    iosGuidedAccessBlock: document.getElementById('ios-guided-access-block'),
+    kioskPinField: document.getElementById('kiosk-pin-field'),
+    kioskToggleRow: document.getElementById('kiosk-toggle-row'),
+    exitPinOverlay: document.getElementById('exit-pin-overlay'),
+    exitPinTitle: document.getElementById('exit-pin-title'),
+    exitPinInput: document.getElementById('exit-pin-input'),
+    exitPinError: document.getElementById('exit-pin-error'),
+    exitPinCancel: document.getElementById('exit-pin-cancel'),
+    exitPinSubmit: document.getElementById('exit-pin-submit'),
+    licenseStatusNote: document.getElementById('license-status-note'),
+    licenseParentInput: document.getElementById('license-parent-input'),
+    licenseParentSubmit: document.getElementById('license-parent-submit'),
+    licenseParentError: document.getElementById('license-parent-error'),
+    licenseLockOverlay: document.getElementById('license-lock-overlay'),
+    licenseLockTitle: document.getElementById('license-lock-title'),
+    licenseLockInput: document.getElementById('license-lock-input'),
+    licenseLockError: document.getElementById('license-lock-error'),
+    licenseLockSubmit: document.getElementById('license-lock-submit')
+  };
+
+  // ---------- PWA: офлайн-кэш + установка на экран ----------
+  // Сервис-воркер нужен только веб-версии (PWA в браузере). Внутри
+  // нативного приложения (Capacitor) он не нужен — офлайн и так
+  // работает через файлы, упакованные в apk, — а его кэш может
+  // "застрять" и показывать старую версию после обновления apk.
+  var isNativeShell = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+  // iPhone/iPad в вебе (не наше нативное Android-приложение) — там нет
+  // системного "закрепления экрана", зато есть штатная функция Apple
+  // "Доступ" (Guided Access), которая даёт тот же результат. navigator.platform
+  // для iPad на новых iOS сообщает "MacIntel", поэтому дополнительно
+  // проверяем тач-экран, чтобы не принять обычный Mac за iPad.
+  var isIOS = /iP(hone|od|ad)/.test(navigator.userAgent || '') ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if ('serviceWorker' in navigator && !isNativeShell){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){ /* офлайн-кэш недоступен — не критично */ });
+    });
+  } else if ('serviceWorker' in navigator && isNativeShell){
+    // На случай, если сервис-воркер уже был зарегистрирован в этом
+    // WebView раньше (старые сборки) — снимаем регистрацию и чистим
+    // его кэш, чтобы приложение больше не могло "откатиться" на
+    // устаревшую версию из-за устаревшего service worker.
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(r){ r.unregister(); });
+      }).catch(function(){});
+      if (window.caches && caches.keys){
+        caches.keys().then(function(names){
+          names.forEach(function(n){ caches.delete(n); });
+        }).catch(function(){});
+      }
+    });
+  }
+
+  // ---------- Режим для ребёнка: закрепление + PIN на выход ----------
+  // Задача: ребёнок не должен случайно выйти из приложения (кнопка
+  // "Домой"/"Недавние" или раздел "Родитель/специалист"), но экран при
+  // этом НЕ должен гаснуть/блокироваться — это разные вещи. Поэтому тут
+  // два независимых механизма:
+  // 1) Wake Lock — не даёт экрану погаснуть, пока приложение открыто.
+  // 2) Штатное Android screen pinning (через маленький нативный плагин
+  //    Kiosk) — закрепляет приложение на экране; выйти можно, только
+  //    зажав логотип и введя код.
+  (function setupWakeLock(){
+    var lock = null;
+    function request(){
+      if (!('wakeLock' in navigator)) return;
+      navigator.wakeLock.request('screen').then(function(l){
+        lock = l;
+        l.addEventListener('release', function(){ lock = null; });
+      }).catch(function(){ /* не критично — на некоторых устройствах недоступно */ });
+    }
+    request();
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') request();
+    });
+  })();
+
+  function kioskPlugin(){
+    return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Kiosk) || null;
+  }
+  // Возвращает Promise<{ok, error}> — вызывающий код показывает
+  // результат прямо в интерфейсе, а не молчит, если закрепление не
+  // сработало (на части устройств системная функция "Закрепление
+  // экрана" по умолчанию выключена в настройках Android, и тогда
+  // startLockTask() ничего не делает или падает с ошибкой).
+  function kioskEngage(){
+    var p = kioskPlugin();
+    if (!p || !p.start) return Promise.resolve({ ok:false, error:'no-plugin' });
+    return p.start().catch(function(e){ return { ok:false, error: (e && e.message) || 'unknown' }; });
+  }
+  function kioskRelease(){
+    var p = kioskPlugin();
+    if (!p || !p.stop) return;
+    p.stop().catch(function(){});
+  }
+
+  function updateKioskStatusNote(){
+    if (!els.kioskStatusNote) return;
+    els.kioskStatusNote.style.color = '';
+    if (els.kioskOpenSettingsBtn) els.kioskOpenSettingsBtn.hidden = true;
+    // На iPhone/iPad (веб, не наше Android-приложение) наш тумблер ничего
+    // закрепить не может — показываем вместо него инструкцию по штатной
+    // функции Apple "Доступ" (Guided Access), а сам тумблер/поле с кодом
+    // прячем, чтобы не создавать впечатление, будто они тут работают.
+    if (!isNativeShell && isIOS){
+      if (els.iosGuidedAccessBlock) els.iosGuidedAccessBlock.hidden = false;
+      if (els.kioskPinField) els.kioskPinField.hidden = true;
+      if (els.kioskToggleRow) els.kioskToggleRow.hidden = true;
+      els.kioskStatusNote.textContent = '';
+      return;
+    }
+    if (els.iosGuidedAccessBlock) els.iosGuidedAccessBlock.hidden = true;
+    if (els.kioskPinField) els.kioskPinField.hidden = false;
+    if (els.kioskToggleRow) els.kioskToggleRow.hidden = false;
+    if (!isNativeShell){
+      els.kioskStatusNote.textContent = 'Закрепление работает только в установленном приложении, не в этом окне предпросмотра.';
+      return;
+    }
+    els.kioskStatusNote.textContent = state.kioskEnabled
+      ? 'Приложение закреплено. Чтобы выйти — зажмите логотип «Сөйле» вверху экрана и введите код.'
+      : 'Сейчас не закреплено — можно выйти обычным способом в любой момент.';
+  }
+
+  // Показывает, что штатное закрепление на ЭТОМ устройстве не сработало,
+  // и что именно проверить в настройках Android — на разных
+  // производителях (особенно на бюджетных планшетах) этот системный
+  // переключатель иногда выключен по умолчанию, и тогда наш код может
+  // только попросить включить его руками, включить его самим он не может.
+  function showKioskFailedNote(){
+    if (!els.kioskStatusNote) return;
+    els.kioskStatusNote.style.color = 'var(--danger)';
+    els.kioskStatusNote.textContent = 'На этом устройстве не удалось закрепить приложение — вероятно, в настройках Android выключена системная функция "Закрепление экрана". Откройте настройки безопасности (кнопка ниже), найдите пункт про закрепление экрана/приложений, включите его, затем ещё раз выключите и включите этот переключатель здесь. Название пункта меню отличается у разных производителей.';
+    if (els.kioskOpenSettingsBtn) els.kioskOpenSettingsBtn.hidden = !isNativeShell;
+  }
+  if (els.kioskOpenSettingsBtn){
+    els.kioskOpenSettingsBtn.addEventListener('click', function(){
+      var p = kioskPlugin();
+      if (p && p.openSettings) p.openSettings().catch(function(){});
+    });
+  }
+
+  if (els.kioskPinInput){
+    els.kioskPinInput.value = state.exitPin || '';
+    els.kioskPinInput.addEventListener('input', function(){
+      els.kioskPinInput.value = els.kioskPinInput.value.replace(/\D/g,'').slice(0,4);
+    });
+  }
+  if (els.kioskToggle) els.kioskToggle.checked = state.kioskEnabled;
+  updateKioskStatusNote();
+
+  if (els.kioskToggle){
+    els.kioskToggle.addEventListener('change', function(){
+      if (els.kioskToggle.checked){
+        var pin = (els.kioskPinInput && els.kioskPinInput.value || '').trim();
+        if (pin.length !== 4){
+          els.kioskToggle.checked = false;
+          if (els.kioskStatusNote){
+            els.kioskStatusNote.textContent = 'Сначала задайте код из 4 цифр в поле выше — он понадобится, чтобы выйти.';
+            els.kioskStatusNote.style.color = 'var(--danger)';
+          }
+          if (els.kioskPinInput) els.kioskPinInput.focus();
+          return;
+        }
+        state.exitPin = pin;
+        saveJSON('soile_exit_pin', state.exitPin);
+        state.kioskEnabled = true;
+        saveJSON('soile_kiosk_enabled', true);
+        updateKioskStatusNote();
+        kioskEngage().then(function(res){
+          if (!res || !res.ok) showKioskFailedNote();
+        });
+        return;
+      } else {
+        state.kioskEnabled = false;
+        saveJSON('soile_kiosk_enabled', false);
+        kioskRelease();
+      }
+      updateKioskStatusNote();
+    });
+  }
+
+  // Окно ввода кода — используется в двух случаях: чтобы снять
+  // закрепление и выйти (purpose:'exit'), и чтобы открыть раздел
+  // "Родитель/специалист", когда приложение закреплено (purpose:'parent').
+  var exitPinPurpose = null;
+  function openExitPin(purpose){
+    exitPinPurpose = purpose;
+    if (els.exitPinTitle) els.exitPinTitle.textContent = purpose === 'parent'
+      ? 'Код для раздела «Родитель/специалист»'
+      : 'Код для выхода из приложения';
+    if (els.exitPinInput) els.exitPinInput.value = '';
+    if (els.exitPinError) els.exitPinError.textContent = '';
+    if (els.exitPinOverlay) els.exitPinOverlay.hidden = false;
+    if (els.exitPinInput) setTimeout(function(){ els.exitPinInput.focus(); }, 50);
+  }
+  function closeExitPin(){
+    if (els.exitPinOverlay) els.exitPinOverlay.hidden = true;
+    exitPinPurpose = null;
+  }
+  if (els.exitPinCancel) els.exitPinCancel.addEventListener('click', closeExitPin);
+  if (els.exitPinOverlay){
+    els.exitPinOverlay.addEventListener('click', function(e){ if (e.target === els.exitPinOverlay) closeExitPin(); });
+  }
+  function submitExitPin(){
+    var entered = (els.exitPinInput && els.exitPinInput.value || '').trim();
+    if (!state.exitPin || entered !== state.exitPin){
+      if (els.exitPinError) els.exitPinError.textContent = 'Неверный код, попробуйте ещё раз.';
+      if (els.exitPinInput){ els.exitPinInput.value = ''; els.exitPinInput.focus(); }
+      return;
+    }
+    var purpose = exitPinPurpose;
+    closeExitPin();
+    if (purpose === 'parent'){
+      setMode('parent');
+    } else {
+      // Снимаем закрепление. Режим "для ребёнка" тоже выключаем — при
+      // следующем запуске приложение не закрепится само собой, родитель
+      // включит его заново явно, когда снова понадобится.
+      state.kioskEnabled = false;
+      saveJSON('soile_kiosk_enabled', false);
+      kioskRelease();
+      if (els.kioskToggle) els.kioskToggle.checked = false;
+      updateKioskStatusNote();
+    }
+  }
+  if (els.exitPinSubmit) els.exitPinSubmit.addEventListener('click', submitExitPin);
+  if (els.exitPinInput){
+    els.exitPinInput.addEventListener('input', function(){
+      els.exitPinInput.value = els.exitPinInput.value.replace(/\D/g,'').slice(0,4);
+    });
+    els.exitPinInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') submitExitPin(); });
+  }
+
+  // Долгое нажатие (≈1.6с) на логотип "Сөйле" в шапке — единственный
+  // способ вызвать окно с кодом для выхода. Специально не кнопка и не
+  // иконка — обычное нажатие на логотип ничего не делает, поэтому
+  // ребёнок вряд ли случайно наткнётся на это за пару секунд.
+  (function setupLongPressExit(){
+    if (!els.wordmark) return;
+    var timer = null;
+    var LONG_PRESS_MS = 1600;
+    function start(){
+      clear();
+      timer = setTimeout(function(){ timer = null; openExitPin('exit'); }, LONG_PRESS_MS);
+    }
+    function clear(){ if (timer){ clearTimeout(timer); timer = null; } }
+    els.wordmark.addEventListener('touchstart', start, { passive:true });
+    els.wordmark.addEventListener('touchend', clear);
+    els.wordmark.addEventListener('touchmove', clear);
+    els.wordmark.addEventListener('touchcancel', clear);
+    els.wordmark.addEventListener('mousedown', start);
+    els.wordmark.addEventListener('mouseup', clear);
+    els.wordmark.addEventListener('mouseleave', clear);
+  })();
+
+  // Если закрепление было включено раньше — включаем его заново при
+  // каждом запуске приложения (после того как страница и нативный мост
+  // точно готовы).
+  if (isNativeShell && state.kioskEnabled){
+    window.addEventListener('load', function(){
+      setTimeout(function(){
+        kioskEngage().then(function(res){ if (!res || !res.ok) showKioskFailedNote(); });
+      }, 500);
+    });
+  }
+
+  // ---------- Подписка: код активации, привязанный к устройству ----------
+  // Каждый код одноразовый: первый, кто его вводит, "занимает" его на своём
+  // устройстве (device_id — случайная строка, которая один раз генерируется
+  // и хранится локально, это не выдаёт ничего о самом устройстве). Если тот
+  // же код ввести на другом устройстве — сервер откажет, поэтому один
+  // купленный код нельзя просто передать пятерым. Сама проверка — только в
+  // момент ввода кода (и тихо при каждом запуске, если есть интернет), а
+  // между проверками приложение работает полностью офлайн — как и раньше.
+  var LICENSE_URL = 'https://yfllckqitolusdfgydks.supabase.co/rest/v1/rpc/redeem_license';
+  var LICENSE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmbGxja3FpdG9sdXNkZmd5ZGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NDU4OTQsImV4cCI6MjEwNjMyMTg5NH0.ipVCshdJOcNtGsmzXjNBjE_ZRrSoPYnLn-j-l08pqzA';
+
+  function getDeviceId(){
+    var id = loadJSON('soile_device_id', null);
+    if (!id){
+      id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+      saveJSON('soile_device_id', id);
+    }
+    return id;
+  }
+  function loadLicenseLocal(){
+    return {
+      code: loadJSON('soile_license_code', ''),
+      expiresAt: loadJSON('soile_license_expires_at', '')
+    };
+  }
+  function saveLicenseLocal(code, expiresAt){
+    saveJSON('soile_license_code', code || '');
+    saveJSON('soile_license_expires_at', expiresAt || '');
+  }
+  function licenseIsActive(){
+    var lic = loadLicenseLocal();
+    if (!lic.expiresAt) return false;
+    var t = new Date(lic.expiresAt).getTime();
+    return !isNaN(t) && t > Date.now();
+  }
+  function licenseErrorMessage(err){
+    switch (err){
+      case 'not_found': return 'Код не найден — проверьте, правильно ли он введён.';
+      case 'already_used': return 'Этот код уже активирован на другом устройстве. Обратитесь за новым кодом.';
+      case 'revoked': return 'Этот код отключён. Обратитесь за новым кодом.';
+      case 'network': return 'Нет интернета — подключитесь к сети один раз, чтобы активировать код.';
+      case 'empty': return 'Введите код.';
+      default: return 'Не получилось активировать код, попробуйте ещё раз.';
+    }
+  }
+  function activateLicenseCode(rawCode){
+    var code = (rawCode || '').trim().toUpperCase();
+    if (!code) return Promise.resolve({ ok:false, error:'empty' });
+    return fetch(LICENSE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': LICENSE_ANON_KEY,
+        'Authorization': 'Bearer ' + LICENSE_ANON_KEY
+      },
+      body: JSON.stringify({ p_code: code, p_device_id: getDeviceId() })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data && data.ok) saveLicenseLocal(code, data.expires_at);
+      return data || { ok:false, error:'network' };
+    }).catch(function(){ return { ok:false, error:'network' }; });
+  }
+  function licenseStatusText(){
+    var lic = loadLicenseLocal();
+    if (!lic.expiresAt) return 'Подписка не активирована.';
+    var dateStr = new Date(lic.expiresAt).toLocaleDateString('ru-RU');
+    return licenseIsActive() ? ('Подписка активна до ' + dateStr + '.') : ('Подписка закончилась ' + dateStr + '.');
+  }
+  function updateLicenseStatusNote(){
+    if (els.licenseStatusNote) els.licenseStatusNote.textContent = licenseStatusText();
+  }
+  function showLicenseLock(){
+    if (!els.licenseLockOverlay) return;
+    var lic = loadLicenseLocal();
+    if (els.licenseLockTitle) els.licenseLockTitle.textContent = lic.expiresAt ? 'Подписка закончилась' : 'Нужна активация';
+    if (els.licenseLockInput) els.licenseLockInput.value = '';
+    if (els.licenseLockError) els.licenseLockError.textContent = '';
+    els.licenseLockOverlay.hidden = false;
+  }
+  function hideLicenseLock(){
+    if (els.licenseLockOverlay) els.licenseLockOverlay.hidden = true;
+  }
+  function checkLicenseGate(){
+    if (licenseIsActive()) hideLicenseLock();
+    else showLicenseLock();
+  }
+
+  if (els.licenseLockSubmit){
+    els.licenseLockSubmit.addEventListener('click', function(){
+      els.licenseLockSubmit.disabled = true;
+      var prevLabel = els.licenseLockSubmit.textContent;
+      els.licenseLockSubmit.textContent = 'Проверяем…';
+      activateLicenseCode(els.licenseLockInput && els.licenseLockInput.value).then(function(res){
+        els.licenseLockSubmit.disabled = false;
+        els.licenseLockSubmit.textContent = prevLabel;
+        updateLicenseStatusNote();
+        if (res && res.ok){ hideLicenseLock(); }
+        else if (els.licenseLockError) els.licenseLockError.textContent = licenseErrorMessage(res && res.error);
+      });
+    });
+  }
+  if (els.licenseLockInput){
+    els.licenseLockInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') els.licenseLockSubmit.click(); });
+  }
+  if (els.licenseParentSubmit){
+    els.licenseParentSubmit.addEventListener('click', function(){
+      els.licenseParentSubmit.disabled = true;
+      var prevLabel = els.licenseParentSubmit.textContent;
+      els.licenseParentSubmit.textContent = 'Проверяем…';
+      activateLicenseCode(els.licenseParentInput && els.licenseParentInput.value).then(function(res){
+        els.licenseParentSubmit.disabled = false;
+        els.licenseParentSubmit.textContent = prevLabel;
+        updateLicenseStatusNote();
+        if (res && res.ok){
+          if (els.licenseParentError) els.licenseParentError.textContent = '';
+          if (els.licenseParentInput) els.licenseParentInput.value = '';
+          checkLicenseGate();
+        } else if (els.licenseParentError) els.licenseParentError.textContent = licenseErrorMessage(res && res.error);
+      });
+    });
+  }
+
+  updateLicenseStatusNote();
+  checkLicenseGate();
+  // Тихая переpроверка при запуске, если есть интернет — подхватывает
+  // досрочное продление или отзыв кода, не тревожа пользователя, пока всё
+  // в порядке.
+  (function silentRevalidateLicense(){
+    var lic = loadLicenseLocal();
+    if (!lic.code || !navigator.onLine) return;
+    activateLicenseCode(lic.code).then(function(res){
+      updateLicenseStatusNote();
+      if (res && res.ok){ checkLicenseGate(); }
+      else if (res && res.error === 'revoked'){ saveLicenseLocal(lic.code, ''); updateLicenseStatusNote(); checkLicenseGate(); }
+    });
+  })();
+
+  (function setupInstallBanner(){
+    if (!els.installBanner) return;
+    if (loadJSON('soile_install_dismissed', false)) return;
+    var isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) return;
+    var deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault();
+      deferredPrompt = e;
+      els.installBanner.hidden = false;
+    });
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS){
+      els.installText.textContent = 'Установите как приложение: нажмите «Поделиться» в Safari внизу экрана → «На экран «Домой»».';
+      els.installBtn.hidden = true;
+      els.installBanner.hidden = false;
+    }
+    if (els.installBtn){
+      els.installBtn.addEventListener('click', function(){
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.finally(function(){
+          deferredPrompt = null;
+          els.installBanner.hidden = true;
+        });
+      });
+    }
+    if (els.installClose){
+      els.installClose.addEventListener('click', function(){
+        els.installBanner.hidden = true;
+        saveJSON('soile_install_dismissed', true);
+      });
+    }
+  })();
+
+  var kkVoiceChecked = false, kkVoiceFound = false;
+  var cachedVoices = [];
+
+  // Список фрагментов имён, которые обычно встречаются у более живых,
+  // "облачных"/нейросетевых голосов браузера (Google, Microsoft Online,
+  // Natural/Neural и т.п.), в отличие от базовых системных robot-voices.
+  var GOOD_VOICE_HINTS = ['google', 'natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'yandex', 'milena', 'ru-ru', 'irina'];
+
+  function refreshVoices(){
+    if (!('speechSynthesis' in window)) return;
+    cachedVoices = window.speechSynthesis.getVoices() || [];
+  }
+
+  function checkKkVoice(){
+    if (!('speechSynthesis' in window)) return;
+    refreshVoices();
+    if (!cachedVoices.length){ return; }
+    kkVoiceChecked = true;
+    kkVoiceFound = cachedVoices.some(function(v){ return /^kk/i.test(v.lang); });
+  }
+  if ('speechSynthesis' in window){
+    checkKkVoice();
+    window.speechSynthesis.onvoiceschanged = function(){ checkKkVoice(); populateVoiceSelect(); };
+  }
+
+  // Список голосов, которые доступны именно в этом браузере/ОС, — то,
+  // что видит пользователь, полностью зависит от его устройства (в этой
+  // песочнице для проверки кода голосов почти нет — это нормально).
+  function ruVoices(){
+    if (!cachedVoices.length) refreshVoices();
+    return cachedVoices.filter(function(v){ return v.lang && v.lang.toLowerCase().indexOf('ru') === 0; });
+  }
+
+  function populateVoiceSelect(){
+    if (!els.voiceSelect) return;
+    var voices = ruVoices();
+    var prevValue = els.voiceSelect.value;
+    els.voiceSelect.innerHTML = '';
+    var autoOpt = document.createElement('option');
+    autoOpt.value = '';
+    autoOpt.textContent = 'Автоматически (рекомендуемый)';
+    els.voiceSelect.appendChild(autoOpt);
+    voices.forEach(function(v){
+      var opt = document.createElement('option');
+      opt.value = v.voiceURI;
+      opt.textContent = v.name + (v.localService ? '' : ' · сеть');
+      els.voiceSelect.appendChild(opt);
+    });
+    els.voiceSelect.value = state.voiceURI && voices.some(function(v){ return v.voiceURI === state.voiceURI; }) ? state.voiceURI : (prevValue || '');
+    if (els.voiceCountNote){
+      els.voiceCountNote.textContent = voices.length
+        ? 'Голосов для русского найдено: ' + voices.length + '.'
+        : 'Браузер пока не сообщил список голосов — откройте это меню ещё раз через пару секунд.';
+    }
+  }
+  populateVoiceSelect();
+
+  if (els.voiceSelect){
+    els.voiceSelect.addEventListener('change', function(){
+      state.voiceURI = els.voiceSelect.value;
+      saveJSON('soile_voice_uri', state.voiceURI);
+    });
+  }
+  if (els.voiceTest){
+    els.voiceTest.addEventListener('click', function(){
+      speak(state.lang === 'kk' ? 'Сәлем! Дауыс осылай естіледі.' : 'Привет! Вот так звучит этот голос.', state.lang);
+    });
+  }
+
+  // Выбираем голос: явный выбор родителя в настройках — в приоритете;
+  // если его нет, пробуем "живой" облачный голос (Google/Natural/Online
+  // и т.д.), затем любой голос с точным языком/тем же префиксом.
+  function pickBestVoice(langPrefix){
+    if (!cachedVoices.length) refreshVoices();
+    if (!cachedVoices.length) return null;
+    if (langPrefix === 'ru' && state.voiceURI){
+      var chosen = cachedVoices.find(function(v){ return v.voiceURI === state.voiceURI; });
+      if (chosen) return chosen;
+    }
+    var matches = cachedVoices.filter(function(v){ return v.lang && v.lang.toLowerCase().indexOf(langPrefix) === 0; });
+    if (!matches.length) return null;
+    matches.sort(function(a, b){
+      function score(v){
+        var name = (v.name || '').toLowerCase();
+        var s = 0;
+        for (var i = 0; i < GOOD_VOICE_HINTS.length; i++){
+          if (name.indexOf(GOOD_VOICE_HINTS[i]) !== -1) s += 2;
+        }
+        if (!v.localService) s += 1; // облачные голоса обычно звучат живее локальных
+        return s;
+      }
+      return score(b) - score(a);
+    });
+    return matches[0];
+  }
+
+  function speak(text, lang){
+    if (!('speechSynthesis' in window)) return;
+    var langPrefix = lang === 'kk' ? 'kk' : 'ru';
+    if (lang === 'kk'){
+      checkKkVoice();
+      els.voiceNote.classList.toggle('show', kkVoiceChecked && !kkVoiceFound);
+    } else {
+      els.voiceNote.classList.remove('show');
+    }
+    try{
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = lang === 'kk' ? 'kk-KZ' : 'ru-RU';
+      var best = pickBestVoice(langPrefix);
+      if (best) u.voice = best;
+      u.rate = 0.95;
+      u.pitch = 1;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function allCards(){ return DEFAULT_CARDS.concat(state.customCards); }
+
+  function visibleCardsForCat(){
+    // На уровне 1 всегда показываем свои карточки (добавленные родителем
+    // фото/голосом) — это state.customCards, а не любая карточка с полем
+    // photo: у нас теперь и часть DEFAULT_CARDS хранит фото (PECS-стиль
+    // картинок), и они должны фильтроваться по LEVEL1_IDS как обычно.
+    // «Мои карточки» — показываем вообще все собственные карточки родителя,
+    // независимо от того, какая категория была выбрана при сохранении и
+    // скрыты ли сейчас какие-то категории в настройках — это отдельная
+    // сводная вкладка, а не фильтр по card.cat.
+    if (state.activeCat === 'mine') {
+      return allCards().filter(function(c){ return state.customCards.indexOf(c) !== -1; });
+    }
+    // «Избранное» — карточки, которые специалист/родитель вручную отметил
+    // в разделе «Родитель / специалист». Тоже сводная вкладка: показываем
+    // как есть, без фильтра по уровню поддержки и видимости категорий —
+    // раз их выбрали специально, значит хотят видеть их всегда.
+    if (state.activeCat === 'fav') {
+      return allCards().filter(function(c){ return isFavoriteCard(c.id); });
+    }
+    return allCards().filter(function(c){
+      var isOwnCard = state.customCards.indexOf(c) !== -1;
+      if (state.level === '1' && !isOwnCard && LEVEL1_IDS.indexOf(c.id) === -1) return false;
+      if (state.level !== '3' && LEVEL3_ONLY_IDS.indexOf(c.id) !== -1) return false;
+      if (state.visibleCats.indexOf(c.cat) === -1) return false;
+      if (state.activeCat === 'all') return true;
+      return c.cat === state.activeCat;
+    });
+  }
+
+  function renderCatRow(){
+    els.catRow.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.className = 'cat-pill';
+    allBtn.type = 'button';
+    allBtn.setAttribute('aria-pressed', state.activeCat==='all');
+    allBtn.innerHTML = '<span class="swatch" style="background:var(--ink-dim)"></span>' + (state.lang==='kk' ? 'Барлығы' : 'Все');
+    allBtn.addEventListener('click', function(){ state.activeCat='all'; render(); });
+    els.catRow.appendChild(allBtn);
+
+    // «Мои карточки» — отдельная сводная вкладка, всегда первая после
+    // «Все». Она не является настоящей категорией (не входит в CATEGORIES,
+    // не участвует в переключателях видимости категорий в родительском
+    // разделе и в диаграмме активности) — это просто быстрый доступ ко
+    // всем собственным карточкам родителя, независимо от того, в какую
+    // категорию они были сохранены при добавлении.
+    var mineBtn = document.createElement('button');
+    mineBtn.className = 'cat-pill';
+    mineBtn.type = 'button';
+    mineBtn.style.setProperty('--cat-color', 'var(--cat-mine)');
+    mineBtn.setAttribute('aria-pressed', state.activeCat==='mine');
+    mineBtn.innerHTML = '<span class="swatch" style="background:var(--cat-mine)"></span>' + (state.lang==='kk' ? 'Менің карталарым' : 'Мои карточки');
+    mineBtn.addEventListener('click', function(){ state.activeCat='mine'; render(); });
+    els.catRow.appendChild(mineBtn);
+
+    // «Избранное» — карточки, которые специалист вручную отобрал для
+    // этого ребёнка (раздел «Родитель / специалист» → «Избранные
+    // карточки»). Тоже не настоящая категория, просто ещё один быстрый
+    // доступ, всегда третья вкладка.
+    var favBtn = document.createElement('button');
+    favBtn.className = 'cat-pill';
+    favBtn.type = 'button';
+    favBtn.style.setProperty('--cat-color', 'var(--cat-fav)');
+    favBtn.setAttribute('aria-pressed', state.activeCat==='fav');
+    favBtn.innerHTML = '<span class="swatch" style="background:var(--cat-fav)"></span>' + (state.lang==='kk' ? 'Таңдаулылар' : 'Избранное');
+    favBtn.addEventListener('click', function(){ state.activeCat='fav'; render(); });
+    els.catRow.appendChild(favBtn);
+
+    CATEGORIES.forEach(function(c){
+      if (state.visibleCats.indexOf(c.key) === -1) return;
+      var b = document.createElement('button');
+      b.className = 'cat-pill';
+      b.type = 'button';
+      b.style.setProperty('--cat-color', c.color);
+      b.setAttribute('aria-pressed', state.activeCat===c.key);
+      b.innerHTML = '<span class="swatch" style="background:'+c.color+'"></span>' + (state.lang==='kk' ? c.kk : c.ru);
+      b.addEventListener('click', function(){ state.activeCat=c.key; render(); });
+      els.catRow.appendChild(b);
+    });
+  }
+
+  function renderCardGrid(){
+    els.cardGrid.innerHTML = '';
+    visibleCardsForCat().forEach(function(card){
+      var cat = catByKey(card.cat);
+      var tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'card-tile' + (card.photo ? ' custom' : '');
+      tile.style.setProperty('--cat-color', cat.color);
+      var label = state.lang==='kk' ? card.kk : card.ru;
+      var sub = state.lang==='kk' ? card.ru : card.kk;
+      tile.innerHTML =
+        (card.photo
+          ? '<img src="'+card.photo+'" alt="">'
+          : '<svg viewBox="0 0 64 64">'+(ICONS[card.icon]||'')+'</svg>') +
+        '<span class="word">'+label+'</span>' +
+        '<span class="word-sub">'+sub+'</span>';
+      tile.addEventListener('click', function(){ tapCard(card); });
+      els.cardGrid.appendChild(tile);
+    });
+  }
+
+  // Приоритет озвучки для карточки: своя запись под текущий язык (папина
+  // запись для kk, либо запись, сделанная прямо в приложении для кастомной
+  // карточки) — а если её нет, обычный синтез речи браузера.
+  function cardVoiceSrc(card, lang){
+    var recorded = lang === 'kk' ? card.audioKk : card.audioRu;
+    return recorded || card.audio;
+  }
+
+  // Проигрывает одну карточку и вызывает done() (без аргументов) после
+  // окончания — либо когда закончилась записанная аудио-дорожка, либо
+  // когда браузер закончил синтез речи. Нужно, чтобы можно было
+  // проигрывать несколько карточек подряд одну за другой (см. playPhrase).
+  function speakCard(card, lang, done){
+    var recorded = cardVoiceSrc(card, lang);
+    if (recorded){
+      try{
+        var audio = new Audio(recorded);
+        audio.addEventListener('ended', done);
+        audio.addEventListener('error', done);
+        audio.play().catch(done);
+      }catch(e){ done(); }
+      return;
+    }
+    if (!('speechSynthesis' in window)){ done(); return; }
+    try{
+      var u = new SpeechSynthesisUtterance(lang === 'kk' ? card.kk : card.ru);
+      u.lang = lang === 'kk' ? 'kk-KZ' : 'ru-RU';
+      var best = pickBestVoice(lang === 'kk' ? 'kk' : 'ru');
+      if (best) u.voice = best;
+      u.rate = 0.95;
+      u.pitch = 1;
+      u.onend = done;
+      u.onerror = done;
+      window.speechSynthesis.speak(u);
+    }catch(e){ done(); }
+  }
+
+  // Озвучивает фразу из нескольких карточек по одной, друг за другом —
+  // каждое слово своим лучшим доступным голосом (запись, если она есть,
+  // иначе синтез речи), а не единой "деревянной" фразой через TTS.
+  function playPhrase(cards, lang){
+    if (!cards.length) return;
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    var i = 0;
+    function next(){
+      if (i >= cards.length) return;
+      var card = cards[i++];
+      speakCard(card, lang, next);
+    }
+    next();
+  }
+
+  function tapCard(card){
+    // Озвучка — первым делом, без каких-либо синхронных задержек до неё,
+    // чтобы ребёнок слышал звук сразу по нажатию, а не через полсекунды.
+    speakCard(card, state.lang, function(){});
+
+    state.phrase.push(card);
+    var entry = { id:card.id, cat:card.cat, label: state.lang==='kk'?card.kk:card.ru, ts: Date.now() };
+    state.log.unshift(entry);
+    state.log = state.log.slice(0, 40);
+    saveJSON('soile_log', state.log);
+
+    renderPhrase();
+    // Панель "Родитель/специалист" (журнал активности, диаграмма по
+    // категориям) на каждое нажатие карточки НЕ перерисовываем — она всё
+    // равно скрыта в детском режиме, а полная перерисовка (в т.ч. проверка
+    // голосов по всем ~250 карточкам) на слабых планшетах ощутимо тормозила
+    // именно нажатие карточек. Она пересчитывается сама при заходе в этот
+    // раздел (см. setMode) — там state.log уже актуален.
+    if (state.mode === 'parent') renderParent();
+  }
+
+  function renderPhrase(){
+    els.phraseChips.innerHTML = '';
+    if (!state.phrase.length){
+      els.phraseChips.appendChild(els.phraseEmpty);
+      els.phrasePlay.disabled = true;
+      return;
+    }
+    els.phrasePlay.disabled = false;
+    state.phrase.forEach(function(card){
+      var chip = document.createElement('span');
+      chip.className = 'phrase-chip';
+      chip.textContent = state.lang==='kk' ? card.kk : card.ru;
+      els.phraseChips.appendChild(chip);
+    });
+  }
+
+  els.phraseClear.addEventListener('click', function(){ state.phrase = []; renderPhrase(); });
+  els.phrasePlay.addEventListener('click', function(){
+    playPhrase(state.phrase.slice(), state.lang);
+  });
+
+  // Список ▶-плееров для ручной проверки: для каждой звуковой дорожки
+  // (ключ в SOILE_VOICE_KK / SOILE_VOICE_RU) показываем, каким словом мы её
+  // сейчас считаем, и даём выбрать другое слово, если на слух дорожка
+  // оказалась не та. Переключатель языка появляется, только когда есть
+  // запись хотя бы на одном языке; если она есть на обоих — можно
+  // проверить и казахскую, и русскую по очереди.
+  function renderVoiceCheck(){
+    if (!els.voiceCheckSection) return;
+    var hasKk = !!window.SOILE_VOICE_KK, hasRu = !!window.SOILE_VOICE_RU;
+    if (!hasKk && !hasRu){ els.voiceCheckSection.hidden = true; return; }
+    if (state.voiceCheckLang === 'ru' && !hasRu) state.voiceCheckLang = 'kk';
+    if (state.voiceCheckLang === 'kk' && !hasKk) state.voiceCheckLang = 'ru';
+    els.voiceCheckSection.hidden = false;
+
+    els.voiceCheckLangRow.innerHTML = '';
+    if (hasKk && hasRu){
+      els.voiceCheckLangRow.hidden = false;
+      [['kk','ҚАЗ'],['ru','РУС']].forEach(function(pair){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-pressed', state.voiceCheckLang === pair[0]);
+        b.textContent = pair[1];
+        b.addEventListener('click', function(){ state.voiceCheckLang = pair[0]; renderVoiceCheck(); });
+        els.voiceCheckLangRow.appendChild(b);
+      });
+    } else {
+      els.voiceCheckLangRow.hidden = true;
+    }
+
+    var lang = state.voiceCheckLang;
+    var raw = voiceRawMap(lang);
+    els.voiceCheckList.innerHTML = '';
+    var wordOptions = DEFAULT_CARDS.map(function(c){ return { id:c.id, text: c.kk + ' — ' + c.ru }; });
+    DEFAULT_CARDS.forEach(function(card){
+      var slotId = card.id;
+      if (!raw[slotId]) return;
+      var currentLabel = trueLabelForSlot(lang, slotId);
+      var row = document.createElement('div');
+      row.className = 'voice-check-row' + (currentLabel !== slotId ? ' fixed' : '');
+
+      var playBtn = document.createElement('button');
+      playBtn.type = 'button';
+      playBtn.className = 'vc-play';
+      playBtn.setAttribute('aria-label', 'Прослушать');
+      playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      playBtn.addEventListener('click', function(){
+        try{ new Audio(raw[slotId]).play(); }catch(e){}
+      });
+
+      var label = document.createElement('span');
+      label.className = 'vc-label';
+      label.textContent = lang === 'kk' ? card.kk : card.ru;
+
+      var select = document.createElement('select');
+      wordOptions.forEach(function(opt){
+        var o = document.createElement('option');
+        o.value = opt.id;
+        o.textContent = opt.text;
+        if (opt.id === currentLabel) o.selected = true;
+        select.appendChild(o);
+      });
+      select.addEventListener('change', function(){
+        var labels = state.voiceSlotLabels[lang];
+        if (select.value === slotId){
+          delete labels[slotId];
+        } else {
+          labels[slotId] = select.value;
+        }
+        saveJSON('soile_voice_slot_labels', state.voiceSlotLabels);
+        applyVoiceMap();
+        renderVoiceCheck();
+      });
+
+      row.appendChild(playBtn);
+      row.appendChild(label);
+      row.appendChild(select);
+      els.voiceCheckList.appendChild(row);
+    });
+  }
+
+  function renderParent(){
+    renderVoiceCheck();
+    els.levelRow.innerHTML = '';
+    LEVELS.forEach(function(lv){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-pressed', state.level === lv.key);
+      b.textContent = state.lang==='kk' ? lv.kk : lv.ru;
+      b.addEventListener('click', function(){
+        state.level = lv.key;
+        saveJSON('soile_level', state.level);
+        render();
+      });
+      els.levelRow.appendChild(b);
+    });
+    var activeLevel = LEVELS.filter(function(lv){ return lv.key === state.level; })[0];
+    els.levelHint.textContent = activeLevel ? activeLevel.hint : '';
+
+    if (!state.log.length){
+      els.logList.innerHTML = '<p class="p-empty">Пока нет активности — карточки, на которые нажмёт ребёнок, появятся здесь.</p>';
+    } else {
+      els.logList.innerHTML = '';
+      state.log.slice(0,10).forEach(function(entry){
+        var cat = catByKey(entry.cat);
+        var row = document.createElement('div');
+        row.className = 'log-row';
+        var d = new Date(entry.ts);
+        var hh = ('0'+d.getHours()).slice(-2), mm = ('0'+d.getMinutes()).slice(-2);
+        row.innerHTML = '<span class="dot" style="background:'+cat.color+'"></span><span>'+entry.label+'</span><span class="t">'+hh+':'+mm+'</span>';
+        els.logList.appendChild(row);
+      });
+    }
+
+    var counts = {};
+    state.log.forEach(function(e){ counts[e.cat] = (counts[e.cat]||0)+1; });
+    var total = state.log.length || 1;
+    els.bars.innerHTML = '';
+    if (!state.log.length){
+      els.bars.innerHTML = '<p class="p-empty">Появится после первых нажатий.</p>';
+    } else {
+      CATEGORIES.forEach(function(c){
+        var n = counts[c.key]||0;
+        if (!n) return;
+        var pct = Math.round(100*n/total);
+        var row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = '<span>'+(state.lang==='kk'?c.kk:c.ru)+'</span>' +
+          '<span class="bar-track"><span class="bar-fill" style="width:'+pct+'%;background:'+c.color+'"></span></span>' +
+          '<span style="text-align:right">'+n+'</span>';
+        els.bars.appendChild(row);
+      });
+    }
+
+    els.assignList.innerHTML = '';
+    CATEGORIES.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'assign-row';
+      var checked = state.visibleCats.indexOf(c.key) !== -1;
+      row.innerHTML =
+        '<span class="swatch" style="background:'+c.color+'"></span>' +
+        '<label>' + (state.lang==='kk'?c.kk:c.ru) +
+          '<span class="switch" style="margin-left:auto">' +
+            '<input type="checkbox" data-cat="'+c.key+'" '+(checked?'checked':'')+'>' +
+            '<span class="track"></span><span class="knob"></span>' +
+          '</span>' +
+        '</label>';
+      els.assignList.appendChild(row);
+    });
+    Array.prototype.forEach.call(els.assignList.querySelectorAll('input[type="checkbox"]'), function(cb){
+      cb.addEventListener('change', function(){
+        var k = cb.getAttribute('data-cat');
+        var idx = state.visibleCats.indexOf(k);
+        if (cb.checked && idx===-1) state.visibleCats.push(k);
+        if (!cb.checked && idx!==-1) state.visibleCats.splice(idx,1);
+        saveJSON('soile_visible_cats', state.visibleCats);
+        if (state.activeCat!=='all' && state.activeCat!=='mine' && state.activeCat!=='fav' && state.visibleCats.indexOf(state.activeCat)===-1) state.activeCat='all';
+        renderCatRow();
+        renderCardGrid();
+      });
+    });
+  }
+
+  // Список для выбора избранных карточек специалистом. Сознательно НЕ
+  // вызывается из общего render() (в отличие от остальной части
+  // renderParent()) — тут рисуется грид на все ~250 карточек, и делать
+  // это при каждом переключении вкладки ребёнком означало бы вернуть
+  // именно то подтормаживание на слабых планшетах, которое мы недавно
+  // убирали. Вызывается только при заходе в раздел "Родитель/специалист"
+  // и при переключении языка внутри него.
+  function renderFavPicker(){
+    var wrap = els.favPicker;
+    wrap.innerHTML = '';
+    CATEGORIES.forEach(function(cat){
+      var catCards = allCards().filter(function(c){ return c.cat === cat.key; });
+      if (!catCards.length) return;
+      var heading = document.createElement('div');
+      heading.className = 'fav-group-heading';
+      heading.style.setProperty('--cat-color', cat.color);
+      heading.textContent = state.lang==='kk' ? cat.kk : cat.ru;
+      wrap.appendChild(heading);
+
+      var row = document.createElement('div');
+      row.className = 'fav-picker-row';
+      catCards.forEach(function(card){
+        var tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'fav-tile';
+        tile.style.setProperty('--cat-color', cat.color);
+        var fav = isFavoriteCard(card.id);
+        tile.setAttribute('aria-pressed', fav);
+        var label = state.lang==='kk' ? card.kk : card.ru;
+        tile.innerHTML =
+          (card.photo
+            ? '<img src="'+card.photo+'" alt="">'
+            : '<svg viewBox="0 0 64 64">'+(ICONS[card.icon]||'')+'</svg>') +
+          '<span class="word">'+label+'</span>' +
+          '<span class="fav-star">'+(fav ? '★' : '☆')+'</span>';
+        tile.addEventListener('click', function(){
+          toggleFavoriteCard(card.id);
+          var nowFav = isFavoriteCard(card.id);
+          tile.setAttribute('aria-pressed', nowFav);
+          tile.querySelector('.fav-star').textContent = nowFav ? '★' : '☆';
+        });
+        row.appendChild(tile);
+      });
+      wrap.appendChild(row);
+    });
+  }
+
+  // Подстраховка от "съезжающих" слов: реальный шрифт на конкретном
+  // телефоне может оказаться шире, чем в тестах, и длинное слово
+  // (например «Өтінемін» или «Кеңейтілген») вылезет за пределы своей
+  // карточки/кнопки. Тут мы после отрисовки проверяем, помещается ли
+  // текст, и если нет — чуть уменьшаем шрифт именно этому элементу,
+  // не трогая остальные.
+  //
+  // Раньше это делалось циклом на КАЖДЫЙ элемент: читаем scrollWidth →
+  // пишем fontSize → читаем scrollWidth снова → ... (до 20 раз на
+  // элемент). Чередование чтения и записи размеров заставляет браузер
+  // пересчитывать раскладку всей страницы на каждом шаге — при ~250
+  // карточках на вкладке "Все"/"Мои карточки" это были тысячи синхронных
+  // reflow за один рендер, и именно это подтормаживало на слабых
+  // планшетах, а не сами картинки. Теперь читаем размеры ВСЕХ элементов
+  // одним пакетом, потом одним пакетом пишем — это 1-2 reflow на весь
+  // экран вместо тысяч, при том же результате на экране.
+  function fitLabels(selector, minSize){
+    var els = document.querySelectorAll(selector);
+    var n = els.length;
+    if (!n) return;
+    for (var i = 0; i < n; i++){ els[i].style.fontSize = ''; }
+    for (var pass = 0; pass < 2; pass++){
+      // Пакетное чтение — один проход, без записи между элементами.
+      var over = [];
+      for (var i = 0; i < n; i++){
+        var el = els[i];
+        var scrollW = el.scrollWidth, clientW = el.clientWidth;
+        if (scrollW > clientW + 1 && clientW > 0){
+          over.push({ el: el, scrollW: scrollW, clientW: clientW });
+        }
+      }
+      if (!over.length) break;
+      // Пакетная запись — считаем нужный размер по пропорции (обычно
+      // хватает одного прохода), без пошагового перебора.
+      for (var j = 0; j < over.length; j++){
+        var o = over[j];
+        var cur = parseFloat(window.getComputedStyle(o.el).fontSize) || 12;
+        var target = pass === 0
+          ? Math.max(minSize, cur * (o.clientW / o.scrollW) - 0.3)
+          : Math.max(minSize, cur - 0.5);
+        o.el.style.fontSize = target + 'px';
+      }
+    }
+  }
+  function fitAllLabels(){
+    fitLabels('.card-tile .word', 9.5);
+    fitLabels('.level-row button', 9.5);
+  }
+
+  function render(){
+    renderCatRow();
+    renderCardGrid();
+    renderPhrase();
+    renderParent();
+    fitAllLabels();
+  }
+
+  els.langKk.addEventListener('click', function(){ setLang('kk'); });
+  els.langRu.addEventListener('click', function(){ setLang('ru'); });
+  function setLang(l){
+    state.lang = l;
+    els.langKk.setAttribute('aria-pressed', l==='kk');
+    els.langRu.setAttribute('aria-pressed', l==='ru');
+    render();
+    if (state.mode === 'parent') renderFavPicker();
+  }
+
+  els.modeChild.addEventListener('click', function(){ setMode('child'); });
+  els.modeParent.addEventListener('click', function(){
+    if (state.kioskEnabled && state.mode !== 'parent'){ openExitPin('parent'); return; }
+    setMode('parent');
+  });
+  function setMode(m){
+    state.mode = m;
+    els.modeChild.setAttribute('aria-pressed', m==='child');
+    els.modeParent.setAttribute('aria-pressed', m==='parent');
+    els.viewChild.hidden = m!=='child';
+    els.viewParent.hidden = m!=='parent';
+    els.fabAdd.hidden = m!=='child';
+    if (m==='parent'){
+      renderParent();
+      fitLabels('.level-row button', 9.5);
+      // Список "Избранные карточки" (грид на ~250 карточек) — самая
+      // тяжёлая часть этой панели. Рисуем её отдельным кадром, ПОСЛЕ
+      // того как остальная панель (уровни, журнал, диаграмма) уже
+      // отрисована и видна — так переключение на "Родитель/специалист"
+      // ощущается мгновенным, а не тормозит на пол-секунды на слабых
+      // планшетах, пока строится большая сетка.
+      requestAnimationFrame(function(){ renderFavPicker(); });
+    }
+  }
+
+  /* ---------- modal / custom card ---------- */
+  var mediaStream = null, mediaRecorder = null, chunks = [];
+
+  function resetDraft(){
+    state.draft = { photo:null, cat:'food', audio:null };
+    els.photoPreview.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.6-2h4.8L16 6"/></svg>';
+    els.wordInput.value = '';
+    els.micStatus.textContent = 'не записано — сработает озвучка по тексту';
+    renderCatChoice();
+  }
+
+  function renderCatChoice(){
+    els.catChoice.innerHTML = '';
+    CATEGORIES.forEach(function(c){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.style.background = c.color;
+      b.setAttribute('aria-pressed', state.draft.cat===c.key);
+      b.textContent = state.lang==='kk' ? c.kk : c.ru;
+      b.addEventListener('click', function(){
+        state.draft.cat = c.key;
+        renderCatChoice();
+      });
+      els.catChoice.appendChild(b);
+    });
+  }
+
+  function openModal(){
+    resetDraft();
+    els.modalOverlay.hidden = false;
+  }
+  function closeModal(){
+    els.modalOverlay.hidden = true;
+    if (mediaStream){ mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
+  }
+  els.fabAdd.addEventListener('click', openModal);
+  els.modalCancel.addEventListener('click', closeModal);
+  els.modalOverlay.addEventListener('click', function(e){ if (e.target === els.modalOverlay) closeModal(); });
+
+  // Фото с телефона может весить несколько мегабайт — сжимаем до разумного
+  // размера перед сохранением, иначе на бюджетном планшете быстро кончится
+  // место и приложение начнёт тормозить на большом количестве своих карточек.
+  function compressPhoto(file, maxSide, quality){
+    return new Promise(function(resolve){
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          var w = Math.max(1, Math.round(img.width * scale));
+          var h = Math.max(1, Math.round(img.height * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          try{
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          }catch(e){
+            resolve(reader.result); // если canvas недоступен — хотя бы исходник
+          }
+        };
+        img.onerror = function(){ resolve(reader.result); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function handlePhotoFile(file){
+    if (!file) return;
+    els.photoPreview.innerHTML = '<span style="font-size:11px">обработка фото…</span>';
+    compressPhoto(file, 480, 0.72).then(function(dataUrl){
+      state.draft.photo = dataUrl;
+      els.photoPreview.innerHTML = dataUrl ? '<img src="'+dataUrl+'" alt="">' : '';
+    });
+  }
+
+  els.photoBtn.addEventListener('click', function(){ els.photoInput.click(); });
+  els.photoInput.addEventListener('change', function(){
+    handlePhotoFile(els.photoInput.files && els.photoInput.files[0]);
+    els.photoInput.value = '';
+  });
+
+  if (els.photoCameraBtn && els.photoInputCamera){
+    els.photoCameraBtn.addEventListener('click', function(){ els.photoInputCamera.click(); });
+    els.photoInputCamera.addEventListener('change', function(){
+      handlePhotoFile(els.photoInputCamera.files && els.photoInputCamera.files[0]);
+      els.photoInputCamera.value = '';
+    });
+  }
+
+  els.micBtn.addEventListener('click', function(){
+    if (mediaRecorder && mediaRecorder.state === 'recording'){
+      mediaRecorder.stop();
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      els.micStatus.textContent = 'микрофон недоступен в этом окне — в приложении запись работает';
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio:true }).then(function(stream){
+      mediaStream = stream;
+      chunks = [];
+      try{
+        mediaRecorder = new MediaRecorder(stream);
+      }catch(e){
+        els.micStatus.textContent = 'запись не поддерживается: ' + ((e && (e.name || e.message)) || 'неизвестная ошибка');
+        return;
+      }
+      mediaRecorder.ondataavailable = function(e){ if (e.data.size) chunks.push(e.data); };
+      mediaRecorder.onstop = function(){
+        var blob = new Blob(chunks, { type:'audio/webm' });
+        var reader = new FileReader();
+        reader.onload = function(){
+          state.draft.audio = reader.result;
+          els.micStatus.textContent = 'голос записан ✓';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(function(t){ t.stop(); });
+      };
+      mediaRecorder.start();
+      els.micStatus.textContent = 'идёт запись… нажмите ещё раз, чтобы остановить';
+      els.micBtn.textContent = '⏺ Остановить';
+    }).catch(function(err){
+      var reason = (err && (err.name || err.message)) || 'неизвестная ошибка';
+      els.micStatus.textContent = 'нет доступа к микрофону (' + reason + ') — сработает озвучка по тексту';
+    });
+  });
+
+  els.modalSave.addEventListener('click', function(){
+    var word = els.wordInput.value.trim();
+    if (!word){ els.wordInput.focus(); return; }
+    var card = {
+      id: 'custom-' + Date.now(),
+      cat: state.draft.cat,
+      kk: word,
+      ru: word,
+      photo: state.draft.photo,
+      audio: state.draft.audio
+    };
+    state.customCards.push(card);
+    render();
+    idbPut(card); // асинхронно, не блокирует интерфейс ребёнка/родителя
+    els.micBtn.textContent = '🎙️ Записать голос';
+    closeModal();
+  });
+
+  if (els.resetBtn){
+    els.resetBtn.addEventListener('click', function(){
+      els.resetConfirm.hidden = false;
+    });
+    els.resetCancel.addEventListener('click', function(){
+      els.resetConfirm.hidden = true;
+    });
+    els.resetConfirmBtn.addEventListener('click', function(){
+      state.log = [];
+      state.customCards = [];
+      state.activeCat = 'all';
+      saveJSON('soile_log', []);
+      idbClear();
+      els.resetConfirm.hidden = true;
+      render();
+    });
+  }
+
+  render();
+  loadCustomCards();
+})();
+</script>
