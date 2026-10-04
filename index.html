@@ -531,6 +531,25 @@
   .assign-row .swatch{ width:10px;height:10px;border-radius:50%; }
   .assign-row label{ flex:1; display:flex; align-items:center; gap:8px; cursor:pointer; }
 
+
+  /* ---------- свои фото на встроенных карточках ---------- */
+  .own-photo-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(86px, 1fr)); gap:8px; margin-top:10px; }
+  .own-tile{
+    position:relative; border:0; border-radius:14px; padding:8px 4px 6px;
+    background:var(--cat-color); color:#fff; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .own-tile img{ width:56px; height:56px; object-fit:cover; border-radius:10px; box-shadow:0 0 0 2px rgba(255,255,255,.75); }
+  .own-tile svg{ width:56px; height:56px; }
+  .own-tile .word{ font-size:10.5px; font-weight:800; text-align:center; line-height:1.15; overflow-wrap:anywhere; }
+  .own-tile .cam{
+    position:absolute; top:4px; left:4px; width:20px; height:20px; border-radius:999px;
+    background:rgba(255,255,255,.9); color:#333; font-size:11px; line-height:20px; text-align:center;
+  }
+  .own-tile .own-x{
+    position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:999px; border:0;
+    background:#fff; color:#c0392b; font-size:13px; font-weight:800; line-height:22px; padding:0; cursor:pointer;
+  }
   /* ---------- избранные карточки (выбор специалиста) ---------- */
   .fav-picker-wrap{ display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto; padding-right:2px; }
   .fav-group-heading{
@@ -803,6 +822,12 @@
         <h3>Назначенные категории</h3>
         <div id="assign-list" class="assign-list"></div>
         <p class="key-note" style="margin-top:10px">Так специалист включает или временно убирает категории карточек у ребёнка — например, оставить только «Еда» и «Действия» на первую неделю.</p>
+      </div>
+      <div class="p-section">
+        <h3>Свои фото на карточках</h3>
+        <p class="key-note">Нажмите на карточку и выберите фото из галереи или сделайте снимок — ребёнок увидит на ней реальное лицо: себя, маму, папу, воспитателя, свою школу и т.д. Фото хранится только на этом устройстве. Крестик возвращает стандартную картинку.</p>
+        <div id="own-photo-grid" class="own-photo-grid"></div>
+        <input type="file" id="own-photo-input" accept="image/*" hidden>
       </div>
       <div class="p-section">
         <h3>Избранные карточки</h3>
@@ -1534,6 +1559,27 @@
   }
   applyVoiceMap();
 
+  // ---------- свои фото на встроенных карточках ----------
+  // Родитель может заменить картинку любой «личной» карточки (Я, Мама,
+  // Папа, ... Школа, Магазин) на своё фото. Хранится локально на
+  // устройстве (localStorage, сжатый квадрат ~320px), поверх стандартной.
+  var OWN_PHOTO_IDS = ['me','mom','dad','sister','brother','grandma','grandpa','friend','teacher','school','playground','shop','street'];
+  var photoOverrides = loadJSON('soile_photo_overrides', {});
+  DEFAULT_CARDS.forEach(function(c){ c.photoOrig = c.photo; });
+  function applyPhotoOverrides(){
+    DEFAULT_CARDS.forEach(function(c){
+      var o = photoOverrides[c.id];
+      if (o) c.photo = o;
+      else if (c.photoOrig) c.photo = c.photoOrig;
+      else delete c.photo;
+    });
+  }
+  applyPhotoOverrides();
+  function savePhotoOverrides(){
+    try{ localStorage.setItem('soile_photo_overrides', JSON.stringify(photoOverrides)); return true; }
+    catch(e){ return false; }
+  }
+
   // Подхватываем свои карточки из IndexedDB при старте; если на этом
   // устройстве ещё остались карточки со старой (localStorage) версии —
   // переносим их один раз и чистим старое место.
@@ -1585,6 +1631,8 @@
     bars: document.getElementById('bars'),
     assignList: document.getElementById('assign-list'),
     favPicker: document.getElementById('fav-picker'),
+    ownPhotoGrid: document.getElementById('own-photo-grid'),
+    ownPhotoInput: document.getElementById('own-photo-input'),
     voiceCheckSection: document.getElementById('voice-check-section'),
     voiceCheckLangRow: document.getElementById('voice-check-lang-row'),
     voiceCheckList: document.getElementById('voice-check-list'),
@@ -2527,6 +2575,75 @@
   // именно то подтормаживание на слабых планшетах, которое мы недавно
   // убирали. Вызывается только при заходе в раздел "Родитель/специалист"
   // и при переключении языка внутри него.
+  var ownPhotoTarget = null;
+  function cropSquare(file, side, quality){
+    return new Promise(function(resolve){
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var m = Math.min(img.width, img.height);
+          var sx = (img.width - m) / 2, sy = (img.height - m) / 2;
+          var canvas = document.createElement('canvas');
+          canvas.width = side; canvas.height = side;
+          canvas.getContext('2d').drawImage(img, sx, sy, m, m, 0, 0, side, side);
+          try{ resolve(canvas.toDataURL('image/jpeg', quality)); }catch(e){ resolve(null); }
+        };
+        img.onerror = function(){ resolve(null); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  }
+  function renderOwnPhotoGrid(){
+    var wrap = els.ownPhotoGrid;
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    OWN_PHOTO_IDS.forEach(function(id){
+      var card = null;
+      for (var i=0;i<DEFAULT_CARDS.length;i++){ if (DEFAULT_CARDS[i].id === id){ card = DEFAULT_CARDS[i]; break; } }
+      if (!card) return;
+      var cat = catByKey(card.cat);
+      var tile = document.createElement('div');
+      tile.className = 'own-tile';
+      tile.setAttribute('role','button');
+      tile.tabIndex = 0;
+      tile.style.setProperty('--cat-color', cat.color);
+      var label = state.lang==='kk' ? card.kk : card.ru;
+      tile.innerHTML =
+        (card.photo
+          ? '<img src="'+card.photo+'" alt="">'
+          : '<svg viewBox="0 0 64 64">'+(ICONS[card.icon]||'')+'</svg>') +
+        '<span class="word">'+label+'</span><span class="cam">\uD83D\uDCF7</span>' +
+        (photoOverrides[id] ? '<button type="button" class="own-x" aria-label="Сбросить">\u2715</button>' : '');
+      tile.addEventListener('click', function(e){
+        if (e.target.classList && e.target.classList.contains('own-x')){
+          delete photoOverrides[id];
+          savePhotoOverrides(); applyPhotoOverrides(); renderOwnPhotoGrid(); render();
+          return;
+        }
+        ownPhotoTarget = id;
+        els.ownPhotoInput.click();
+      });
+      wrap.appendChild(tile);
+    });
+  }
+  if (els.ownPhotoInput){
+    els.ownPhotoInput.addEventListener('change', function(){
+      var file = els.ownPhotoInput.files && els.ownPhotoInput.files[0];
+      var id = ownPhotoTarget;
+      els.ownPhotoInput.value = '';
+      if (!file || !id) return;
+      cropSquare(file, 320, 0.8).then(function(dataUrl){
+        if (!dataUrl) return;
+        photoOverrides[id] = dataUrl;
+        if (!savePhotoOverrides()){ delete photoOverrides[id]; return; }
+        applyPhotoOverrides(); renderOwnPhotoGrid(); render();
+      });
+    });
+  }
+
   function renderFavPicker(){
     var wrap = els.favPicker;
     wrap.innerHTML = '';
@@ -2631,7 +2748,7 @@
     els.langKk.setAttribute('aria-pressed', l==='kk');
     els.langRu.setAttribute('aria-pressed', l==='ru');
     render();
-    if (state.mode === 'parent') renderFavPicker();
+    if (state.mode === 'parent') { renderFavPicker(); renderOwnPhotoGrid(); }
   }
 
   els.modeChild.addEventListener('click', function(){ setMode('child'); });
@@ -2655,6 +2772,7 @@
       // отрисована и видна — так переключение на "Родитель/специалист"
       // ощущается мгновенным, а не тормозит на пол-секунды на слабых
       // планшетах, пока строится большая сетка.
+      renderOwnPhotoGrid();
       requestAnimationFrame(function(){ renderFavPicker(); });
     }
   }
