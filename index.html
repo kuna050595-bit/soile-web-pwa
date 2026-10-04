@@ -761,7 +761,7 @@
           <path d="M23 39q9 8 18 0" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
         </svg>
         Сөйле
-        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 30.09-license</span>
+        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 05.10-license</span>
       </div>
       <div class="lang-toggle" role="group" aria-label="Язык озвучки">
         <button type="button" id="lang-kk" aria-pressed="true">ҚАЗ</button>
@@ -880,6 +880,7 @@
         </div>
         <button type="button" class="btn accent" id="license-parent-submit" style="margin-top:10px">Активировать</button>
         <p class="key-note" id="license-parent-error" style="color:var(--danger); min-height:1.2em; margin-top:8px"></p>
+        <p class="key-note" id="license-renew-hint" hidden style="margin-top:6px"><b style="color:var(--danger)">Скоро закончится.</b> <a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="font-weight:800">Продлить в Telegram-боте →</a></p>
       </div>
       <div class="p-section">
         <h3>Перед новым ребёнком</h3>
@@ -926,6 +927,18 @@
       <p class="key-note" id="license-lock-error" style="color:var(--danger); min-height:1.2em"></p>
       <div class="modal-actions">
         <button type="button" class="btn accent" id="license-lock-submit">Активировать</button>
+      </div>
+      <p class="key-note" style="margin-top:12px; text-align:center">Нет кода или закончилась подписка?<br><a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="color:var(--accent,#2a7de1); font-weight:800">Получить / продлить в Telegram-боте →</a></p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="license-expiry-overlay" hidden>
+    <div class="modal">
+      <h3>⏰ Подписка скоро закончится</h3>
+      <p class="key-note" id="license-expiry-text" style="font-size:14px"></p>
+      <div class="modal-actions" style="flex-direction:column; gap:8px; align-items:stretch">
+        <a class="btn accent" href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="display:block; text-align:center; text-decoration:none">Продлить в Telegram</a>
+        <button type="button" class="btn" id="license-expiry-later">Позже</button>
       </div>
     </div>
   </div>
@@ -1671,7 +1684,11 @@
     licenseLockTitle: document.getElementById('license-lock-title'),
     licenseLockInput: document.getElementById('license-lock-input'),
     licenseLockError: document.getElementById('license-lock-error'),
-    licenseLockSubmit: document.getElementById('license-lock-submit')
+    licenseLockSubmit: document.getElementById('license-lock-submit'),
+    licenseExpiryOverlay: document.getElementById('license-expiry-overlay'),
+    licenseExpiryText: document.getElementById('license-expiry-text'),
+    licenseExpiryLater: document.getElementById('license-expiry-later'),
+    licenseRenewHint: document.getElementById('license-renew-hint')
   };
 
   // ---------- PWA: офлайн-кэш + установка на экран ----------
@@ -2005,6 +2022,37 @@
   function checkLicenseGate(){
     if (licenseIsActive()) hideLicenseLock();
     else showLicenseLock();
+    updateExpiryNotice();
+  }
+
+  // Напоминание «подписка заканчивается» — для любого срока (пробный, месяц, год):
+  // за 24 часа до конца. Подсказка в разделе «Родитель/специалист» видна всё
+  // это время, а всплывающее окно при запуске — не чаще раза в день.
+  function licenseMsLeft(){
+    var lic = loadLicenseLocal();
+    if (!lic.expiresAt) return null;
+    var t = new Date(lic.expiresAt).getTime();
+    return isNaN(t) ? null : (t - Date.now());
+  }
+  function updateExpiryNotice(){
+    var left = licenseMsLeft();
+    var soon = left !== null && left > 0 && left <= 24*3600*1000;
+    if (els.licenseRenewHint) els.licenseRenewHint.hidden = !soon;
+    if (els.licenseExpiryOverlay && !soon) els.licenseExpiryOverlay.hidden = true;
+    if (!soon || !els.licenseExpiryOverlay) return;
+    var today = new Date().toISOString().slice(0,10);
+    if (loadJSON('soile_expiry_notice_day', '') === today) return;
+    var until = new Date(loadLicenseLocal().expiresAt).toLocaleString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    var hours = Math.max(1, Math.round(left / 3600000));
+    if (els.licenseExpiryText) els.licenseExpiryText.textContent =
+      'Доступ к «Сөйле» заканчивается ' + until + ' (примерно через ' + hours + ' ч). Чтобы ребёнок не остался без карточек и озвучки, продлите подписку заранее — свои фото и карточки на устройстве сохранятся.';
+    els.licenseExpiryOverlay.hidden = false;
+  }
+  if (els.licenseExpiryLater){
+    els.licenseExpiryLater.addEventListener('click', function(){
+      saveJSON('soile_expiry_notice_day', new Date().toISOString().slice(0,10));
+      els.licenseExpiryOverlay.hidden = true;
+    });
   }
 
   if (els.licenseLockSubmit){
