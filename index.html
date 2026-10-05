@@ -751,11 +751,12 @@
       <div class="wordmark" id="wordmark">
         <svg class="mascot-sm" viewBox="0 0 768 768" aria-hidden="true"><rect width="768" height="768" rx="170" fill="#FFC83D"/><g><path fill="#fff" d="M384 136C512 136 616 240 616 368C616 496 512 600 384 600C363 600 343 597 323 592L190 617L240 551C183 510 152 442 152 368C152 240 256 136 384 136Z"/><path fill="#F26B4F" fill-rule="evenodd" d="M384 218C318 218 251 281 251 368C251 455 318 518 384 518C450 518 517 455 517 368C517 281 450 218 384 218ZM384 269C339 269 304 315 304 348L464 348C464 315 429 269 384 269ZM304 388C304 421 339 467 384 467C429 467 464 421 464 388Z"/><circle cx="596" cy="225" r="20" fill="#1FA89E"/><circle cx="632" cy="184" r="15" fill="#1FA89E"/><circle cx="660" cy="150" r="10" fill="#1FA89E"/></g></svg>
         Сөйле
-        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 06.10-logo</span>
+        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 05.10-eng</span>
       </div>
       <div class="lang-toggle" role="group" aria-label="Язык озвучки">
         <button type="button" id="lang-kk" aria-pressed="true">ҚАЗ</button>
         <button type="button" id="lang-ru" aria-pressed="false">РУС</button>
+        <button type="button" id="lang-en" aria-pressed="false">ENG</button>
       </div>
     </div>
     <div class="mode-toggle" role="group" aria-label="Режим">
@@ -918,6 +919,7 @@
       <div class="modal-actions">
         <button type="button" class="btn accent" id="license-lock-submit">Активировать</button>
       </div>
+      <p style="margin-top:10px; text-align:center"><button type="button" class="btn" id="license-lock-lang">🌐 English</button></p>
       <p class="key-note" style="margin-top:12px; text-align:center">Нет кода или закончилась подписка?<br><a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="color:var(--accent,#2a7de1); font-weight:800">Получить / продлить в Telegram-боте →</a></p>
     </div>
   </div>
@@ -1364,6 +1366,20 @@
     { id:'colorgray', cat:'color', photo:'icons/pecs/colorgray.jpeg', kk:'Сұр түс', ru:'Серый' },
   ];
 
+  // ---- English (ENG): подписи карточек, категорий и уровней ----
+  var EN_CARDS = {"water": "Water", "bread": "Bread", "apple": "Apple", "milk": "Milk", "eat": "Eat", "drink": "Drink", "play": "Play", "sleep": "Sleep", "me": "Me", "mom": "Mom", "dad": "Dad", "friend": "Friend", "happy": "Happy", "angry": "Angry", "tired": "Tired", "scared": "Scared", "house": "House", "school": "School", "playground": "Playground", "shop": "Shop", "bathroom": "Bathroom", "street": "Street", "car": "Car", "yes": "Yes", "no": "No", "want": "I want", "more": "More", "stop": "Stop", "help": "Help", "please": "Please", "thanks": "Thank you", "banana": "Banana", "candy": "Candy", "soup": "Soup", "tea": "Tea", "go": "Go", "give": "Give me", "open": "Open", "look": "Look", "washhands": "Wash hands", "sister": "Sister", "brother": "Brother", "grandma": "Grandma", "grandpa": "Grandpa", "teacher": "Teacher", "hurt": "It hurts", "like": "I like it", "sad": "Sad", "children": "Children", "girl": "Girl", "doctor": "Doctor", "boy": "Boy", "child": "Child", "baby": "Baby", "close": "Close", "walk": "Walk", "waitfor": "Wait", "show": "Show me", "take": "Take", "listen": "Listen", "giveback": "Give back", "goaway": "Go away", "stand": "Stand", "comehere": "Come here", "sit": "Sit", "bathe": "Take a bath", "rest": "Rest", "pour": "Pour", "kiss": "Kiss", "tickle": "Tickle", "putclothes": "Put on", "takeoffclothes": "Take off", "dislike": "I don't like it", "wanttocry": "I want to cry", "wanthug": "I want a hug", "worry": "Worried", "embarrassed": "Embarrassed", "bored": "Bored", "offended": "Upset", "surprised": "Surprised", "calm": "Calm", "guilty": "Guilty", "proud": "Proud", "pity": "Sorry for", "envy": "Jealous", "funmood": "Fun", "longing": "Missing you", "love": "Love", "hope": "Hope", "loud": "Loud", "myself": "I do it myself", "notallowed": "Not allowed", "dontwant": "I don't want", "hi": "Hi", "may": "May I?", "bye": "Bye", "yourturn": "Your turn", "myname": "Name", "juice": "Juice", "yogurt": "Yogurt", "orangejuice": "Orange juice", "soda": "Soda", "applejuice": "Apple juice", "cookie": "Cookie", "porridge": "Porridge", "chocolate": "Chocolate", "pizza": "Pizza", "egg": "Egg", "toycar": "Toy car", "ball": "Ball", "doll": "Doll", "blocks": "Blocks", "tabletdevice": "Tablet", "teddybear": "Teddy bear", "toyshovel": "Shovel", "music": "Music", "hot": "Hot", "cold": "Cold", "dirty": "Dirty", "wet": "Wet", "clean": "Clean", "ready": "Done", "num0": "0", "num1": "1", "num2": "2", "num3": "3", "num4": "4", "num5": "5", "num6": "6", "num7": "7", "num8": "8", "num9": "9", "cat": "Cat", "dog": "Dog", "rooster": "Rooster", "sheep": "Sheep", "horse": "Horse", "pig": "Pig", "duck": "Duck", "tiger": "Tiger", "lion": "Lion", "bear": "Bear", "fox": "Fox", "whale": "Whale", "shark": "Shark", "octopus": "Octopus", "wolf": "Wolf", "deer": "Deer", "cheetah": "Cheetah", "starfish": "Starfish", "elephant": "Elephant", "dolphin": "Dolphin", "crab": "Crab", "seaturtle": "Sea turtle", "bus": "Bus", "bike": "Bicycle", "plane": "Airplane", "train": "Train", "firetruck": "Fire truck", "policecar": "Police car", "ambulance": "Ambulance", "emergencytruck": "Emergency truck", "yacht": "Yacht", "sailboat": "Sailboat", "barge": "Barge", "taxi": "Taxi", "truck": "Truck", "wheel": "Wheel", "boots": "Boots", "pants": "Pants", "jacket": "Jacket", "socks": "Socks", "dress": "Dress", "shoes": "Shoes", "tshirt": "T-shirt", "hat": "Hat", "backpack": "Backpack", "facemask": "Face mask", "hood": "Hood", "jeans": "Jeans", "cap": "Cap", "cardigan": "Cardigan", "sneakers": "Sneakers", "tanktop": "Tank top", "clothesdirty": "Dirty clothes", "clotheswet": "Wet clothes", "clothesdry": "Dry clothes", "clothesclean": "Clean clothes", "gloves": "Gloves", "underwear": "Underwear", "hoodie": "Hoodie", "tracksuit": "Tracksuit", "shirt": "Shirt", "headache": "Headache", "sorethroat": "Sore throat", "stomachache": "Stomachache", "cough": "Cough", "earache": "Earache", "runnynose": "Runny nose", "injection": "Injection", "fever": "Fever", "diarrhea": "Diarrhea", "dentist": "Dentist", "vomit": "Vomiting", "room": "Room", "soap": "Soap", "towel": "Towel", "door": "Door", "bed": "Bed", "table": "Table", "pillow": "Pillow", "window": "Window", "blanket": "Blanket", "spoon": "Spoon", "chair": "Chair", "plate": "Plate", "cup": "Cup", "bottle": "Bottle", "bucket": "Bucket", "mirror": "Mirror", "sofa": "Sofa", "fork": "Fork", "key": "Key", "box": "Box", "knife": "Knife", "bag": "Plastic bag", "floor": "Floor", "socket": "Socket", "wall": "Wall", "cupboard": "Cupboard", "handbag": "Handbag", "tv": "TV", "clock": "Clock", "toothbrush": "Toothbrush", "bell": "Bell", "computer": "Computer", "wardrobe": "Wardrobe", "star": "Star", "heart": "Heart", "square": "Square", "circle": "Circle", "triangle": "Triangle", "cube": "Cube", "rectangle": "Rectangle", "colorwhite": "White", "colorblack": "Black", "colorbrown": "Brown", "colorpurple": "Purple", "colororange": "Orange", "coloryellow": "Yellow", "colorgreen": "Green", "colorpink": "Pink", "colorlightblue": "Light blue", "colorred": "Red", "colorblue": "Blue", "colorbeige": "Beige", "colorturquoise": "Turquoise", "colorsilver": "Silver", "colorgold": "Gold", "colorgray": "Gray"};
+  DEFAULT_CARDS.forEach(function(c){ if (EN_CARDS[c.id]) c.en = EN_CARDS[c.id]; });
+  var EN_CATS = {"core": "Basic", "people": "People", "action": "Actions", "food": "Food", "emotion": "Feelings", "place": "Places", "toys": "Toys", "state": "States", "number": "Numbers", "animal": "Animals", "transport": "Transport", "clothes": "Clothes", "health": "Health", "home": "Home", "shape": "Shapes", "color": "Colors"};
+  CATEGORIES.forEach(function(c){ if (EN_CATS[c.key]) c.en = EN_CATS[c.key]; });
+  var EN_LEVELS = {"1": ["Basic", "Minimum words, only the essentials — for those who are just starting with cards and barely speak on their own."], "2": ["Standard", "The full vocabulary of the current version — suits most children using cards."], "3": ["Advanced", "Full vocabulary plus a focus on building phrases from several cards — for those who already speak a little and use cards as support, not as the only way to communicate."]};
+  LEVELS.forEach(function(l){ var e = EN_LEVELS[l.key]; if (e){ l.en = e[0]; l.hintEn = e[1]; } });
+  // подписи под выбранный язык (kk / ru / en)
+  function cardLabel(c){ return state.lang==='kk' ? c.kk : (state.lang==='en' ? (c.en || c.ru) : c.ru); }
+  function cardSub(c){ return state.lang==='kk' ? c.ru : (state.lang==='en' ? c.ru : c.kk); }
+  function catLabel(c){ return state.lang==='kk' ? c.kk : (state.lang==='en' ? (c.en || c.ru) : c.ru); }
+  function lvLabel(l){ return state.lang==='kk' ? l.kk : (state.lang==='en' ? (l.en || l.ru) : l.ru); }
+
+
   function catByKey(k){ for (var i=0;i<CATEGORIES.length;i++){ if (CATEGORIES[i].key===k) return CATEGORIES[i]; } return CATEGORIES[0]; }
 
   function isFavoriteCard(id){ return state.favoriteCards.indexOf(id) !== -1; }
@@ -1429,7 +1445,7 @@
   }
 
   var state = {
-    lang: 'kk',
+    lang: (function(){ var l = loadJSON('soile_lang','kk'); return (l==='ru'||l==='en') ? l : 'kk'; })(),
     mode: 'child',
     activeCat: 'all',
     phrase: [],
@@ -1441,6 +1457,7 @@
     favoriteCards: loadJSON('soile_favorite_cards', []),
     visibleCats: loadJSON('soile_visible_cats', CATEGORIES.map(function(c){return c.key;})),
     voiceURI: loadJSON('soile_voice_uri', ''),
+    voiceURIEn: loadJSON('soile_voice_uri_en', ''),
     level: loadJSON('soile_level', '2'),
     // "Режим для ребёнка": приложение закреплено на экране (штатный
     // Android screen pinning), выйти можно только зажав логотип и введя
@@ -1603,9 +1620,100 @@
     });
   }
 
+  /* ---------- English UI: DOM-переводчик (kk/ru-интерфейс остаётся как есть) ---------- */
+  var EN_UI = {"1) Настройки → Универсальный доступ → Доступ (на части версий iOS: Настройки → Экранное время → Доступ). Включите переключатель и в пункте «Код-пароль» задайте 4-значный код — он понадобится, чтобы выйти.": "1) Settings → Accessibility → Guided Access (on some iOS versions: Settings → Screen Time → Guided Access). Turn the switch on and set a 4-digit code under “Passcode Settings” — you will need it to exit.", "2) Откройте «Сөйле» с экрана «Домой», как обычное приложение.": "2) Open “Сөйле” from the Home Screen like a regular app.", "3) Быстро нажмите боковую кнопку трижды подряд (на iPhone с кнопкой «Домой» — трижды саму кнопку «Домой»). Появится экран «Доступ» — нажмите «Начать».": "3) Quickly press the side button three times in a row (on an iPhone with a Home button — press the Home button three times). The Guided Access screen appears — tap “Start”.", "4) Теперь ребёнок не выйдет из приложения. Чтобы выйти самим — снова трижды нажмите ту же кнопку и введите код.": "4) Now the child cannot leave the app. To exit yourself — press the same button three times again and enter the code.", "Автоматическая нарезка записи иногда сдвигает дорожку на соседнее слово. Нажмите ▶ у каждой карточки — если звучит не то слово, выберите в списке справа то, что вы на самом деле услышали. Исправления сохранятся сразу.": "Automatic slicing of the recording sometimes shifts a track to the neighbouring word. Press ▶ on each card — if the wrong word plays, pick the word you actually heard from the list on the right. Corrections are saved immediately.", "Активировать": "Activate", "Голос": "Voice", "Голос для казахского языка не найден в этом браузере — это влияет только на карточки без заранее записанного голоса (например, добавленные вручную). Базовый словарь уже озвучен записанным голосом и работает без этого ограничения.": "No Kazakh voice was found in this browser — this only affects cards without a pre-recorded voice (for example, ones added manually). The basic vocabulary already has a recorded voice and works without this limitation.", "Голос озвучки": "Speech voice", "Готово": "Done", "Да, очистить": "Yes, clear", "Действия": "Actions", "Добавить карточку": "Add a card", "Дом и вещи": "Home", "Еда / предметы": "Food / objects", "Если это общий планшет на несколько детей в кабинете — очистите историю и добавленные фото/карточки предыдущего ребёнка перед новым занятием. Сами карточки-слова из базового словаря и уровень поддержки не удаляются.": "If this is a shared tablet for several children in a classroom — clear the previous child's history and added photos/cards before a new session. The basic vocabulary cards and the support level are not deleted.", "Животные": "Animals", "Закрепить приложение": "Pin the app", "Закрепляет приложение на экране: ребёнок не сможет случайно нажать «Домой»/«Недавние» и выйти, и не сможет открыть раздел «Родитель/специалист» без кода. Экран при этом НЕ блокируется и не гаснет — это защита только от выхода из приложения, а не блокировка устройства. Чтобы выйти самим — зажмите логотип «Сөйле» в шапке (2 секунды) и введите код.": "Pins the app on screen: the child cannot accidentally press Home/Recents and leave, and cannot open the “Parent / specialist” section without the code. The screen is NOT locked and does not turn off — this only protects against leaving the app, it is not a device lock. To exit yourself — press and hold the “Сөйле” logo in the header (2 seconds) and enter the code.", "Здоровье": "Health", "Игрушки": "Toys", "Избранные карточки": "Favorite cards", "Категории карточек": "Card categories", "Категория": "Category", "Код активации / продления": "Activation / renewal code", "Код для выхода": "Exit code", "Код для выхода (4 цифры)": "Exit code (4 digits)", "Люди": "People", "Места": "Places", "На iPhone/iPad наше закрепление недоступно — ни один сайт в Safari не может сам заблокировать телефон на одном приложении, это ограничение Apple. Но у Apple есть для этого собственная функция — «Доступ» (Guided Access), она отлично подходит:": "Our app pinning is not available on iPhone/iPad — no website in Safari can lock a phone to a single app, this is an Apple restriction. But Apple has its own feature for this — Guided Access, and it works great:", "Нажмите на карточку и выберите фото из галереи или сделайте снимок — ребёнок увидит на ней реальное лицо: себя, маму, папу, воспитателя, свою школу и т.д. Фото хранится только на этом устройстве. Крестик возвращает стандартную картинку.": "Tap a card and choose a photo from the gallery or take a picture — the child will see a real face on it: themselves, mom, dad, a teacher, their school, etc. The photo is stored only on this device. The cross restores the standard picture.", "Назначенные категории": "Assigned categories", "Нет кода или закончилась подписка?": "No code, or subscription ended?", "Новая карточка": "New card", "Нужна активация": "Activation required", "Одежда": "Clothes", "Основные слова": "Basic words", "Открыть настройки Android": "Open Android settings", "Отмена": "Cancel", "Отметьте карточки ★ — они соберутся во вкладке «Избранное» у ребёнка отдельным быстрым доступом, независимо от категории и уровня поддержки. Удобно, когда специалист хочет вынести на первый экран 8-10 конкретных слов под текущую цель занятия.": "Mark cards with ★ — they will be collected in the child's “Favorites” tab for quick access, regardless of category and support level. Handy when a specialist wants to put 8–10 specific words on the first screen for the current goal of the session.", "Очистить историю и свои карточки": "Clear history and my cards", "Перед новым ребёнком": "Before a new child", "Подписка не активирована.": "Subscription is not activated.", "Позже": "Later", "Пока нет активности — карточки, на которые нажмёт ребёнок, появятся здесь.": "No activity yet — the cards the child taps will appear here.", "Получить / продлить в Telegram-боте →": "Get / renew in the Telegram bot →", "Появится после первых нажатий.": "Will appear after the first taps.", "Продлить в Telegram": "Renew in Telegram", "Продлить в Telegram-боте →": "Renew in the Telegram bot →", "Ребёнок": "Child", "Ребёнок собирает фразу из карточек, приложение озвучивает её на казахском или русском.": "The child builds a phrase from cards and the app says it out loud in Kazakh, Russian or English.", "Родитель / специалист": "Parent / specialist", "Свои фото на карточках": "Your own photos on cards", "Сегодняшняя активность": "Today's activity", "Скоро закончится.": "Ends soon.", "Слово (родной язык ребёнка)": "Word (child's native language)", "Соберите фразу — нажимайте на карточки": "Build a phrase — tap the cards", "Состояния": "States", "Список голосов даёт браузер/устройство — их качество и «живость» зависит от системы, не от приложения. Выберите тот, что звучит естественнее, и проверьте кнопкой ниже.": "The list of voices is provided by the browser/device — their quality depends on the system, not on the app. Choose the one that sounds most natural and test it with the button below.", "Сөйле — карточки для общения": "Сөйле — communication cards", "Так специалист включает или временно убирает категории карточек у ребёнка — например, оставить только «Еда» и «Действия» на первую неделю.": "This is how a specialist turns card categories on or temporarily hides them for a child — for example, leaving only “Food” and “Actions” for the first week.", "Точно удалить историю занятий и все свои карточки с этого устройства? Это нельзя отменить.": "Really delete the session history and all your own cards from this device? This cannot be undone.", "Транспорт": "Transport", "Уровень поддержки": "Support level", "Установить": "Install", "Формы": "Shapes", "Фото": "Photo", "Цвета": "Colors", "Цвета фона карточек — по принятой в AAC-методиках раскладке (ключ Фицджеральд):": "Card background colors follow the layout accepted in AAC methods (Fitzgerald key):", "Цветовой ключ карточек": "Card color key", "Числа": "Numbers", "Что использует чаще всего": "Most used", "Чтобы пользоваться карточками, введите код активации подписки. Если подписка закончилась или код ещё не выдан — напишите нам в WhatsApp: 8 707 776 03 27.": "To use the cards, enter your subscription activation code. If your subscription has ended or you have no code yet — message us on WhatsApp: +7 707 776 03 27.", "Чувства": "Feelings", "Это можно установить как отдельное приложение — иконка на экране, без адресной строки браузера.": "You can install this as a standalone app — an icon on your screen, without the browser address bar.", "бирюзовый": "turquoise", "жёлтый": "yellow", "зелёный": "green", "синий": "blue", "оранжевый": "orange", "фиолетовый": "purple", "не записано — сработает озвучка по тексту": "not recorded — text-to-speech will be used", "обработка фото…": "processing photo…", "— действия,": "— actions,", "— еда и предметы,": "— food and objects,", "— люди,": "— people,", "— места,": "— places,", "— основные слова (да/нет/хочу/помощь и т.п.). Один и тот же цвет — одна и та же роль слова на любой карточке.": "— basic words (yes/no/I want/help, etc.). The same color means the same role of the word on any card.", "— чувства и описания,": "— feelings and descriptions,", "⏰ Подписка скоро закончится": "⏰ Your subscription ends soon", "▶ Проверить": "▶ Test", "⚠️ Проверка озвучки слов": "⚠️ Voice check", "✦ Приложение для общения": "✦ A communication app", "🎙️ Записать голос": "🎙️ Record voice", "💳 Подписка": "💳 Subscription", "📷 Сфотографировать": "📷 Take a photo", "🔒 Защита от выхода": "🔒 Exit protection", "🖼 Из галереи": "🖼 From gallery", "Автоматически (рекомендуемый)": "Automatic (recommended)", "Браузер пока не сообщил список голосов — откройте это меню ещё раз через пару секунд.": "The browser has not reported the list of voices yet — open this menu again in a couple of seconds.", "Введите код.": "Enter the code.", "Все": "All", "Избранное": "Favorites", "Мои карточки": "My cards", "Добавить свою карточку": "Add your own card", "Закрепление работает только в установленном приложении, не в этом окне предпросмотра.": "Pinning only works in the installed app, not in this preview window.", "Код не найден — проверьте, правильно ли он введён.": "Code not found — check that it was entered correctly.", "На этом устройстве не удалось закрепить приложение — вероятно, в настройках Android выключена системная функция \"Закрепление экрана\". Откройте настройки безопасности (кнопка ниже), найдите пункт про закрепление экрана/приложений, включите его, затем ещё раз выключите и включите этот переключатель здесь. Название пункта меню отличается у разных производителей.": "Could not pin the app on this device — the system “Screen pinning” feature is probably turned off in Android settings. Open the security settings (button below), find the screen/app pinning item, turn it on, then switch this toggle off and on again here. The menu item name differs between manufacturers.", "Не получилось активировать код, попробуйте ещё раз.": "Could not activate the code, please try again.", "Неверный код, попробуйте ещё раз.": "Wrong code, please try again.", "Нет интернета — подключитесь к сети один раз, чтобы активировать код.": "No internet — connect to the network once to activate the code.", "Озвучить фразу": "Say the phrase", "Очистить": "Clear", "Очистить фразу": "Clear the phrase", "Подписка закончилась": "Subscription ended", "Привет! Вот так звучит этот голос.": "Hello! This is how this voice sounds.", "Приложение закреплено. Чтобы выйти — зажмите логотип «Сөйле» вверху экрана и введите код.": "The app is pinned. To exit — press and hold the “Сөйле” logo at the top of the screen and enter the code.", "Проверяем…": "Checking…", "Прослушать": "Play", "Режим": "Mode", "Режим для ребёнка": "Child mode", "Родитель/специалист": "Parent / specialist", "Сейчас не закреплено — можно выйти обычным способом в любой момент.": "Not pinned right now — you can leave the app normally at any time.", "Скрыть": "Hide", "Сначала задайте код из 4 цифр в поле выше — он понадобится, чтобы выйти.": "First set a 4-digit code in the field above — you will need it to exit.", "Установите как приложение: нажмите «Поделиться» в Safari внизу экрана → «На экран «Домой»».": "Install as an app: tap “Share” in Safari at the bottom of the screen → “Add to Home Screen”.", "Этот код отключён. Обратитесь за новым кодом.": "This code has been disabled. Please ask for a new code.", "Этот код уже активирован на другом устройстве. Обратитесь за новым кодом.": "This code has already been activated on another device. Please ask for a new code.", "Язык записи": "Recording language", "Язык озвучки": "Speech language", "голос записан ✓": "voice recorded ✓", "идёт запись… нажмите ещё раз, чтобы остановить": "recording… tap again to stop", "микрофон недоступен в этом окне — в приложении запись работает": "microphone is not available in this window — recording works in the app", "неизвестная ошибка": "unknown error", "⏺ Остановить": "⏺ Stop", "Сбросить": "Reset", "Например: 1234": "For example: 1234", "Например: XXXX-XXXX": "For example: XXXX-XXXX", "Например: печенье": "For example: cookie"};
+  var EN_RULES = [["^Подписка активна до (.+)\\.$", "Subscription active until $1."], ["^Подписка закончилась (.+)\\.$", "Subscription ended on $1."], ["^Подписка закончилась$", "Subscription ended"], ["^Доступ к «Сөйле» заканчивается (.+?) \\(примерно через (\\d+) ч\\)\\. Чтобы ребёнок не остался без карточек и озвучки, продлите подписку заранее — свои фото и карточки на устройстве сохранятся\\.$", "Access to “Сөйле” ends on $1 (in about $2 h). To keep your child's cards and voice available, renew your subscription in advance — your photos and cards on this device will be kept."], ["^Голосов для русского найдено: (\\d+)\\.$", "Voices found: $1."], ["^запись не поддерживается: (.+)$", "recording is not supported: $1"], ["^нет доступа к микрофону \\((.*)\\) — сработает озвучка по тексту$", "no microphone access ($1) — text-to-speech will be used"]];
+  EN_RULES = EN_RULES.map(function(r){ return [new RegExp(r[0]), r[1]]; });
+  var EN_CYR = /[\u0400-\u04FF]/;
+  var EN_ATTRS = ['aria-label', 'title', 'placeholder', 'alt'];
+  var enNodes = new Map();   // text node -> {o: оригинал, t: перевод}
+  var enAttrs = [];          // {el, a, o, t}
+  var enObserver = null;
+  function enNorm(x){ return x.replace(/\s+/g, ' ').trim(); }
+  function enLookup(str){
+    if (!EN_CYR.test(str)) return null;
+    var n = enNorm(str);
+    var r = EN_UI[n];
+    if (r !== undefined) return r;
+    for (var i = 0; i < EN_RULES.length; i++){
+      if (EN_RULES[i][0].test(n)) return n.replace(EN_RULES[i][0], EN_RULES[i][1]);
+    }
+    return null;
+  }
+  function enSkipNode(el){
+    // подписи карточек: «word-sub» — намеренно на другом языке, не переводим
+    return !!(el && el.closest && el.closest('.word-sub'));
+  }
+  function enTextNode(node){
+    var v = node.nodeValue;
+    var rec = enNodes.get(node);
+    if (rec && v === rec.t) return;
+    var par = node.parentNode;
+    if (!par || par.nodeName === 'SCRIPT' || par.nodeName === 'STYLE' || enSkipNode(par)){ if (rec) enNodes.delete(node); return; }
+    var t = enLookup(v);
+    if (t === null){ if (rec) enNodes.delete(node); return; }
+    var out = v.match(/^\s*/)[0] + t + v.match(/\s*$/)[0];
+    enNodes.set(node, {o: v, t: out});
+    node.nodeValue = out;
+  }
+  function enAttrNode(el, a){
+    var v = el.getAttribute(a);
+    if (v == null) return;
+    for (var i = 0; i < enAttrs.length; i++){
+      if (enAttrs[i].el === el && enAttrs[i].a === a){
+        if (v === enAttrs[i].t) return;
+        enAttrs.splice(i, 1); break;
+      }
+    }
+    var t = enLookup(v);
+    if (t === null) return;
+    enAttrs.push({el: el, a: a, o: v, t: t});
+    el.setAttribute(a, t);
+  }
+  function enWalk(root){
+    if (!root) return;
+    if (root.nodeType === 3){ enTextNode(root); return; }
+    if (root.nodeType !== 1) return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var n, list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(enTextNode);
+    var els2 = root.querySelectorAll('[aria-label],[title],[placeholder],[alt]');
+    for (var i = 0; i < els2.length; i++) EN_ATTRS.forEach(function(a){ enAttrNode(els2[i], a); });
+    EN_ATTRS.forEach(function(a){ if (root.hasAttribute && root.hasAttribute(a)) enAttrNode(root, a); });
+  }
+  function enRestore(){
+    enNodes.forEach(function(rec, node){ if (node.nodeValue === rec.t) node.nodeValue = rec.o; });
+    enNodes.clear();
+    enAttrs.forEach(function(r){ if (r.el.getAttribute(r.a) === r.t) r.el.setAttribute(r.a, r.o); });
+    enAttrs = [];
+  }
+  function enSync(){
+    if (state.lang === 'en'){
+      if (!enObserver){
+        enObserver = new MutationObserver(function(muts){
+          if (state.lang !== 'en') return;
+          muts.forEach(function(m){
+            if (m.type === 'childList') m.addedNodes.forEach(enWalk);
+            else if (m.type === 'characterData') enTextNode(m.target);
+            else if (m.type === 'attributes') enAttrNode(m.target, m.attributeName);
+          });
+          if (enNodes.size > 3000){
+            enNodes.forEach(function(rec, node){ if (!node.isConnected) enNodes.delete(node); });
+          }
+        });
+        enObserver.observe(document.body, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:EN_ATTRS});
+      }
+      enWalk(document.body);
+    } else {
+      enRestore();
+    }
+  }
+
   var els = {
     langKk: document.getElementById('lang-kk'),
     langRu: document.getElementById('lang-ru'),
+    langEn: document.getElementById('lang-en'),
     modeChild: document.getElementById('mode-child'),
     modeParent: document.getElementById('mode-parent'),
     viewChild: document.getElementById('view-child'),
@@ -1671,6 +1779,7 @@
     licenseParentSubmit: document.getElementById('license-parent-submit'),
     licenseParentError: document.getElementById('license-parent-error'),
     licenseLockOverlay: document.getElementById('license-lock-overlay'),
+    licenseLockLang: document.getElementById('license-lock-lang'),
     licenseLockTitle: document.getElementById('license-lock-title'),
     licenseLockInput: document.getElementById('license-lock-input'),
     licenseLockError: document.getElementById('license-lock-error'),
@@ -2136,7 +2245,7 @@
   // Список фрагментов имён, которые обычно встречаются у более живых,
   // "облачных"/нейросетевых голосов браузера (Google, Microsoft Online,
   // Natural/Neural и т.п.), в отличие от базовых системных robot-voices.
-  var GOOD_VOICE_HINTS = ['google', 'natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'yandex', 'milena', 'ru-ru', 'irina'];
+  var GOOD_VOICE_HINTS = ['samantha', 'aria', 'jenny', 'en-us', 'google', 'natural', 'neural', 'online', 'enhanced', 'premium', 'wavenet', 'yandex', 'milena', 'ru-ru', 'irina'];
 
   function refreshVoices(){
     if (!('speechSynthesis' in window)) return;
@@ -2160,7 +2269,8 @@
   // песочнице для проверки кода голосов почти нет — это нормально).
   function ruVoices(){
     if (!cachedVoices.length) refreshVoices();
-    return cachedVoices.filter(function(v){ return v.lang && v.lang.toLowerCase().indexOf('ru') === 0; });
+    var pre = state.lang === 'en' ? 'en' : 'ru';
+    return cachedVoices.filter(function(v){ return v.lang && v.lang.toLowerCase().indexOf(pre) === 0; });
   }
 
   function populateVoiceSelect(){
@@ -2178,10 +2288,11 @@
       opt.textContent = v.name + (v.localService ? '' : ' · сеть');
       els.voiceSelect.appendChild(opt);
     });
-    els.voiceSelect.value = state.voiceURI && voices.some(function(v){ return v.voiceURI === state.voiceURI; }) ? state.voiceURI : (prevValue || '');
+    var curURI = state.lang === 'en' ? state.voiceURIEn : state.voiceURI;
+    els.voiceSelect.value = curURI && voices.some(function(v){ return v.voiceURI === curURI; }) ? curURI : (prevValue || '');
     if (els.voiceCountNote){
       els.voiceCountNote.textContent = voices.length
-        ? 'Голосов для русского найдено: ' + voices.length + '.'
+        ? (state.lang === 'en' ? 'English voices found: ' : 'Голосов для русского найдено: ') + voices.length + '.'
         : 'Браузер пока не сообщил список голосов — откройте это меню ещё раз через пару секунд.';
     }
   }
@@ -2189,13 +2300,18 @@
 
   if (els.voiceSelect){
     els.voiceSelect.addEventListener('change', function(){
-      state.voiceURI = els.voiceSelect.value;
-      saveJSON('soile_voice_uri', state.voiceURI);
+      if (state.lang === 'en'){
+        state.voiceURIEn = els.voiceSelect.value;
+        saveJSON('soile_voice_uri_en', state.voiceURIEn);
+      } else {
+        state.voiceURI = els.voiceSelect.value;
+        saveJSON('soile_voice_uri', state.voiceURI);
+      }
     });
   }
   if (els.voiceTest){
     els.voiceTest.addEventListener('click', function(){
-      speak(state.lang === 'kk' ? 'Сәлем! Дауыс осылай естіледі.' : 'Привет! Вот так звучит этот голос.', state.lang);
+      speak(state.lang === 'kk' ? 'Сәлем! Дауыс осылай естіледі.' : (state.lang === 'en' ? 'Hello! This is how this voice sounds.' : 'Привет! Вот так звучит этот голос.'), state.lang);
     });
   }
 
@@ -2205,8 +2321,9 @@
   function pickBestVoice(langPrefix){
     if (!cachedVoices.length) refreshVoices();
     if (!cachedVoices.length) return null;
-    if (langPrefix === 'ru' && state.voiceURI){
-      var chosen = cachedVoices.find(function(v){ return v.voiceURI === state.voiceURI; });
+    var pickedURI = langPrefix === 'ru' ? state.voiceURI : (langPrefix === 'en' ? state.voiceURIEn : '');
+    if (pickedURI){
+      var chosen = cachedVoices.find(function(v){ return v.voiceURI === pickedURI; });
       if (chosen) return chosen;
     }
     var matches = cachedVoices.filter(function(v){ return v.lang && v.lang.toLowerCase().indexOf(langPrefix) === 0; });
@@ -2228,7 +2345,7 @@
 
   function speak(text, lang){
     if (!('speechSynthesis' in window)) return;
-    var langPrefix = lang === 'kk' ? 'kk' : 'ru';
+    var langPrefix = lang === 'kk' ? 'kk' : (lang === 'en' ? 'en' : 'ru');
     if (lang === 'kk'){
       checkKkVoice();
       els.voiceNote.classList.toggle('show', kkVoiceChecked && !kkVoiceFound);
@@ -2238,7 +2355,7 @@
     try{
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = lang === 'kk' ? 'kk-KZ' : 'ru-RU';
+      u.lang = lang === 'kk' ? 'kk-KZ' : (lang === 'en' ? 'en-US' : 'ru-RU');
       var best = pickBestVoice(langPrefix);
       if (best) u.voice = best;
       u.rate = 0.95;
@@ -2284,7 +2401,7 @@
     allBtn.className = 'cat-pill';
     allBtn.type = 'button';
     allBtn.setAttribute('aria-pressed', state.activeCat==='all');
-    allBtn.innerHTML = '<span class="swatch" style="background:var(--ink-dim)"></span>' + (state.lang==='kk' ? 'Барлығы' : 'Все');
+    allBtn.innerHTML = '<span class="swatch" style="background:var(--ink-dim)"></span>' + (state.lang==='kk' ? 'Барлығы' : (state.lang==='en' ? 'All' : 'Все'));
     allBtn.addEventListener('click', function(){ state.activeCat='all'; render(); });
     els.catRow.appendChild(allBtn);
 
@@ -2299,7 +2416,7 @@
     mineBtn.type = 'button';
     mineBtn.style.setProperty('--cat-color', 'var(--cat-mine)');
     mineBtn.setAttribute('aria-pressed', state.activeCat==='mine');
-    mineBtn.innerHTML = '<span class="swatch" style="background:var(--cat-mine)"></span>' + (state.lang==='kk' ? 'Менің карталарым' : 'Мои карточки');
+    mineBtn.innerHTML = '<span class="swatch" style="background:var(--cat-mine)"></span>' + (state.lang==='kk' ? 'Менің карталарым' : (state.lang==='en' ? 'My cards' : 'Мои карточки'));
     mineBtn.addEventListener('click', function(){ state.activeCat='mine'; render(); });
     els.catRow.appendChild(mineBtn);
 
@@ -2312,7 +2429,7 @@
     favBtn.type = 'button';
     favBtn.style.setProperty('--cat-color', 'var(--cat-fav)');
     favBtn.setAttribute('aria-pressed', state.activeCat==='fav');
-    favBtn.innerHTML = '<span class="swatch" style="background:var(--cat-fav)"></span>' + (state.lang==='kk' ? 'Таңдаулылар' : 'Избранное');
+    favBtn.innerHTML = '<span class="swatch" style="background:var(--cat-fav)"></span>' + (state.lang==='kk' ? 'Таңдаулылар' : (state.lang==='en' ? 'Favorites' : 'Избранное'));
     favBtn.addEventListener('click', function(){ state.activeCat='fav'; render(); });
     els.catRow.appendChild(favBtn);
 
@@ -2323,7 +2440,7 @@
       b.type = 'button';
       b.style.setProperty('--cat-color', c.color);
       b.setAttribute('aria-pressed', state.activeCat===c.key);
-      b.innerHTML = '<span class="swatch" style="background:'+c.color+'"></span>' + (state.lang==='kk' ? c.kk : c.ru);
+      b.innerHTML = '<span class="swatch" style="background:'+c.color+'"></span>' + catLabel(c);
       b.addEventListener('click', function(){ state.activeCat=c.key; render(); });
       els.catRow.appendChild(b);
     });
@@ -2337,8 +2454,8 @@
       tile.type = 'button';
       tile.className = 'card-tile' + (card.photo ? ' custom' : '');
       tile.style.setProperty('--cat-color', cat.color);
-      var label = state.lang==='kk' ? card.kk : card.ru;
-      var sub = state.lang==='kk' ? card.ru : card.kk;
+      var label = cardLabel(card);
+      var sub = cardSub(card);
       tile.innerHTML =
         (card.photo
           ? '<img src="'+card.photo+'" alt="">'
@@ -2354,7 +2471,7 @@
   // запись для kk, либо запись, сделанная прямо в приложении для кастомной
   // карточки) — а если её нет, обычный синтез речи браузера.
   function cardVoiceSrc(card, lang){
-    var recorded = lang === 'kk' ? card.audioKk : card.audioRu;
+    var recorded = lang === 'kk' ? card.audioKk : (lang === 'en' ? card.audioEn : card.audioRu);
     return recorded || card.audio;
   }
 
@@ -2375,9 +2492,9 @@
     }
     if (!('speechSynthesis' in window)){ done(); return; }
     try{
-      var u = new SpeechSynthesisUtterance(lang === 'kk' ? card.kk : card.ru);
-      u.lang = lang === 'kk' ? 'kk-KZ' : 'ru-RU';
-      var best = pickBestVoice(lang === 'kk' ? 'kk' : 'ru');
+      var u = new SpeechSynthesisUtterance(lang === 'kk' ? card.kk : (lang === 'en' ? (card.en || card.ru) : card.ru));
+      u.lang = lang === 'kk' ? 'kk-KZ' : (lang === 'en' ? 'en-US' : 'ru-RU');
+      var best = pickBestVoice(lang === 'kk' ? 'kk' : (lang === 'en' ? 'en' : 'ru'));
       if (best) u.voice = best;
       u.rate = 0.95;
       u.pitch = 1;
@@ -2408,7 +2525,7 @@
     speakCard(card, state.lang, function(){});
 
     state.phrase.push(card);
-    var entry = { id:card.id, cat:card.cat, label: state.lang==='kk'?card.kk:card.ru, ts: Date.now() };
+    var entry = { id:card.id, cat:card.cat, label: cardLabel(card), ts: Date.now() };
     state.log.unshift(entry);
     state.log = state.log.slice(0, 40);
     saveJSON('soile_log', state.log);
@@ -2434,7 +2551,7 @@
     state.phrase.forEach(function(card){
       var chip = document.createElement('span');
       chip.className = 'phrase-chip';
-      chip.textContent = state.lang==='kk' ? card.kk : card.ru;
+      chip.textContent = cardLabel(card);
       els.phraseChips.appendChild(chip);
     });
   }
@@ -2453,7 +2570,7 @@
   function renderVoiceCheck(){
     if (!els.voiceCheckSection) return;
     var hasKk = !!window.SOILE_VOICE_KK, hasRu = !!window.SOILE_VOICE_RU;
-    if (!hasKk && !hasRu){ els.voiceCheckSection.hidden = true; return; }
+    if (state.lang === 'en' || (!hasKk && !hasRu)){ els.voiceCheckSection.hidden = true; return; }
     if (state.voiceCheckLang === 'ru' && !hasRu) state.voiceCheckLang = 'kk';
     if (state.voiceCheckLang === 'kk' && !hasKk) state.voiceCheckLang = 'ru';
     els.voiceCheckSection.hidden = false;
@@ -2531,7 +2648,7 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.setAttribute('aria-pressed', state.level === lv.key);
-      b.textContent = state.lang==='kk' ? lv.kk : lv.ru;
+      b.textContent = lvLabel(lv);
       b.addEventListener('click', function(){
         state.level = lv.key;
         saveJSON('soile_level', state.level);
@@ -2540,7 +2657,7 @@
       els.levelRow.appendChild(b);
     });
     var activeLevel = LEVELS.filter(function(lv){ return lv.key === state.level; })[0];
-    els.levelHint.textContent = activeLevel ? activeLevel.hint : '';
+    els.levelHint.textContent = activeLevel ? ((state.lang==='en' && activeLevel.hintEn) ? activeLevel.hintEn : activeLevel.hint) : '';
 
     if (!state.log.length){
       els.logList.innerHTML = '<p class="p-empty">Пока нет активности — карточки, на которые нажмёт ребёнок, появятся здесь.</p>';
@@ -2570,7 +2687,7 @@
         var pct = Math.round(100*n/total);
         var row = document.createElement('div');
         row.className = 'bar-row';
-        row.innerHTML = '<span>'+(state.lang==='kk'?c.kk:c.ru)+'</span>' +
+        row.innerHTML = '<span>'+catLabel(c)+'</span>' +
           '<span class="bar-track"><span class="bar-fill" style="width:'+pct+'%;background:'+c.color+'"></span></span>' +
           '<span style="text-align:right">'+n+'</span>';
         els.bars.appendChild(row);
@@ -2584,7 +2701,7 @@
       var checked = state.visibleCats.indexOf(c.key) !== -1;
       row.innerHTML =
         '<span class="swatch" style="background:'+c.color+'"></span>' +
-        '<label>' + (state.lang==='kk'?c.kk:c.ru) +
+        '<label>' + catLabel(c) +
           '<span class="switch" style="margin-left:auto">' +
             '<input type="checkbox" data-cat="'+c.key+'" '+(checked?'checked':'')+'>' +
             '<span class="track"></span><span class="knob"></span>' +
@@ -2648,7 +2765,7 @@
       tile.setAttribute('role','button');
       tile.tabIndex = 0;
       tile.style.setProperty('--cat-color', cat.color);
-      var label = state.lang==='kk' ? card.kk : card.ru;
+      var label = cardLabel(card);
       tile.innerHTML =
         (card.photo
           ? '<img src="'+card.photo+'" alt="">'
@@ -2691,7 +2808,7 @@
       var heading = document.createElement('div');
       heading.className = 'fav-group-heading';
       heading.style.setProperty('--cat-color', cat.color);
-      heading.textContent = state.lang==='kk' ? cat.kk : cat.ru;
+      heading.textContent = catLabel(cat);
       wrap.appendChild(heading);
 
       var row = document.createElement('div');
@@ -2703,7 +2820,7 @@
         tile.style.setProperty('--cat-color', cat.color);
         var fav = isFavoriteCard(card.id);
         tile.setAttribute('aria-pressed', fav);
-        var label = state.lang==='kk' ? card.kk : card.ru;
+        var label = cardLabel(card);
         tile.innerHTML =
           (card.photo
             ? '<img src="'+card.photo+'" alt="">'
@@ -2781,10 +2898,19 @@
 
   els.langKk.addEventListener('click', function(){ setLang('kk'); });
   els.langRu.addEventListener('click', function(){ setLang('ru'); });
+  els.langEn.addEventListener('click', function(){ setLang('en'); });
+  els.licenseLockLang.addEventListener('click', function(){ setLang(state.lang==='en' ? 'ru' : 'en'); });
+  function syncLockLang(){ els.licenseLockLang.textContent = state.lang==='en' ? '🌐 Русский' : '🌐 English'; }
   function setLang(l){
     state.lang = l;
+    saveJSON('soile_lang', l);
     els.langKk.setAttribute('aria-pressed', l==='kk');
     els.langRu.setAttribute('aria-pressed', l==='ru');
+    els.langEn.setAttribute('aria-pressed', l==='en');
+    document.documentElement.setAttribute('lang', l==='en' ? 'en' : (l==='ru' ? 'ru' : 'kk'));
+    populateVoiceSelect();
+    syncLockLang();
+    enSync();
     render();
     if (state.mode === 'parent') { renderFavPicker(); renderOwnPhotoGrid(); }
   }
@@ -2833,7 +2959,7 @@
       b.type = 'button';
       b.style.background = c.color;
       b.setAttribute('aria-pressed', state.draft.cat===c.key);
-      b.textContent = state.lang==='kk' ? c.kk : c.ru;
+      b.textContent = catLabel(c);
       b.addEventListener('click', function(){
         state.draft.cat = c.key;
         renderCatChoice();
@@ -2981,7 +3107,15 @@
     });
   }
 
+  (function(){
+    els.langKk.setAttribute('aria-pressed', state.lang==='kk');
+    els.langRu.setAttribute('aria-pressed', state.lang==='ru');
+    els.langEn.setAttribute('aria-pressed', state.lang==='en');
+    document.documentElement.setAttribute('lang', state.lang==='en' ? 'en' : (state.lang==='ru' ? 'ru' : 'kk'));
+  })();
   render();
+  syncLockLang();
+  enSync();
   loadCustomCards();
 })();
 </script>
