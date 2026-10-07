@@ -655,6 +655,16 @@
     overflow-y:auto;
   }
   .modal h3{ margin:0; font-family:var(--font-display); font-size:18px; }
+  /* Версия из Google Play: прячем всё про оплату вне Google Play */
+  .onstore{ display:none !important; }
+  html.store-play .offstore{ display:none !important; }
+  html.store-play .onstore{ display:block !important; }
+  .play-plans{ display:grid; gap:8px; margin-top:12px; }
+  .play-plan{ display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; padding:13px 14px; border-radius:14px; border:1.5px solid var(--line); background:var(--surface-2); font:inherit; color:inherit; text-align:left; cursor:pointer; }
+  .play-plan b{ font-size:16px; }
+  .play-plan span{ font-weight:800; white-space:nowrap; }
+  .play-plan small{ display:block; color:var(--accent,#2a7de1); font-weight:700; margin-top:2px; }
+  .play-plan:disabled{ opacity:.55; }
   .ios-install{ align-self:center; border-radius:22px; margin:0 12px; }
   .ios-steps{ margin:0; padding-left:20px; display:grid; gap:10px; font-size:15px; line-height:1.4; }
   .ios-share{ width:22px; height:22px; vertical-align:-5px; color:#2a7de1; margin-left:2px; }
@@ -875,7 +885,11 @@
         </div>
         <button type="button" class="btn accent" id="license-parent-submit" style="margin-top:10px">Активировать</button>
         <p class="key-note" id="license-parent-error" style="color:var(--danger); min-height:1.2em; margin-top:8px"></p>
-        <p class="key-note" id="license-renew-hint" hidden style="margin-top:6px"><b style="color:var(--danger)">Скоро закончится.</b> <a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="font-weight:800">Продлить в Telegram-боте →</a></p>
+        <p class="key-note" id="license-renew-hint" hidden style="margin-top:6px"><b style="color:var(--danger)">Скоро закончится.</b> <a class="offstore" style="display:inline; font-weight:800" href="https://t.me/Soile_kzbot" target="_blank" rel="noopener">Продлить в Telegram-боте →</a></p>
+        <div class="onstore" style="margin-top:10px">
+          <button type="button" class="btn accent" id="play-open-plans">Оформить / продлить подписку</button>
+          <button type="button" class="btn ghost" id="play-manage" style="margin-top:8px">Управлять подпиской в Google Play</button>
+        </div>
       </div>
       <div class="p-section">
         <h3>Перед новым ребёнком</h3>
@@ -932,7 +946,14 @@
   <div class="modal-overlay" id="license-lock-overlay" hidden>
     <div class="modal">
       <h3 id="license-lock-title">Нужна активация</h3>
-      <p class="key-note">Чтобы пользоваться карточками, введите код активации подписки. Если подписка закончилась или код ещё не выдан — напишите нам в WhatsApp: 8 707 776 03 27.</p>
+      <p class="key-note offstore">Чтобы пользоваться карточками, введите код активации подписки. Если подписка закончилась или код ещё не выдан — напишите нам в WhatsApp: 8 707 776 03 27.</p>
+      <div class="onstore">
+        <p class="key-note">Выберите тариф — оплата через Google Play. Отменить подписку можно в любой момент.</p>
+        <div class="play-plans" id="play-plans"></div>
+        <p class="key-note" id="play-buy-status" style="min-height:1.2em; margin-top:8px"></p>
+        <p class="key-note" style="text-align:center"><a href="#" id="play-restore">Уже оплачивали? Восстановить покупку</a></p>
+        <p class="key-note" style="margin-top:14px">Есть код активации? Введите его:</p>
+      </div>
       <div class="field" style="margin-top:10px">
         <input type="text" id="license-lock-input" placeholder="XXXX-XXXX"
           style="font-size:22px; text-align:center; letter-spacing:2px; text-transform:uppercase">
@@ -941,7 +962,8 @@
       <div class="modal-actions">
         <button type="button" class="btn accent" id="license-lock-submit">Активировать</button>
       </div>
-      <p class="key-note" style="margin-top:12px; text-align:center">Нет кода или закончилась подписка?<br><a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="color:var(--accent,#2a7de1); font-weight:800">Получить / продлить в Telegram-боте →</a></p>
+      <button type="button" class="btn ghost" id="license-lock-close" hidden style="width:100%; margin-top:10px">Закрыть</button>
+      <p class="key-note offstore" style="margin-top:12px; text-align:center">Нет кода или закончилась подписка?<br><a href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="color:var(--accent,#2a7de1); font-weight:800">Получить / продлить в Telegram-боте →</a></p>
     </div>
   </div>
 
@@ -950,7 +972,8 @@
       <h3>⏰ Подписка скоро закончится</h3>
       <p class="key-note" id="license-expiry-text" style="font-size:14px"></p>
       <div class="modal-actions" style="flex-direction:column; gap:8px; align-items:stretch">
-        <a class="btn accent" href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="display:block; text-align:center; text-decoration:none">Продлить в Telegram</a>
+        <a class="btn accent offstore" href="https://t.me/Soile_kzbot" target="_blank" rel="noopener" style="display:block; text-align:center; text-decoration:none">Продлить в Telegram</a>
+        <button type="button" class="btn accent onstore" id="play-expiry-buy">Продлить подписку</button>
         <button type="button" class="btn" id="license-expiry-later">Позже</button>
       </div>
     </div>
@@ -1989,7 +2012,7 @@
   function licenseErrorMessage(err){
     switch (err){
       case 'not_found': return 'Код не найден — проверьте, правильно ли он введён.';
-      case 'already_used': return 'Этот код уже используется на двух устройствах. Напишите в бот @Soile_kzbot — поможем.';
+      case 'already_used': return playBilling ? 'Этот код уже используется на двух устройствах.' : 'Этот код уже используется на двух устройствах. Напишите в бот @Soile_kzbot — поможем.';
       case 'revoked': return 'Этот код отключён. Обратитесь за новым кодом.';
       case 'network': return 'Нет интернета — подключитесь к сети один раз, чтобы активировать код.';
       case 'empty': return 'Введите код.';
@@ -2014,6 +2037,10 @@
   }
   function licenseStatusText(){
     var lic = loadLicenseLocal();
+    if (lic.code === PLAY_CODE){
+      if (!licenseIsActive()) return 'Подписка Google Play не активна.';
+      return loadJSON('soile_play_product', '') === 'soile_life' ? 'Доступ навсегда (Google Play).' : 'Подписка Google Play активна.';
+    }
     if (!lic.expiresAt) return 'Подписка не активирована.';
     var dateStr = new Date(lic.expiresAt).toLocaleDateString('ru-RU');
     return licenseIsActive() ? ('Подписка активна до ' + dateStr + '.') : ('Подписка закончилась ' + dateStr + '.');
@@ -2024,7 +2051,10 @@
   function showLicenseLock(){
     if (!els.licenseLockOverlay) return;
     var lic = loadLicenseLocal();
-    if (els.licenseLockTitle) els.licenseLockTitle.textContent = lic.expiresAt ? 'Подписка закончилась' : 'Нужна активация';
+    if (els.licenseLockTitle) els.licenseLockTitle.textContent = licenseIsActive() ? 'Подписка' : (lic.expiresAt ? 'Подписка закончилась' : (playBilling ? 'Оформите подписку' : 'Нужна активация'));
+    var lockClose = document.getElementById('license-lock-close');
+    if (lockClose) lockClose.hidden = !licenseIsActive();
+    if (playBilling) renderPlayPlans();
     if (els.licenseLockInput) els.licenseLockInput.value = urlCode || '';
     if (els.licenseLockError) els.licenseLockError.textContent = '';
     els.licenseLockOverlay.hidden = false;
@@ -2062,6 +2092,124 @@
     });
   })();
 
+  // ===== Версия из Google Play: оплата через Google Play Billing =====
+  // Плагин Billing есть только в сборке «play». В веб-версии и в APK из бота
+  // playBilling = null, и всё работает как раньше (коды из Telegram-бота).
+  var playBilling = (isNativeShell && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('Billing'))
+    ? window.Capacitor.Plugins.Billing : null;
+  var PLAY_CODE = 'GOOGLE-PLAY';
+  var PLAY_GRACE_MS = 3*24*3600*1000;   // без интернета доступ держится 3 дня после последней проверки
+  var PLAY_LIFE_UNTIL = new Date('2026-12-31T23:59:59+05:00').getTime();
+  var PLAY_LABELS = { m1:'1 месяц', m3:'3 месяца', m6:'6 месяцев', m12:'12 месяцев', life:'Навсегда' };
+  var PLAY_ORDER = ['m1','m3','m6','m12','life'];
+  var playProducts = null, playLoading = false;
+  if (playBilling) document.documentElement.classList.add('store-play');
+
+  function refreshPlayEntitlement(){
+    if (!playBilling) return Promise.resolve(null);
+    return playBilling.getEntitlement().then(function(res){
+      if (!res || !res.ok) return null;   // Google Play недоступен — ничего не меняем
+      var lic = loadLicenseLocal();
+      if (res.active){
+        if (!licenseIsActive() || lic.code === PLAY_CODE){
+          saveLicenseLocal(PLAY_CODE, new Date(Date.now() + PLAY_GRACE_MS).toISOString());
+          saveJSON('soile_play_product', res.productId || '');
+        }
+      } else if (lic.code === PLAY_CODE && licenseIsActive()){
+        saveLicenseLocal(PLAY_CODE, new Date(Date.now() - 1000).toISOString());
+      }
+      updateLicenseStatusNote();
+      checkLicenseGate();
+      return res;
+    }).catch(function(){ return null; });
+  }
+  function playTrialDays(iso){
+    var m = /^P(\d+)([DWM])$/.exec(iso || '');
+    if (!m) return 0;
+    var n = parseInt(m[1], 10);
+    return m[2] === 'D' ? n : (m[2] === 'W' ? n*7 : n*30);
+  }
+  function playSetStatus(t){ var el = document.getElementById('play-buy-status'); if (el) el.textContent = t || ''; }
+  function renderPlayPlans(){
+    var box = document.getElementById('play-plans');
+    if (!box || !playBilling) return;
+    if (!playProducts){
+      box.innerHTML = '';
+      if (playLoading) return;
+      playLoading = true;
+      playSetStatus('Загружаем тарифы…');
+      playBilling.getProducts().then(function(res){
+        playLoading = false;
+        if (res && res.ok && res.products && res.products.length){
+          playProducts = res.products; playSetStatus(''); renderPlayPlans();
+        } else playSetStatus('Не удалось загрузить тарифы. Проверьте интернет и откройте окно снова.');
+      }).catch(function(){ playLoading = false; playSetStatus('Не удалось загрузить тарифы. Проверьте интернет.'); });
+      return;
+    }
+    var list = playProducts.filter(function(p){
+      return PLAY_LABELS[p.key] && !(p.key === 'life' && Date.now() > PLAY_LIFE_UNTIL);
+    }).sort(function(a, b){ return PLAY_ORDER.indexOf(a.key) - PLAY_ORDER.indexOf(b.key); });
+    box.innerHTML = '';
+    list.forEach(function(p){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'play-plan';
+      var left = document.createElement('div');
+      var name = document.createElement('b'); name.textContent = PLAY_LABELS[p.key]; left.appendChild(name);
+      var days = playTrialDays(p.trialPeriod);
+      var note = days ? ('первые ' + days + ' дн. бесплатно') : (p.key === 'life' ? 'один платёж, до 31.12.2026' : '');
+      if (note){ var sm = document.createElement('small'); sm.textContent = note; left.appendChild(sm); }
+      var price = document.createElement('span'); price.textContent = p.price;
+      btn.appendChild(left); btn.appendChild(price);
+      btn.addEventListener('click', function(){ playBuy(p.key); });
+      box.appendChild(btn);
+    });
+  }
+  function playButtonsDisabled(v){
+    var bs = document.querySelectorAll('#play-plans .play-plan');
+    for (var i = 0; i < bs.length; i++) bs[i].disabled = v;
+  }
+  function playBuy(key){
+    playButtonsDisabled(true);
+    playSetStatus('Открываем Google Play…');
+    playBilling.purchase({ key: key }).then(function(res){
+      playButtonsDisabled(false);
+      if (res && res.ok){
+        playSetStatus('Спасибо! Подписка оформлена ✓');
+        refreshPlayEntitlement().then(function(){ if (licenseIsActive()) hideLicenseLock(); });
+      } else if (res && res.error === 'cancelled') playSetStatus('');
+      else if (res && res.error === 'pending') playSetStatus('Платёж обрабатывается — доступ откроется сам, как только Google его подтвердит.');
+      else playSetStatus('Не получилось оформить. Попробуйте ещё раз.');
+    }).catch(function(){ playButtonsDisabled(false); playSetStatus('Не получилось оформить. Попробуйте ещё раз.'); });
+  }
+  (function wirePlay(){
+    if (!playBilling) return;
+    var restore = document.getElementById('play-restore');
+    if (restore) restore.addEventListener('click', function(e){
+      e.preventDefault();
+      playSetStatus('Проверяем покупки…');
+      refreshPlayEntitlement().then(function(res){
+        if (res && res.active){ playSetStatus(''); hideLicenseLock(); }
+        else if (res) playSetStatus('На этом аккаунте Google активных покупок не найдено.');
+        else playSetStatus('Нет связи с Google Play. Проверьте интернет.');
+      });
+    });
+    var close = document.getElementById('license-lock-close');
+    if (close) close.addEventListener('click', function(){ if (licenseIsActive()) hideLicenseLock(); });
+    var open = document.getElementById('play-open-plans');
+    if (open) open.addEventListener('click', function(){ showLicenseLock(); });
+    var manage = document.getElementById('play-manage');
+    if (manage) manage.addEventListener('click', function(){ playBilling.manageSubscriptions(); });
+    var expBuy = document.getElementById('play-expiry-buy');
+    if (expBuy) expBuy.addEventListener('click', function(){
+      if (els.licenseExpiryOverlay) els.licenseExpiryOverlay.hidden = true;
+      showLicenseLock();
+    });
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') refreshPlayEntitlement();
+    });
+  })();
+
   function checkLicenseGate(){
     if (licenseIsActive()){ hideLicenseLock(); hideIosInstall(); }
     else if (iosNeedsInstall && !iosBrowserChosen){ hideLicenseLock(); showIosInstall(); }
@@ -2079,6 +2227,11 @@
     return isNaN(t) ? null : (t - Date.now());
   }
   function updateExpiryNotice(){
+    if (playBilling && loadLicenseLocal().code === PLAY_CODE){
+      if (els.licenseRenewHint) els.licenseRenewHint.hidden = true;
+      if (els.licenseExpiryOverlay) els.licenseExpiryOverlay.hidden = true;
+      return;
+    }
     var left = licenseMsLeft();
     var soon = left !== null && left > 0 && left <= 24*3600*1000;
     if (els.licenseRenewHint) els.licenseRenewHint.hidden = !soon;
@@ -2136,6 +2289,7 @@
 
   updateLicenseStatusNote();
   checkLicenseGate();
+  refreshPlayEntitlement();
   if (urlCode && !licenseIsActive() && (!iosNeedsInstall)){
     activateLicenseCode(urlCode).then(function(res){
       updateLicenseStatusNote();
