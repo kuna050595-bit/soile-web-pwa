@@ -1985,6 +1985,12 @@
   var LICENSE_URL = 'https://yfllckqitolusdfgydks.supabase.co/rest/v1/rpc/redeem_license';
   var LICENSE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmbGxja3FpdG9sdXNkZmd5ZGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NDU4OTQsImV4cCI6MjEwNjMyMTg5NH0.ipVCshdJOcNtGsmzXjNBjE_ZRrSoPYnLn-j-l08pqzA';
 
+  // Пробный период без кода: при первом запуске приложение само даёт 3 дня.
+  // Не действует в версии из Google Play (там своя пробная подписка) и на
+  // iPhone в Safari (считаем с иконки «Домой», там своё хранилище).
+  var TRIAL_CODE = 'TRIAL-LOCAL';
+  var TRIAL_MS = 3*24*3600*1000;
+
   function getDeviceId(){
     var id = loadJSON('soile_device_id', null);
     if (!id){
@@ -2042,6 +2048,10 @@
       return loadJSON('soile_play_product', '') === 'soile_life' ? 'Доступ навсегда (Google Play).' : 'Подписка Google Play активна.';
     }
     if (!lic.expiresAt) return 'Подписка не активирована.';
+    if (lic.code === TRIAL_CODE){
+      var tDate = new Date(lic.expiresAt).toLocaleDateString('ru-RU');
+      return licenseIsActive() ? ('Пробный период до ' + tDate + '.') : ('Пробный период закончился ' + tDate + '.');
+    }
     var dateStr = new Date(lic.expiresAt).toLocaleDateString('ru-RU');
     return licenseIsActive() ? ('Подписка активна до ' + dateStr + '.') : ('Подписка закончилась ' + dateStr + '.');
   }
@@ -2051,7 +2061,7 @@
   function showLicenseLock(){
     if (!els.licenseLockOverlay) return;
     var lic = loadLicenseLocal();
-    if (els.licenseLockTitle) els.licenseLockTitle.textContent = licenseIsActive() ? 'Подписка' : (lic.expiresAt ? 'Подписка закончилась' : (playBilling ? 'Оформите подписку' : 'Нужна активация'));
+    if (els.licenseLockTitle) els.licenseLockTitle.textContent = licenseIsActive() ? 'Подписка' : (lic.expiresAt ? (lic.code === TRIAL_CODE ? 'Пробный период закончился' : 'Подписка закончилась') : (playBilling ? 'Оформите подписку' : 'Нужна активация'));
     var lockClose = document.getElementById('license-lock-close');
     if (lockClose) lockClose.hidden = !licenseIsActive();
     if (playBilling) renderPlayPlans();
@@ -2287,10 +2297,22 @@
     });
   }
 
+  (function startLocalTrial(){
+    if (playBilling) return;
+    if (iosNeedsInstall) return;
+    if (urlCode) return;
+    if (loadJSON('soile_trial_started', '')) return;
+    var lic = loadLicenseLocal();
+    if (lic.code || lic.expiresAt) return;
+    var now = Date.now();
+    saveJSON('soile_trial_started', new Date(now).toISOString());
+    saveLicenseLocal(TRIAL_CODE, new Date(now + TRIAL_MS).toISOString());
+  })();
+
   updateLicenseStatusNote();
   checkLicenseGate();
   refreshPlayEntitlement();
-  if (urlCode && !licenseIsActive() && (!iosNeedsInstall)){
+  if (urlCode && (!licenseIsActive() || loadLicenseLocal().code === TRIAL_CODE) && (!iosNeedsInstall)){
     activateLicenseCode(urlCode).then(function(res){
       updateLicenseStatusNote();
       if (res && res.ok) checkLicenseGate();
@@ -2302,7 +2324,7 @@
   // в порядке.
   (function silentRevalidateLicense(){
     var lic = loadLicenseLocal();
-    if (!lic.code || !navigator.onLine) return;
+    if (!lic.code || lic.code === TRIAL_CODE || !navigator.onLine) return;
     activateLicenseCode(lic.code).then(function(res){
       updateLicenseStatusNote();
       if (res && res.ok){ checkLicenseGate(); }
