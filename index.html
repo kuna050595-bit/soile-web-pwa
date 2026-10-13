@@ -255,6 +255,12 @@
     box-shadow:0 1px 3px rgba(0,0,0,.12);
   }
 
+  .mode-toggle button.mode-games{ flex:0 0 auto; display:flex; align-items:center; gap:5px; padding:8px 12px; color:#fff; background:linear-gradient(155deg,#FF86B2,var(--accent)); box-shadow:0 2px 6px -2px color-mix(in srgb, var(--accent) 70%, transparent); }
+  .mode-toggle button.mode-games svg{ width:16px; height:16px; }
+  #games-overlay{ position:fixed; inset:0; z-index:4; background:#FFF7E8; }
+  #games-overlay[hidden]{ display:none; }
+  #games-overlay iframe{ width:100%; height:100%; border:0; display:block; background:#FFF7E8; }
+
   .level-row{
     display:flex;
     background:var(--surface-2);
@@ -766,7 +772,7 @@
       <div class="wordmark" id="wordmark">
         <svg class="mascot-sm" viewBox="0 0 768 768" aria-hidden="true"><rect width="768" height="768" rx="170" fill="#FFC83D"/><g><path fill="#fff" d="M384 136C512 136 616 240 616 368C616 496 512 600 384 600C363 600 343 597 323 592L190 617L240 551C183 510 152 442 152 368C152 240 256 136 384 136Z"/><path fill="#F26B4F" fill-rule="evenodd" d="M384 218C318 218 251 281 251 368C251 455 318 518 384 518C450 518 517 455 517 368C517 281 450 218 384 218ZM384 269C339 269 304 315 304 348L464 348C464 315 429 269 384 269ZM304 388C304 421 339 467 384 467C429 467 464 421 464 388Z"/><circle cx="596" cy="225" r="20" fill="#1FA89E"/><circle cx="632" cy="184" r="15" fill="#1FA89E"/><circle cx="660" cy="150" r="10" fill="#1FA89E"/></g></svg>
         Сөйле
-        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 06.10-logo</span>
+        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 13.10-games</span>
       </div>
       <div class="lang-toggle" role="group" aria-label="Язык озвучки">
         <button type="button" id="lang-kk" aria-pressed="true">ҚАЗ</button>
@@ -776,6 +782,7 @@
     <div class="mode-toggle" role="group" aria-label="Режим">
       <button type="button" id="mode-child" aria-pressed="true">Ребёнок</button>
       <button type="button" id="mode-parent" aria-pressed="false">Родитель / специалист</button>
+      <button type="button" id="mode-games" class="mode-games" aria-label="Игры"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r=".9" fill="currentColor"/><circle cx="18" cy="13.7" r=".9" fill="currentColor"/></svg>Игры</button>
     </div>
   </div>
 
@@ -942,6 +949,8 @@
       <p class="key-note" style="text-align:center"><a href="#" id="ios-install-skip">Продолжить в браузере</a></p>
     </div>
   </div>
+
+  <div id="games-overlay" hidden></div>
 
   <div class="modal-overlay" id="license-lock-overlay" hidden>
     <div class="modal">
@@ -3088,6 +3097,50 @@
     if (mediaStream){ mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
   }
   els.fabAdd.addEventListener('click', openModal);
+
+  /* ---------- Игры (v15): мини-игры открываются на весь экран в iframe ---------- */
+  // Игры берут у приложения карточки (с уже учтёнными своими фото и правками озвучки),
+  // язык и «закрыть» — через window.SOILE_GAMES_API. Папка: games/.
+  var gamesOpen = false;
+  function gamesCardList(){
+    var rootStyle = getComputedStyle(document.documentElement);
+    return DEFAULT_CARDS.map(function(c){
+      var o = { id:c.id, cat:c.cat, kk:c.kk, ru:c.ru };
+      if (c.audioKk) o.audioKk = c.audioKk;
+      if (c.audioRu) o.audioRu = c.audioRu;
+      if (c.photo) o.photo = c.photo;
+      else {
+        o.color = (rootStyle.getPropertyValue('--cat-' + c.cat) || '').trim() || '#8367B8';
+        if (ICONS[c.icon]) o.svg = ICONS[c.icon];
+      }
+      return o;
+    });
+  }
+  window.SOILE_GAMES_API = {
+    cards: gamesCardList,
+    lang: function(){ return state.lang; },
+    close: function(){ closeGames(); }
+  };
+  function openGames(){
+    if (gamesOpen) return;
+    gamesOpen = true;
+    // iframe создаём заново при каждом открытии (и удаляем при закрытии): так он не засоряет историю браузера,
+    // а кнопка «назад» на телефоне закрывает игры, а не «листает» iframe.
+    var fr = document.createElement('iframe');
+    fr.id = 'games-frame'; fr.title = 'Игры'; fr.setAttribute('allow', 'autoplay'); fr.src = 'games/index.html';
+    var ov = document.getElementById('games-overlay');
+    ov.innerHTML = ''; ov.appendChild(fr); ov.hidden = false;
+    try{ history.pushState({ soileGames:1 }, ''); }catch(e){}   // кнопка «назад» на телефоне закрывает игры, а не приложение
+  }
+  function closeGames(fromPop){
+    if (!gamesOpen) return;
+    gamesOpen = false;
+    var ov = document.getElementById('games-overlay');
+    ov.hidden = true; ov.innerHTML = '';   // убираем iframe целиком: звук останавливается, память освобождается
+    if (fromPop !== true){ try{ if (history.state && history.state.soileGames) history.back(); }catch(e){} }
+  }
+  window.addEventListener('popstate', function(){ if (gamesOpen) closeGames(true); });
+  document.getElementById('mode-games').addEventListener('click', openGames);
   els.modalCancel.addEventListener('click', closeModal);
   els.modalOverlay.addEventListener('click', function(e){ if (e.target === els.modalOverlay) closeModal(); });
 

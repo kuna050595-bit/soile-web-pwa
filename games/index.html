@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Сөйле — Ойындар / Игры</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="games.css">
+</head>
+<body class="g-body">
+<div class="g-shell" id="shell"></div>
+
+<script>
+/* Внутри приложения (iframe) карточки, язык и озвучка берутся у него — тяжёлые файлы с голосами второй раз не грузим. */
+(function(){
+  var emb = false;
+  try{ emb = !!(window.parent && window.parent !== window && window.parent.SOILE_GAMES_API); }catch(e){}
+  if (!emb){
+    ['../voice-data.js','../voice-data-ru.js','cards.js'].forEach(function(f){ document.write('<script src="' + f + '"><\/script>'); });
+  }
+})();
+</script>
+<script src="engine.js"></script>
+<script src="icons.js"></script>
+<script src="framework.js"></script>
+<script src="memory.js"></script>
+<script src="find.js"></script>
+<script src="sort.js"></script>
+<script src="odd.js"></script>
+<script src="puzzle.js"></script>
+<script src="shadow.js"></script>
+<script src="bubbles.js"></script>
+<script src="count.js"></script>
+<script src="missing.js"></script>
+<script src="zoom.js"></script>
+<script src="words.js"></script>
+<script src="simon.js"></script>
+<script src="sentence.js"></script>
+<script src="colors.js"></script>
+<script>
+(function(){
+  var SG = window.SoileGames, shell = document.getElementById('shell');
+  var HUB = { title:{kk:'Ойындар',ru:'Игры'}, sub:{kk:'Ойнап үйрен',ru:'Играем и учимся'} };
+  var FEATURED = ['sentence','colors'];   // две крупные плитки над сеткой 4×3
+  function ordered(){
+    var by = {}; SG.games.forEach(function(g){ by[g.id] = g; });
+    var list = SG.ORDER.filter(function(id){ return by[id]; }).map(function(id){ return by[id]; });
+    SG.games.forEach(function(g){ if (list.indexOf(g) < 0 && FEATURED.indexOf(g.id) < 0) list.push(g); });
+    return list;
+  }
+  function hub(){
+    shell.innerHTML = '';
+    var bar = SG.el('div','g-top');
+    if (SG.embedded){      // внутри приложения: стрелка «назад» возвращает к карточкам
+      var back = SG.el('button','g-iconbtn', SG.ICON_BACK); back.type = 'button'; back.setAttribute('aria-label','Back');
+      back.addEventListener('click', function(){ SG.stopSpeech(); try{ SG.api.close(); }catch(e){} });
+      bar.appendChild(back);
+    }
+    bar.appendChild(SG.el('div','g-brand', SG.MASCOT + '<span>Сөйле</span>'));
+    bar.appendChild(SG.controls(hub));
+    shell.appendChild(bar);
+    var main = SG.el('div','g-main');
+    var head = SG.el('div','g-hubhead'); var left = SG.el('div');
+    left.appendChild(SG.el('h1','g-h1', SG.t(HUB.title))); left.appendChild(SG.el('p','g-sub', SG.t(HUB.sub)));
+    head.appendChild(left); head.appendChild(SG.el('span','g-count', SG.games.length + ' ' + SG.t({kk:'ойын',ru:'игр'})));
+    main.appendChild(head);
+    var fgs = FEATURED.map(function(id){ return SG.games.filter(function(g){ return g.id === id; })[0]; }).filter(Boolean);
+    if (fgs.length){
+      var frow = SG.el('div','g-featrow'); frow.style.setProperty('--k', fgs.length);
+      fgs.forEach(function(fg){
+        var fcol = SG.TILE[fg.id] || [fg.color, fg.color2];
+        var ft = SG.el('button','g-feature', (SG.ICONS[fg.id] || '') +
+          '<span class="ft"><b>' + SG.t(fg) + '</b><small>' + SG.t(fg.sub) + '</small></span>');
+        ft.type = 'button'; ft.style.setProperty('--c1', fcol[0]); ft.style.setProperty('--c2', fcol[1]); ft.setAttribute('data-game', fg.id);
+        ft.addEventListener('click', function(){ SG.open(fg.id, shell, { onExit: hub }); });
+        frow.appendChild(ft);
+      });
+      main.appendChild(frow);
+    }
+    var grid = SG.el('div','g-hubgrid');
+    ordered().forEach(function(g){
+      var col = SG.TILE[g.id] || [g.color, g.color2 || g.color];
+      var t = SG.el('button','g-gtile', (SG.ICONS[g.id] || g.icon || '') + '<span>' + SG.t(g) + '</span>'); t.type = 'button';
+      t.style.setProperty('--c1', col[0]); t.style.setProperty('--c2', col[1]); t.setAttribute('data-game', g.id);
+      t.addEventListener('click', function(){ SG.open(g.id, shell, { onExit: hub }); });
+      grid.appendChild(t);
+    });
+    main.appendChild(grid);
+    shell.appendChild(main);
+  }
+  hub();
+  var m = /[?&]game=([a-z0-9_-]+)/.exec(location.search);   // отладка: games/index.html?game=sort
+  if (m) SG.open(m[1], shell, { onExit: hub });
+})();
+</script>
+</body>
+</html>

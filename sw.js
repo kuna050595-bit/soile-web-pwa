@@ -1,7 +1,7 @@
 // Сервис-воркер "Сөйле": простое офлайн-кэширование оболочки приложения,
 // чтобы карточки и озвучка (там, где голос уже есть локально) работали
 // даже при слабом или отсутствующем интернете в кабинете/центре.
-var CACHE_NAME = 'soile-aac-v13';
+var CACHE_NAME = 'soile-aac-v15';
 var SHELL_URLS = [
   './',
   './index.html',
@@ -9,7 +9,27 @@ var SHELL_URLS = [
   './icon-192.png',
   './icon-512.png',
   './voice-data.js',
-  './voice-data-ru.js'
+  './voice-data-ru.js',
+  './games/bubbles.js',
+  './games/cards.js',
+  './games/colors.js',
+  './games/count.js',
+  './games/engine.js',
+  './games/find.js',
+  './games/framework.js',
+  './games/games.css',
+  './games/icons.js',
+  './games/index.html',
+  './games/memory.js',
+  './games/missing.js',
+  './games/odd.js',
+  './games/puzzle.js',
+  './games/sentence.js',
+  './games/shadow.js',
+  './games/simon.js',
+  './games/sort.js',
+  './games/words.js',
+  './games/zoom.js'
 ];
 
 self.addEventListener('install', function(event){
