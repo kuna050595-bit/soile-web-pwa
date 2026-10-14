@@ -261,6 +261,27 @@
   #games-overlay[hidden]{ display:none; }
   #games-overlay iframe{ width:100%; height:100%; border:0; display:block; background:#FFF7E8; }
 
+  /* ---------- Подсказки по шагам (v16) ---------- */
+  #tour-overlay{ position:fixed; inset:0; z-index:60; }
+  #tour-overlay[hidden]{ display:none; }
+  #tour-overlay .tour-hole{ position:fixed; border-radius:16px; box-shadow:0 0 0 9999px rgba(15,23,20,.76); outline:3px solid var(--accent-2); outline-offset:2px; pointer-events:none; transition:left .25s ease, top .25s ease, width .25s ease, height .25s ease; }
+  #tour-overlay .tour-hole::after{ content:''; position:absolute; inset:-7px; border-radius:20px; border:2px solid var(--accent-2); opacity:.0; animation:tourPulse 1.7s ease-out infinite; }
+  @keyframes tourPulse{ 0%{ transform:scale(.97); opacity:.85; } 100%{ transform:scale(1.07); opacity:0; } }
+  #tour-overlay .tour-bubble{ position:fixed; left:12px; width:min(340px, calc(100vw - 24px)); background:var(--surface); color:var(--ink); border-radius:20px; padding:14px 16px 12px; box-shadow:0 18px 40px -12px rgba(0,0,0,.5); transition:top .25s ease, left .25s ease; }
+  #tour-overlay .tour-badge{ display:inline-block; font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); border-radius:999px; padding:3px 9px; margin-bottom:8px; }
+  #tour-overlay .tour-text{ font-size:16px; line-height:1.35; font-weight:700; margin:0; }
+  #tour-overlay .tour-text-kk{ font-size:13.5px; line-height:1.35; color:var(--ink-dim); margin:6px 0 0; }
+  #tour-overlay .tour-foot{ display:flex; align-items:center; gap:10px; margin-top:12px; }
+  #tour-overlay .tour-dots{ display:flex; gap:5px; flex:1; }
+  #tour-overlay .tour-dots i{ width:7px; height:7px; border-radius:50%; background:var(--line); display:block; }
+  #tour-overlay .tour-dots i.on{ background:var(--accent); }
+  #tour-overlay .tour-skip{ background:none; border:0; color:var(--ink-dim); font:inherit; font-size:13px; padding:8px 6px; cursor:pointer; text-align:center; line-height:1.15; }
+  #tour-overlay .tour-skip small, #tour-overlay .tour-next small{ display:block; font-size:10.5px; font-weight:600; opacity:.8; }
+  #tour-overlay .tour-next{ border:0; border-radius:14px; background:var(--accent); color:var(--accent-ink); font:inherit; font-size:15px; font-weight:800; padding:9px 18px; cursor:pointer; text-align:center; line-height:1.15; }
+  #tour-overlay .tour-next:focus{ outline:none; }
+  #tour-overlay .tour-next:focus-visible, #tour-overlay .tour-skip:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ #tour-overlay .tour-hole::after{ animation:none; } #tour-overlay .tour-hole, #tour-overlay .tour-bubble{ transition:none; } }
+
   .level-row{
     display:flex;
     background:var(--surface-2);
@@ -772,7 +793,7 @@
       <div class="wordmark" id="wordmark">
         <svg class="mascot-sm" viewBox="0 0 768 768" aria-hidden="true"><rect width="768" height="768" rx="170" fill="#FFC83D"/><g><path fill="#fff" d="M384 136C512 136 616 240 616 368C616 496 512 600 384 600C363 600 343 597 323 592L190 617L240 551C183 510 152 442 152 368C152 240 256 136 384 136Z"/><path fill="#F26B4F" fill-rule="evenodd" d="M384 218C318 218 251 281 251 368C251 455 318 518 384 518C450 518 517 455 517 368C517 281 450 218 384 218ZM384 269C339 269 304 315 304 348L464 348C464 315 429 269 384 269ZM304 388C304 421 339 467 384 467C429 467 464 421 464 388Z"/><circle cx="596" cy="225" r="20" fill="#1FA89E"/><circle cx="632" cy="184" r="15" fill="#1FA89E"/><circle cx="660" cy="150" r="10" fill="#1FA89E"/></g></svg>
         Сөйле
-        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 13.10-games</span>
+        <span id="build-tag" style="font-size:10px; font-weight:700; color:#fff; background:rgba(255,255,255,.28); border-radius:6px; padding:2px 6px; margin-left:8px; vertical-align:middle; letter-spacing:0;">сборка 14.10-tour</span>
       </div>
       <div class="lang-toggle" role="group" aria-label="Язык озвучки">
         <button type="button" id="lang-kk" aria-pressed="true">ҚАЗ</button>
@@ -897,6 +918,11 @@
           <button type="button" class="btn accent" id="play-open-plans">Оформить / продлить подписку</button>
           <button type="button" class="btn ghost" id="play-manage" style="margin-top:8px">Управлять подпиской в Google Play</button>
         </div>
+      </div>
+      <div class="p-section">
+        <h3>Подсказки по приложению</h3>
+        <p class="key-note">Покажем ещё раз, где карточки, игры и настройки. <span style="opacity:.8">Карточкалар, ойындар мен баптаулар қайда екенін қайта көрсетеміз.</span></p>
+        <button type="button" class="btn ghost" id="tour-replay" style="margin-top:10px">Показать подсказки заново</button>
       </div>
       <div class="p-section">
         <h3>Перед новым ребёнком</h3>
@@ -1708,6 +1734,7 @@
     resetCancel: document.getElementById('reset-cancel'),
     resetConfirmBtn: document.getElementById('reset-confirm-btn'),
     wordmark: document.getElementById('wordmark'),
+    tourReplay: document.getElementById('tour-replay'),
     kioskPinInput: document.getElementById('kiosk-pin-input'),
     kioskToggle: document.getElementById('kiosk-toggle'),
     kioskStatusNote: document.getElementById('kiosk-status-note'),
@@ -3097,6 +3124,132 @@
     if (mediaStream){ mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
   }
   els.fabAdd.addEventListener('click', openModal);
+
+  /* ---------- Подсказки по шагам (v16) ---------- */
+  // Показываются один раз при первом запуске и ещё раз после каждого крупного обновления:
+  // чтобы показать их снова, увеличьте TOUR_VERSION. Родитель может пересмотреть их в разделе «Родитель / специалист».
+  var TOUR_VERSION = 1;
+  var tourOpen = false, tourIdx = 0, tourEl = null, tourWasSeen = false, tourTimer = null;
+  function tourSteps(){
+    function q(sel){ return function(){ return document.querySelector(sel); }; }
+    return [
+      { el:q('.shell-header .lang-toggle'),
+        ru:'Здесь язык озвучки: ҚАЗ — казахский, РУС — русский.',
+        kk:'Мұнда дыбыстау тілі: ҚАЗ — қазақша, РУС — орысша.' },
+      { el:function(){ return document.querySelector('#card-grid .card-tile') || document.getElementById('card-grid'); },
+        ru:'Нажмите на карточку — приложение произнесёт слово вслух.',
+        kk:'Карточканы басыңыз — қосымша сөзді дауыстап айтады.' },
+      { el:q('.phrase-bar'),
+        ru:'Нажатые карточки складываются во фразу. Кнопка ▶ озвучит её целиком.',
+        kk:'Басылған карточкалар сөйлемге жиналады. ▶ түймесі оны түгел айтады.' },
+      { el:q('#mode-games'),
+        ru:'Здесь игры: 14 мини-игр на слова и фразы, без таймеров и штрафов.',
+        kk:'Мұнда ойындар: сөздер мен сөйлемдерге арналған 14 шағын ойын, таймерсіз және айыпсыз.' },
+      { el:q('#mode-parent'),
+        ru:'Здесь настройки для родителя и специалиста: уровень, свои фото и голос, подписка.',
+        kk:'Мұнда ата-ана мен маманға арналған баптаулар: деңгей, өз суреттеріңіз бен дауысыңыз, жазылым.' },
+      { el:q('#fab-add'),
+        ru:'Добавьте свою карточку: сфотографируйте предмет и запишите свой голос.',
+        kk:'Өз карточкаңызды қосыңыз: затты суретке түсіріп, өз дауысыңызды жазыңыз.' }
+    ];
+  }
+  function tourBlocked(){
+    var ids = ['license-lock-overlay','ios-install-overlay','license-expiry-overlay','modal-overlay','exit-pin-overlay','games-overlay'];
+    for (var i = 0; i < ids.length; i++){
+      var e = document.getElementById(ids[i]);
+      if (e && !e.hidden && getComputedStyle(e).display !== 'none') return true;
+    }
+    return state.mode !== 'child' || document.visibilityState !== 'visible';
+  }
+  function tourPlace(){
+    if (!tourOpen || !tourEl) return;
+    var steps = tourSteps(), st = steps[tourIdx];
+    var t = st && st.el();
+    if (!t || t.hidden || !t.getBoundingClientRect().width){ tourStep(tourIdx + 1); return; }
+    var vh = window.innerHeight, vw = window.innerWidth;
+    if (t.closest && t.closest('.shell-header') && window.scrollY > 0) window.scrollTo(0, 0);   // кнопки шапки показываем с самого верха
+    var r = t.getBoundingClientRect();
+    if (r.top < 8 || r.bottom > vh - 8){
+      try{ t.scrollIntoView({ block:'center', behavior:'auto' }); }catch(e){}
+      r = t.getBoundingClientRect();
+    }
+    var pad = 6, hole = tourEl.querySelector('.tour-hole'), bub = tourEl.querySelector('.tour-bubble');
+    hole.style.left = (r.left - pad) + 'px'; hole.style.top = (r.top - pad) + 'px';
+    hole.style.width = (r.width + pad*2) + 'px'; hole.style.height = (r.height + pad*2) + 'px';
+    var bh = bub.offsetHeight, bw = bub.offsetWidth, gap = 14, top;
+    if (r.bottom + pad + gap + bh <= vh - 8) top = r.bottom + pad + gap;
+    else if (r.top - pad - gap - bh >= 8) top = r.top - pad - gap - bh;
+    else top = Math.max(8, vh - bh - 12);
+    var left = Math.min(Math.max(12, r.left + r.width/2 - bw/2), vw - bw - 12);
+    bub.style.top = top + 'px'; bub.style.left = left + 'px';
+  }
+  function tourStep(i){
+    var steps = tourSteps();
+    if (i >= steps.length){ tourClose(false); return; }
+    tourIdx = i;
+    var st = steps[i], last = (i === steps.length - 1);
+    var dots = ''; for (var k = 0; k < steps.length; k++) dots += '<i' + (k === i ? ' class="on"' : '') + '></i>';
+    tourEl.querySelector('.tour-badge').textContent = tourWasSeen ? 'Что нового · Не жаңалық' : 'Быстрый тур · Жылдам шолу';
+    tourEl.querySelector('.tour-text').textContent = st.ru;
+    tourEl.querySelector('.tour-text-kk').textContent = st.kk;
+    tourEl.querySelector('.tour-dots').innerHTML = dots;
+    tourEl.querySelector('.tour-next').innerHTML = last ? 'Понятно<small>Түсінікті</small>' : 'Далее<small>Әрі қарай</small>';
+    tourEl.querySelector('.tour-skip').hidden = last;
+    tourPlace();
+    requestAnimationFrame(tourPlace);
+  }
+  function tourClose(fromPop){
+    if (!tourOpen) return;
+    tourOpen = false;
+    saveJSON('soile_tour_seen', TOUR_VERSION);
+    if (tourEl && tourEl.parentNode) tourEl.parentNode.removeChild(tourEl);
+    tourEl = null;
+    window.removeEventListener('resize', tourPlace);
+    document.removeEventListener('keydown', tourKey);
+    if (fromPop !== true){ try{ if (history.state && history.state.soileTour) history.back(); }catch(e){} }
+  }
+  function tourKey(e){ if (e.key === 'Escape') tourClose(false); }
+  function tourStart(){
+    if (tourOpen) return;
+    if (tourBlocked()) return;
+    tourOpen = true;
+    window.scrollTo(0, 0);
+    tourEl = document.createElement('div');
+    tourEl.id = 'tour-overlay';
+    tourEl.setAttribute('role', 'dialog'); tourEl.setAttribute('aria-modal', 'true'); tourEl.setAttribute('aria-label', 'Подсказки по приложению');
+    tourEl.innerHTML = '<div class="tour-hole"></div><div class="tour-bubble" aria-live="polite">' +
+      '<span class="tour-badge"></span><p class="tour-text"></p><p class="tour-text-kk"></p>' +
+      '<div class="tour-foot"><div class="tour-dots"></div>' +
+      '<button type="button" class="tour-skip">Пропустить<small>Өткізу</small></button>' +
+      '<button type="button" class="tour-next"></button></div></div>';
+    document.body.appendChild(tourEl);
+    tourEl.querySelector('.tour-next').addEventListener('click', function(){ tourStep(tourIdx + 1); });
+    tourEl.querySelector('.tour-skip').addEventListener('click', function(){ tourClose(false); });
+    window.addEventListener('resize', tourPlace);
+    document.addEventListener('keydown', tourKey);
+    try{ history.pushState({ soileTour:1 }, ''); }catch(e){}
+    tourStep(0);
+  }
+  window.addEventListener('popstate', function(){ if (tourOpen) tourClose(true); });
+  function tourMaybeStart(){
+    tourWasSeen = !!loadJSON('soile_tour_seen', 0);
+    if (loadJSON('soile_tour_seen', 0) >= TOUR_VERSION) return;
+    if (state.kioskEnabled) return;            // режим «Ребёнок» с закреплением экрана — подсказки не нужны
+    var tries = 0;
+    (function poll(){
+      if (tourOpen || loadJSON('soile_tour_seen', 0) >= TOUR_VERSION) return;
+      if (!tourBlocked()){ tourStart(); return; }
+      if (++tries < 600) tourTimer = setTimeout(poll, 1000);   // ждём, пока закроются экраны входа и активации
+    })();
+  }
+  setTimeout(tourMaybeStart, 900);
+  if (els.tourReplay){
+    els.tourReplay.addEventListener('click', function(){
+      setMode('child');
+      tourWasSeen = true;
+      setTimeout(tourStart, 150);
+    });
+  }
 
   /* ---------- Игры (v15): мини-игры открываются на весь экран в iframe ---------- */
   // Игры берут у приложения карточки (с уже учтёнными своими фото и правками озвучки),
