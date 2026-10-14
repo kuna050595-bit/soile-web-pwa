@@ -19,7 +19,12 @@
       function setQ(){ q.textContent = SG.t({ kk:'Қанша?', ru:'Сколько?' }); }
       setQ(); ctx.onLang(setQ);
 
-      function numCard(n){ return { id:'num' + n, kk:String(n), ru:String(n) }; }
+      // Числа озвучиваем записанными голосами приложения (карточки num1…num9), а не системным синтезом.
+      function numCard(n){
+        var id = 'num' + n;
+        for (var i = 0; i < SG.cards.length; i++){ if (SG.cards[i].id === id) return SG.cards[i]; }
+        return { id:id, kk:String(n), ru:String(n) };
+      }
       function next(){
         if (round >= ROUNDS){ ctx.win(); return; }
         locked = false;
