@@ -267,7 +267,7 @@ FORMS["child-save"] = async (f, fd) => {
 let CH = null; // current child bundle
 async function loadChild(id) {
   const since = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
-  const [c, g, p, s, r, l, pa, ap] = await Promise.all([
+  const [c, g, p, s, r, l, pa, ap, hc] = await Promise.all([
     sb.from("children").select("*").eq("id", id).maybeSingle(),
     sb.from("goals").select("*").eq("child_id", id).order("created_at"),
     sb.rpc("child_progress", { p_child: id, p_weeks: 8 }),
@@ -276,12 +276,13 @@ async function loadChild(id) {
     sb.from("child_links").select("id, target_org_id, active, consent_note, created_at, tgt:orgs!child_links_target_org_id_fkey(name, city)").eq("child_id", id).eq("active", true),
     sb.from("parent_access").select("token").eq("child_id", id).maybeSingle(),
     sb.from("app_pairings").select("id, linked_at, active").eq("child_id", id).eq("active", true).order("linked_at", { ascending: false }),
+    sb.from("child_home_cards").select("card_ids, note, updated_at").eq("child_id", id).maybeSingle(),
   ]);
   if (c.error) throw c.error;
   if (!c.data) return null;
   let srcOrg = null;
   if (c.data.org_id !== S.org.id) { const o = await sb.from("orgs").select("name").eq("id", c.data.org_id).maybeSingle(); srcOrg = o.data ? o.data.name : ""; }
-  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, apps: ap.data || [], editable: c.data.org_id === S.org.id, srcOrg };
+  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, apps: ap.data || [], home: hc.data || null, editable: c.data.org_id === S.org.id, srcOrg };
 }
 function goalStats(goalId) {
   const weeks = weekStarts(8);
@@ -300,7 +301,7 @@ PAGES.child = async (el, args, alive) => {
   CH = data; const c = data.child;
   document.title = childName(c) + " · Сөйле Pro";
   const ed = data.editable;
-  const tabs = ["progress", "sessions", "reports", "info"];
+  const tabs = ["progress", "home", "sessions", "reports", "info"];
   const tabHref = (x) => `#/child/${id}/${x}`;
   el.innerHTML = `
   <a class="back" href="#/children">${ic("left")}${t("nav_children")}</a>
@@ -326,7 +327,8 @@ PAGES.child = async (el, args, alive) => {
 };
 function drawChildTab(tab) {
   const box = $("#child-tab"); if (!box) return;
-  if (tab === "sessions") box.innerHTML = childSessions();
+  if (tab === "home") box.innerHTML = childHome();
+  else if (tab === "sessions") box.innerHTML = childSessions();
   else if (tab === "reports") box.innerHTML = childReports();
   else if (tab === "info") box.innerHTML = childInfo();
   else box.innerHTML = childProgress();
@@ -359,6 +361,80 @@ function childProgress() {
     ${ed ? `<div><button class="btn" data-act="goal-new">${ic("plus")}${t("goal_add")}</button></div>` : ""}
   </div>`;
 }
+/* ---------- home cards (задание на дом в Сөйле) ---------- */
+const CARD_MAP = Object.fromEntries((window.SOILE_CARDS || []).map((c) => [c[0], { id: c[0], cat: c[1], kk: c[2], ru: c[3], photo: c[4] }]));
+const HOME_MAX = 12;
+function cardTile(id, opts = {}) {
+  const c = CARD_MAP[id]; if (!c) return "";
+  const word = S.lang === "kk" ? c.kk : c.ru, sub = S.lang === "kk" ? c.ru : c.kk;
+  return `<button type="button" class="hc-tile ${opts.on ? "on" : ""}" ${opts.act ? `data-act="${opts.act}" data-id="${esc(id)}"` : "tabindex=\"-1\""} data-name="${esc((c.ru + " " + c.kk).toLowerCase())}" data-cat="${esc(c.cat)}">
+    ${c.photo ? `<img src="../${esc(c.photo)}" alt="" loading="lazy">` : `<span class="hc-ph">${esc(word.slice(0, 2))}</span>`}
+    <span class="hc-w">${esc(word)}</span><span class="hc-s">${esc(sub)}</span>${opts.on ? `<span class="hc-check">${ic("check", 14)}</span>` : ""}</button>`;
+}
+function childHome() {
+  const h = CH.home || { card_ids: [], note: "" }; const ids = h.card_ids || []; const ed = CH.editable;
+  return `<div class="stack">
+    <div class="card card-pad">
+      <div class="row wrap" style="justify-content:space-between;gap:12px">
+        <div style="max-width:620px"><h3>${t("hc_title")}</h3><p class="muted small" style="margin-top:4px">${t("hc_sub")}</p></div>
+        ${ed ? `<button class="btn primary" data-act="hc-pick">${ic("plus")}${ids.length ? t("hc_change") : t("hc_pick")}</button>` : ""}
+      </div>
+      ${CH.apps.length ? `<div class="alert info" style="margin-top:14px">${ic("check")}<div>${t("hc_app_on")}</div></div>`
+        : `<div class="alert" style="margin-top:14px">${ic("info")}<div>${t("hc_app_off")} ${ed ? `<a href="#/child/${CH.child.id}/info">${t("hc_connect")}</a>` : ""}</div></div>`}
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>${t("hc_cards")} · ${ids.length}/${HOME_MAX}</h3>${h.updated_at ? `<span class="small faint">${esc(fmtDate(h.updated_at, { day: "numeric", month: "short" }))}</span>` : ""}</div>
+      <div class="card-body">${ids.length ? `<div class="hc-grid">${ids.map((id) => cardTile(id)).join("")}</div>` : `<div class="empty" style="padding:20px">${t("hc_empty")}</div>`}</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>${t("hc_note")}</h3></div>
+      <div class="card-body">${ed ? `<form data-form="hc-note" class="form-grid"><textarea class="input" name="note" maxlength="600" placeholder="${esc(t("hc_note_ph"))}">${esc(h.note || "")}</textarea><div><button class="btn">${t("save")}</button></div></form>` : `<p>${esc(h.note || "—")}</p>`}</div>
+    </div>
+  </div>`;
+}
+let HC = null;
+ACT["hc-pick"] = () => {
+  HC = { sel: ((CH.home && CH.home.card_ids) || []).slice(), cat: "", q: "" };
+  const cats = window.SOILE_CATS || [];
+  openModal(`${modalHead(t("hc_pick"), t("hc_pick_sub", { n: HOME_MAX }))}
+    <div class="modal-body form-grid" style="padding-bottom:6px">
+      <label class="search">${ic("search")}<input class="input" id="hc-q" placeholder="${esc(t("hc_search"))}"></label>
+      <div class="chips-select" id="hc-cats" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">
+        <button type="button" class="chip-toggle on" data-act="hc-cat" data-v="">${t("all")}</button>
+        ${cats.map((c) => `<button type="button" class="chip-toggle" data-act="hc-cat" data-v="${c.key}">${esc(S.lang === "kk" ? c.kk : c.ru)}</button>`).join("")}
+      </div>
+      <div class="hc-grid hc-picker" id="hc-list"></div>
+    </div>
+    <div class="modal-foot"><span class="muted small" id="hc-count" style="margin-right:auto"></span><button class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary" data-act="hc-save">${t("save")}</button></div>`, { wide: true, noFocus: true });
+  $("#hc-q").addEventListener("input", (e) => { HC.q = e.target.value.trim().toLowerCase(); drawPicker(); });
+  drawPicker();
+};
+function drawPicker() {
+  const list = Object.values(CARD_MAP).filter((c) => (!HC.cat || c.cat === HC.cat) && (!HC.q || (c.ru + " " + c.kk).toLowerCase().includes(HC.q)));
+  const sel = HC.sel.filter((id) => list.some((c) => c.id === id));
+  const rest = list.filter((c) => !HC.sel.includes(c.id));
+  $("#hc-list").innerHTML = [...sel.map((id) => cardTile(id, { on: true, act: "hc-toggle" })), ...rest.map((c) => cardTile(c.id, { act: "hc-toggle" }))].join("") || `<div class="faint">${t("ch_nores")}</div>`;
+  $("#hc-count").textContent = t("hc_count", { n: HC.sel.length, m: HOME_MAX });
+}
+ACT["hc-cat"] = (el) => { HC.cat = el.dataset.v; $$("#hc-cats .chip-toggle").forEach((b) => b.classList.toggle("on", b === el)); drawPicker(); };
+ACT["hc-toggle"] = (el) => {
+  const id = el.dataset.id; const i = HC.sel.indexOf(id);
+  if (i >= 0) HC.sel.splice(i, 1); else { if (HC.sel.length >= HOME_MAX) return toast(t("hc_max", { n: HOME_MAX }), true); HC.sel.push(id); }
+  drawPicker();
+};
+async function saveHome(patch) {
+  const row = { child_id: CH.child.id, org_id: CH.child.org_id, card_ids: (CH.home && CH.home.card_ids) || [], note: (CH.home && CH.home.note) || null, updated_at: new Date().toISOString(), updated_by: S.user.id, ...patch };
+  const { error } = await sb.from("child_home_cards").upsert(row, { onConflict: "child_id" });
+  if (error) { toast(errMsg(error), true); return false; }
+  return true;
+}
+ACT["hc-save"] = async (el) => {
+  await busy(el, async () => { if (await saveHome({ card_ids: HC.sel })) { closeModal(); toast(t("hc_saved")); route(); } });
+};
+FORMS["hc-note"] = async (f, fd) => {
+  await busy(f.querySelector(".btn"), async () => { if (await saveHome({ note: String(fd.get("note") || "").trim() || null })) { toast(t("saved")); route(); } });
+};
+
 function childSessions() {
   if (!CH.sessions.length) return `<div class="card">${emptyState("calendar", t("sessions_empty"), "", CH.editable ? `<button class="btn primary" style="margin-top:14px" data-act="log-session" data-child="${CH.child.id}">${ic("plus")}${t("log_session")}</button>` : "")}</div>`;
   const gmap = Object.fromEntries(CH.goals.map((g) => [g.id, g]));
@@ -939,6 +1015,7 @@ async function renderParent(token) {
       <h1>${esc(d.first_name)}${d.birth_year ? `<span style="font-weight:500;opacity:.75;font-size:18px"> · ${esc(t("age", { n: ageOf(d.birth_year) }))}</span>` : ""}</h1>
       <p>${esc(t("pv_center", { org: d.org || "", b: d.branch || "" }))}</p>
     </div>
+    ${d.home && (d.home.cards || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("hc_title")}</h3></div><div class="card-body">${d.home.note ? `<p style="margin-bottom:12px">${esc(d.home.note)}</p>` : ""}<div class="hc-grid">${d.home.cards.map((id) => cardTile(id)).join("")}</div><p class="hint" style="margin-top:10px">${t("hc_parent_hint")}</p></div></div>` : ""}
     ${d.report ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("pv_report")}</h3><span class="small faint">${esc(fmtDate(d.report.sent_at, { day: "numeric", month: "long" }))}</span></div><div class="card-body report-body">${esc(d.report.body)}</div></div>` : ""}
     <div class="card" style="margin-top:16px">
       <div class="card-head"><h3>${t("pv_goals")}</h3><span class="small faint">${t("trend_8w")}</span></div>

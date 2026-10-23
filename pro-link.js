@@ -88,6 +88,7 @@
     }).join("");
     var key = c.pairing_id ? "pair:" + c.pairing_id : "tok:" + c.token;
     return '<div class="cp-card"><div class="cp-head"><div class="cp-ava">' + esc((c.first_name || "?")[0]) + "</div><div><b>" + esc(c.first_name) + "</b><span>Центр «" + esc(c.org || "") + "»" + (c.branch ? ", " + esc(c.branch) : "") + "</span></div></div>" +
+      (c.home && (c.home.cards || []).length ? '<div class="cp-sec">Задание на дом · Үй тапсырмасы</div><div class="cp-rep" style="background:var(--surface-2)">' + (c.home.note ? esc(c.home.note) + "<br><br>" : "") + "<b>" + c.home.cards.length + " карточек</b> — у ребёнка во вкладке «Задание» / «Тапсырма».</div>" : "") +
       (c.report ? '<div class="cp-sec">Отчёт специалиста · ' + esc(fmtDate(c.report.sent_at, true)) + '</div><div class="cp-rep">' + esc(c.report.body) + "</div>" : "") +
       (goals ? '<div class="cp-sec">Цели и прогресс за 8 недель · Мақсаттар</div>' + goals : '<p class="key-note" style="margin-top:8px">Специалист ещё не добавил цели.</p>') +
       (sess ? '<div class="cp-sec">Последние занятия · Сабақтар</div>' + sess : "") +
@@ -114,6 +115,16 @@
     section.innerHTML = h;
   }
 
+  // Карточки «Задание» от центра → вкладка у ребёнка (index.html слушает событие soile-center-cards)
+  function syncCenterCards(list) {
+    var ids = [];
+    list.forEach(function (c) { ((c.home && c.home.cards) || []).forEach(function (id) { if (ids.indexOf(id) === -1) ids.push(id); }); });
+    if (JSON.stringify(ids) !== JSON.stringify(ls("soile_center_cards", []))) {
+      lsSet("soile_center_cards", ids);
+      try { window.dispatchEvent(new Event("soile-center-cards")); } catch (e) { /* old webview */ }
+    }
+  }
+
   function load() {
     state.loading = true; render();
     var tokens = ls("soile_pro_tokens", []);
@@ -128,6 +139,7 @@
       if (list.length || res[0] !== null) state.children = list;
       if (list.some(function (c) { return c.pairing_id; })) state.code = null;
       lsSet("soile_pro_cache", state.children);
+      if (res[0] !== null) syncCenterCards(list);
       render();
     });
   }
@@ -173,4 +185,6 @@
   function maybeLoad() { if (view && !view.hidden && Date.now() - last > 20000) { last = Date.now(); load(); } }
   if (view && window.MutationObserver) new MutationObserver(maybeLoad).observe(view, { attributes: true, attributeFilter: ["hidden"] });
   maybeLoad();
+  // При запуске тихо обновляем задание от центра, даже если родитель не открывал раздел
+  if (view && view.hidden && (ls("soile_pro_tokens", []).length || ls("soile_pro_key", ""))) { setTimeout(function () { last = Date.now(); load(); }, 1500); }
 })();

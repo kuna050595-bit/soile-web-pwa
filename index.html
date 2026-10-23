@@ -1521,6 +1521,7 @@
     // для конкретного ребёнка — собираются во вкладке "Избранное" у
     // ребёнка, независимо от категории и текущего уровня поддержки.
     favoriteCards: loadJSON('soile_favorite_cards', []),
+    centerCards: loadJSON('soile_center_cards', []),
     visibleCats: loadJSON('soile_visible_cats', CATEGORIES.map(function(c){return c.key;})),
     voiceURI: loadJSON('soile_voice_uri', ''),
     level: loadJSON('soile_level', '2'),
@@ -2539,6 +2540,12 @@
     // в разделе «Родитель / специалист». Тоже сводная вкладка: показываем
     // как есть, без фильтра по уровню поддержки и видимости категорий —
     // раз их выбрали специально, значит хотят видеть их всегда.
+    // «Задание» — карточки, которые специалист центра выбрал в Сөйле Pro
+    // для тренировки дома (приходят через pro-link.js). Порядок — как задал центр.
+    if (state.activeCat === 'center') {
+      var pool = allCards();
+      return state.centerCards.map(function(id){ return pool.filter(function(c){ return c.id === id; })[0]; }).filter(Boolean);
+    }
     if (state.activeCat === 'fav') {
       return allCards().filter(function(c){ return isFavoriteCard(c.id); });
     }
@@ -2589,6 +2596,17 @@
     favBtn.innerHTML = '<span class="swatch" style="background:var(--cat-fav)"></span>' + (state.lang==='kk' ? 'Таңдаулылар' : 'Избранное');
     favBtn.addEventListener('click', function(){ state.activeCat='fav'; render(); });
     els.catRow.appendChild(favBtn);
+
+    if (state.centerCards.length) {
+      var centerBtn = document.createElement('button');
+      centerBtn.className = 'cat-pill';
+      centerBtn.type = 'button';
+      centerBtn.style.setProperty('--cat-color', 'var(--accent)');
+      centerBtn.setAttribute('aria-pressed', state.activeCat==='center');
+      centerBtn.innerHTML = '<span class="swatch" style="background:var(--accent)"></span>' + (state.lang==='kk' ? 'Тапсырма' : 'Задание');
+      centerBtn.addEventListener('click', function(){ state.activeCat='center'; render(); });
+      els.catRow.insertBefore(centerBtn, els.catRow.children[1] || null);
+    }
 
     CATEGORIES.forEach(function(c){
       if (state.visibleCats.indexOf(c.key) === -1) return;
@@ -2873,7 +2891,7 @@
         if (cb.checked && idx===-1) state.visibleCats.push(k);
         if (!cb.checked && idx!==-1) state.visibleCats.splice(idx,1);
         saveJSON('soile_visible_cats', state.visibleCats);
-        if (state.activeCat!=='all' && state.activeCat!=='mine' && state.activeCat!=='fav' && state.visibleCats.indexOf(state.activeCat)===-1) state.activeCat='all';
+        if (state.activeCat!=='all' && state.activeCat!=='mine' && state.activeCat!=='fav' && state.activeCat!=='center' && state.visibleCats.indexOf(state.activeCat)===-1) state.activeCat='all';
         renderCatRow();
         renderCardGrid();
       });
@@ -3425,8 +3443,13 @@
     });
   }
 
+  window.addEventListener('soile-center-cards', function(){
+    state.centerCards = loadJSON('soile_center_cards', []);
+    if (state.activeCat === 'center' && !state.centerCards.length) state.activeCat = 'all';
+    render();
+  });
   render();
   loadCustomCards();
 })();
 </script>
-<script src="pro-link.js?v=1"></script>
+<script src="pro-link.js?v=2"></script>
