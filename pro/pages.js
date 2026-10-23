@@ -267,7 +267,7 @@ FORMS["child-save"] = async (f, fd) => {
 let CH = null; // current child bundle
 async function loadChild(id) {
   const since = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
-  const [c, g, p, s, r, l, pa] = await Promise.all([
+  const [c, g, p, s, r, l, pa, ap] = await Promise.all([
     sb.from("children").select("*").eq("id", id).maybeSingle(),
     sb.from("goals").select("*").eq("child_id", id).order("created_at"),
     sb.rpc("child_progress", { p_child: id, p_weeks: 8 }),
@@ -275,12 +275,13 @@ async function loadChild(id) {
     sb.from("reports").select("*").eq("child_id", id).order("created_at", { ascending: false }),
     sb.from("child_links").select("id, target_org_id, active, consent_note, created_at, tgt:orgs!child_links_target_org_id_fkey(name, city)").eq("child_id", id).eq("active", true),
     sb.from("parent_access").select("token").eq("child_id", id).maybeSingle(),
+    sb.from("app_pairings").select("id, linked_at, active").eq("child_id", id).eq("active", true).order("linked_at", { ascending: false }),
   ]);
   if (c.error) throw c.error;
   if (!c.data) return null;
   let srcOrg = null;
   if (c.data.org_id !== S.org.id) { const o = await sb.from("orgs").select("name").eq("id", c.data.org_id).maybeSingle(); srcOrg = o.data ? o.data.name : ""; }
-  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, editable: c.data.org_id === S.org.id, srcOrg };
+  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, apps: ap.data || [], editable: c.data.org_id === S.org.id, srcOrg };
 }
 function goalStats(goalId) {
   const weeks = weekStarts(8);
@@ -306,7 +307,7 @@ PAGES.child = async (el, args, alive) => {
   <div class="child-head">
     <span class="avatar">${esc(initials(childName(c)))}</span>
     <div class="t">
-      <h1>${esc(childName(c))} ${!c.active ? `<span class="tag">${t("inactive")}</span>` : ""}</h1>
+      <h1>${esc(childName(c))} ${!c.active ? `<span class="tag">${t("inactive")}</span>` : ""}${ed && data.apps.length ? `<span class="tag accent" title="${esc(t("app_connected"))}">${ic("check", 12)}Сөйле</span>` : ""}</h1>
       <div class="meta">
         ${c.birth_year ? `<span>${esc(t("age", { n: ageOf(c.birth_year) }))}</span>` : ""}
         ${ed ? `<span>${ic("branch", 14)} ${esc(branchName(c.branch_id))}</span>` : `<span>${esc(data.srcOrg || "")}</span>`}
@@ -408,6 +409,10 @@ function childInfo() {
     </div>
     ${ed ? `<div class="stack">
       <div class="card">
+        <div class="card-head"><h3>${t("app_title")}</h3><button class="btn sm primary" data-act="app-pair">${ic("link")}${t("app_connect")}</button></div>
+        <div class="list">${CH.apps.length ? CH.apps.map((a) => `<div class="list-item"><span class="org-avatar" style="background:var(--accent-soft);color:var(--accent)">${ic("check", 16)}</span><span class="t"><b>${t("app_connected")}</b><span>${esc(fmtDate(a.linked_at, { day: "numeric", month: "short", year: "numeric" }))}</span></span><button class="btn ghost sm danger" data-act="app-unpair" data-id="${a.id}">${t("tr_revoke")}</button></div>`).join("") : `<div class="card-body muted small">${t("app_none")}</div>`}</div>
+      </div>
+      <div class="card">
         <div class="card-head"><h3>${t("tr_title")}</h3><button class="btn sm" data-act="transfer">${ic("transfer")}${t("tr_btn")}</button></div>
         <div class="list">${CH.links.length ? CH.links.map((l) => `<div class="list-item"><span class="org-avatar">${esc(initials((l.tgt && l.tgt.name) || "?"))}</span><span class="t"><b>${esc((l.tgt && l.tgt.name) || "—")}</b><span>${esc(fmtDate(l.created_at, { day: "numeric", month: "short", year: "numeric" }))}</span></span><button class="btn ghost sm danger" data-act="link-revoke" data-id="${l.id}">${t("tr_revoke")}</button></div>`).join("") : `<div class="card-body muted small">${t("tr_none")}</div>`}</div>
       </div>
@@ -419,6 +424,24 @@ function childInfo() {
   </div>`;
 }
 ACT["child-edit"] = () => openModal(childFormHtml(CH.child));
+ACT["app-pair"] = () => {
+  openModal(`${modalHead(t("app_title"), t("app_how"))}
+    <form data-form="app-pair"><div class="modal-body form-grid">
+      <div class="field"><label>${t("app_code")}</label><input class="input" name="code" required maxlength="8" autocomplete="off" placeholder="ABC234" style="text-transform:uppercase;letter-spacing:.2em;font-size:20px;font-weight:600;height:52px;max-width:220px"></div>
+      <div class="error-text hidden" data-err></div>
+    </div><div class="modal-foot"><button type="button" class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary">${t("app_connect")}</button></div></form>`);
+};
+FORMS["app-pair"] = async (f, fd) => {
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const { error } = await sb.rpc("pair_child", { p_child: CH.child.id, p_code: String(fd.get("code") || "") });
+    if (error) return showFormErr(f, /code_invalid|code_used/.test(error.message) ? t("app_bad_code") : errMsg(error));
+    closeModal(); toast(t("app_done")); route();
+  });
+};
+ACT["app-unpair"] = async (el) => {
+  const { error } = await sb.from("app_pairings").update({ active: false }).eq("id", el.dataset.id);
+  if (error) return toast(errMsg(error), true); route();
+};
 ACT["move-branch"] = async (el) => {
   const b = $("#move-branch").value; if (b === CH.child.branch_id) return;
   await busy(el, async () => {
