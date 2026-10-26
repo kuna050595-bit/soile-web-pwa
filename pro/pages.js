@@ -233,6 +233,7 @@ function childFormHtml(c) {
     <div class="field"><label>${t("cf_code")} <span class="faint">· ${t("optional")}</span></label><input class="input" name="soile_code" maxlength="20" value="${esc(c.soile_code || "")}" placeholder="XXXX-XXXX"></div>
     ${c.id ? `<label class="check"><input type="checkbox" name="active" ${c.active ? "checked" : ""}>${t("cf_active")}</label>` : ""}
     <label class="check"><input type="checkbox" name="consent" ${c.consent_at ? "checked disabled" : ""}>${t("cf_consent")}</label>
+    <a class="small" href="legal/consent.html${S.lang === "kk" ? "?lang=kk" : ""}" target="_blank" rel="noopener" style="margin-top:-6px">${ic("report", 14)} ${t("cf_consent_form")}</a>
     <div class="error-text hidden" data-err></div>
   </div>
   <div class="modal-foot"><button type="button" class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary">${t("save")}</button></div>
@@ -826,7 +827,7 @@ PAGES.team = async (el, args, alive) => {
       <td><div class="person"><span class="avatar">${esc(initials(m.full_name))}</span><div><b>${esc(m.full_name || "—")}</b><span>${esc(m.specialty || "")}${m.user_id === S.user.id ? " · " + t("tm_you") : ""}</span></div></div></td>
       <td><span class="tag ${m.role === "owner" ? "accent" : ""}">${esc(roleName(m.role))}</span></td>
       <td class="hide-m">${m.branch_id ? esc(branchName(m.branch_id)) : `<span class="faint">${t("all_branches")}</span>`}</td>
-      <td class="r">${m.role !== "owner" && m.user_id !== S.user.id ? `<button class="btn ghost sm" data-act="member-remove" data-id="${m.id}" data-name="${esc(m.full_name)}" aria-label="${esc(t("tm_remove"))}">${ic("x")}</button>` : ""}</td>
+      <td class="r">${m.role !== "owner" && m.user_id !== S.user.id && m.user_id && (S.me.role === "owner" || m.role !== "admin") ? `<button class="btn ghost sm" data-act="member-reset" data-id="${m.id}" data-name="${esc(m.full_name)}" title="${esc(t("tm_reset"))}" aria-label="${esc(t("tm_reset"))}">${ic("key")}</button>` : ""}${m.role !== "owner" && m.user_id !== S.user.id ? `<button class="btn ghost sm" data-act="member-remove" data-id="${m.id}" data-name="${esc(m.full_name)}" aria-label="${esc(t("tm_remove"))}">${ic("x")}</button>` : ""}</td>
     </tr>`).join("")}</tbody></table></div></div>
   ${(inv.data || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("tm_pending")}</h3></div><div class="list">
     ${inv.data.map((i) => `<div class="list-item"><span class="avatar">${ic("clock", 16)}</span><span class="t"><b>${esc(i.full_name || "—")}</b><span>${esc(roleName(i.role))}${i.branch_id ? " · " + esc(branchName(i.branch_id)) : ""}</span></span>
@@ -859,6 +860,24 @@ FORMS["invite-save"] = async (f, fd) => {
   });
 };
 ACT["invite-revoke"] = async (el) => { const { error } = await sb.from("invites").delete().eq("id", el.dataset.id); if (error) return toast(errMsg(error), true); route(); };
+ACT["member-reset"] = async (el) => {
+  if (S.org.is_demo) return toast(t("tm_reset_demo"), true);
+  if (!confirm(t("tm_reset_q", { name: el.dataset.name }))) return;
+  await busy(el, async () => {
+    const { data, error } = await sb.functions.invoke("pub", { body: { action: "staff_reset", member_id: el.dataset.id } });
+    if (error || !data || !data.password) {
+      let code = ""; try { code = (await error.context.json()).error; } catch { /* ignore */ }
+      return toast(code === "multi_org" ? t("tm_reset_multi") : t("err"), true);
+    }
+    const url = appUrl("login=1");
+    const msg = t("tm_reset_wa", { org: S.org.name, url, email: data.email, pass: data.password });
+    openModal(`${modalHead(t("tm_reset_title"), el.dataset.name)}<div class="modal-body stack" style="gap:12px">
+      <p class="muted small">${t("tm_reset_text")}</p>
+      <div class="copy-box"><input class="input" readonly value="${esc(data.email)}"><button class="btn" data-act="copy" data-v="${esc(data.email)}">${ic("copy")}</button></div>
+      <div class="copy-box"><input class="input mono" readonly value="${esc(data.password)}"><button class="btn" data-act="copy" data-v="${esc(data.password)}">${ic("copy")}</button></div>
+    </div><div class="modal-foot"><button class="btn" data-act="close-modal">${t("close")}</button><a class="btn primary" target="_blank" rel="noopener" href="${esc(waLink(msg))}">${ic("chat")}${t("share_wa")}</a></div>`);
+  });
+};
 ACT["member-remove"] = async (el) => {
   if (!confirm(t("tm_remove_q", { name: el.dataset.name }))) return;
   const { error } = await sb.from("members").delete().eq("id", el.dataset.id); if (error) return toast(errMsg(error), true); route();
@@ -958,9 +977,9 @@ PAGES.settings = async (el) => {
       <div class="card"><div class="card-head"><h3>${t("st_account")}</h3></div><div class="card-body stack" style="gap:12px">
         <div class="person"><span class="avatar">${esc(initials(S.me.full_name || S.user.email))}</span><div><b>${esc(S.me.full_name || "")}</b><span>${esc(S.user.email || "")}</span></div></div>
         <div class="row"><span class="tag accent">${esc(roleName(S.me.role))}</span>${S.me.branch_id ? `<span class="tag">${esc(branchName(S.me.branch_id))}</span>` : ""}</div>
-        <button class="btn" data-act="logout">${ic("logout")}${t("logout")}</button>
+        <div class="row wrap"><button class="btn" data-act="change-pass">${ic("key")}${t("st_change_pass")}</button><button class="btn" data-act="logout">${ic("logout")}${t("logout")}</button></div>
       </div></div>
-      <div class="card card-pad"><div class="row" style="margin-bottom:8px">${ic("shield", 18)}<h3>${t("st_data")}</h3></div><p class="muted small">${t("st_data_text")}</p><p class="muted small" style="margin-top:8px">${t("cf_privacy")}</p></div>
+      <div class="card card-pad"><div class="row" style="margin-bottom:8px">${ic("shield", 18)}<h3>${t("st_data")}</h3></div><p class="muted small">${t("st_data_text")}</p><p class="muted small" style="margin-top:8px">${t("cf_privacy")}</p>${legalLinks()}</div>
     </div>
   </div>`;
 };
@@ -1032,3 +1051,59 @@ async function renderParent(token) {
 }
 
 boot();
+
+
+/* ---------- тариф и оплата ---------- */
+const BL = { period: "m" };
+function planPrice(pl) { const f = S.plan && S.plan.founder ? 0.7 : 1; return Math.round(pl.price * f / 100) * 100; }
+function planLimitsText(pl) {
+  return [pl.kids ? t("bl_kids_upto", { n: pl.kids }) : t("bl_kids_any"), pl.branches === 1 ? t("bl_br_one") : t("bl_br_many"), t("bl_staff_any")];
+}
+function usageRow(label, n, max) {
+  const pct = max ? Math.min(100, Math.round((n / max) * 100)) : null;
+  return `<div><div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="small muted">${esc(label)}</span><span class="small num"><b>${n}</b>${max ? " / " + max : " · " + t("bl_unlimited")}</span></div>
+    ${max ? `<div class="meter"><div class="bar"><i style="width:${Math.max(2, pct)}%;${pct >= 90 ? "background:var(--warn)" : ""}"></i></div></div>` : ""}</div>`;
+}
+PAGES.billing = async (el, args, alive) => {
+  document.title = t("nav_billing") + " · Сөйле Pro";
+  await loadPlan(); if (!alive()) return;
+  const p = S.plan;
+  if (!p) throw new Error("plan");
+  if (!isManager()) { el.innerHTML = `${pageHead(t("bl_title"))}<div class="card">${emptyState("card", t("bl_only_owner"), "")}</div>`; return; }
+  const dfmt = { day: "numeric", month: "long", year: "numeric" };
+  const until = fmtDate(p.paid_until, dfmt);
+  const status = p.is_demo ? `<span class="tag accent">${t("plan_network")}</span>`
+    : p.expired ? `<span class="tag danger">${esc(t("bl_expired", { d: until }))}</span>`
+    : `<span class="tag ${p.days_left <= 5 ? "warn" : "ok"}">${esc(t("bl_days_left", { n: p.days_left }))}</span>`;
+  el.innerHTML = `${pageHead(t("bl_title"), t("bl_sub"))}
+  ${p.is_demo ? `<div class="alert info" style="margin-bottom:16px">${ic("info")}<div>${t("bl_demo")}</div></div>` : ""}
+  ${p.expired && !p.is_demo ? `<div class="alert" style="margin-bottom:16px">${ic("alert")}<div>${p.writable ? t("bl_grace") : t("bl_readonly")}</div></div>` : ""}
+  <div class="grid g-main" style="margin-bottom:20px">
+    <div class="card card-pad stack" style="gap:14px">
+      <div class="row wrap" style="justify-content:space-between"><div><div class="small faint">${t("bl_current")}</div><h2 style="margin-top:2px">${esc(t("plan_" + p.plan))}</h2></div>${status}</div>
+      ${p.is_demo ? "" : `<div class="muted small">${esc(p.plan === "trial" ? t("bl_trial_until", { d: until }) : t("bl_until", { d: until }))}${p.founder ? " · " + t("bl_founder_on") : ""}</div>`}
+      <div class="grid g-3" style="gap:14px">${usageRow(t("bl_usage_kids"), p.children, p.max_children)}${usageRow(t("bl_usage_br"), p.branches, p.max_branches)}${usageRow(t("bl_usage_staff"), p.staff, null)}</div>
+    </div>
+    <div class="card card-pad stack" style="gap:10px">
+      <div class="row">${ic("info", 18)}<h3>${t("bl_how")}</h3></div>
+      <p class="muted small">${t("bl_how_text")}</p>
+      <a class="btn sm" style="align-self:flex-start" target="_blank" rel="noopener" href="${esc(waLink(t("ld_wa"), SUPPORT_PHONE))}">${ic("chat")}${t("bl_support")}</a>
+    </div>
+  </div>
+  <div class="row wrap" style="justify-content:space-between;margin-bottom:12px">
+    <div class="seg" role="group"><button class="${BL.period === "m" ? "on" : ""}" data-act="bl-period" data-v="m">${t("bl_period_m")}</button><button class="${BL.period === "y" ? "on" : ""}" data-act="bl-period" data-v="y">${t("bl_period_y")}</button></div>
+    <span class="small muted">${t("bl_year")}${p.founder ? "" : " · " + t("bl_founder")}</span>
+  </div>
+  <div class="grid g-3 plans">${PLANS.map((pl) => {
+    const cur = !p.is_demo && p.plan === pl.id;
+    const price = planPrice(pl); const total = BL.period === "y" ? price * 10 : price;
+    return `<div class="card plan-card ${pl.popular ? "popular" : ""} ${cur ? "current" : ""}">
+      ${cur ? `<span class="plan-flag">${t("bl_current_badge")}</span>` : pl.popular ? `<span class="plan-flag">${t("bl_popular")}</span>` : ""}
+      <h3>${esc(t("plan_" + pl.id))}</h3>
+      <div class="plan-price"><b class="num">${fmtMoney(price)}</b> <span>${t("bl_per_month")}</span></div>
+      ${BL.period === "y" ? `<div class="small muted" style="margin-top:-6px">${fmtMoney(total)} ₸ / 12 ${S.lang === "kk" ? "ай" : "мес."}</div>` : ""}
+      <ul class="plan-list">${planLimitsText(pl).map((x) => `<li>${ic("check", 14)}${esc(x)}</li>`).join("")}<li>${ic("check", 14)}${esc(t("bl_feat_all"))}</li></ul>
+      <a class="btn ${pl.popular || cur ? "primary" : ""} block" target="_blank" rel="noopener" href="${esc(waLink(t("bl_wa_msg", { org: S.org.name, plan: t("plan_" + pl.id), price: fmtMoney(price), period: BL.period === "y" ? t("bl_period_y") + " — " + fmtMoney(total) + " ₸" : t("bl_period_m"), id: S.org.id.slice(0, 8) }), SUPPORT_PHONE))}">${ic("chat")}${t("bl_pay")}</a>
+    </div>`; }).join("")}</div>`;
+};
+ACT["bl-period"] = (el) => { BL.period = el.dataset.v; route(); };

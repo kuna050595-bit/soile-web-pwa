@@ -15,8 +15,16 @@ const LS = {
 const S = {
   lang: LS.get("lang", "ru"), theme: LS.get("theme", "auto"),
   user: null, members: [], me: null, org: null, branches: [], staff: [],
-  inviteToken: null, navSeq: 0, kids: null,
+  inviteToken: null, navSeq: 0, kids: null, plan: null, view: null,
 };
+/* поддержка и тарифы (цены — ₸ в месяц) */
+const SUPPORT_PHONE = "77077760327";
+const PLANS = [
+  { id: "start", price: 15000, kids: 15, branches: 1 },
+  { id: "center", price: 29000, kids: 40, branches: 1, popular: true },
+  { id: "network", price: 49000, kids: null, branches: null },
+];
+const fmtMoney = (n) => Math.round(n).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
 
 /* ---------- utils ---------- */
 function t(k, vars) {
@@ -62,7 +70,14 @@ function dirTag(d, full) { return `<span class="tag ${d}"><span class="dot"></sp
 function roleName(r) { return t("role_" + r); }
 function branchName(id) { const b = S.branches.find((x) => x.id === id); return b ? b.name : ""; }
 function staffName(id) { const m = S.staff.find((x) => x.id === id); return m ? m.full_name : ""; }
-function errMsg(e) { console.error(e); return t("err"); }
+function errMsg(e) {
+  console.error(e);
+  const m = String((e && (e.message || e.details)) || e || "");
+  if (m.includes("plan_expired")) return t("err_plan_expired");
+  if (m.includes("plan_limit_children")) return t("err_plan_children");
+  if (m.includes("plan_limit_branches")) return t("err_plan_branches");
+  return t("err");
+}
 
 /* ---------- icons ---------- */
 const ICONS = {
@@ -101,6 +116,8 @@ const ICONS = {
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.3-4 4.3-6 8-6s6.7 2 8 6"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/>',
+  key: '<circle cx="7.5" cy="15.5" r="4"/><path d="m10.5 12.5 9-9M16 7l3 3M14 9l2 2"/>',
 };
 function ic(name, size) { return `<svg viewBox="0 0 24 24" ${size ? `width="${size}" height="${size}"` : ""} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`; }
 const LOGO_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M43 22.5A14 14 0 1 0 43 41.5" fill="none" stroke="white" stroke-width="6.5" stroke-linecap="round"/><circle cx="47.5" cy="32" r="3.6" fill="white"/></svg>';
@@ -180,12 +197,13 @@ function authForm(ctx) {
     ${reg ? `<div class="field"><label for="f-name">${t("full_name")}</label><input class="input" id="f-name" name="full_name" autocomplete="name" required></div>` : ""}
     <div class="field"><label for="f-email">${t("email")}</label><input class="input" id="f-email" name="email" type="email" autocomplete="email" required></div>
     <div class="field"><label for="f-pass">${t("password")}</label><input class="input" id="f-pass" name="password" type="password" autocomplete="${reg ? "new-password" : "current-password"}" required minlength="${reg ? 8 : 1}">${reg ? `<span class="hint">${t("pass_hint")}</span>` : ""}</div>
+    ${reg ? `<label class="check terms"><input type="checkbox" name="terms" required><span>${t("reg_terms")}</span></label>` : `<div class="forgot-row"><a href="#" data-act="forgot">${t("forgot")}</a></div>`}
     <div class="error-text hidden" data-err></div>
     <button class="btn primary lg block" type="submit">${reg ? t("register_btn") : t("login_btn")}</button>
   </form>`;
 }
 function renderAuth() {
-  document.title = "Сөйле Pro";
+  document.title = "Сөйле Pro"; S.view = "auth";
   $("#app").innerHTML = `
   <div class="auth">
     <aside class="auth-side">
@@ -204,7 +222,7 @@ function renderAuth() {
       <div class="lang-switch hide-d">${langSwitch()}</div>
     </aside>
     <main class="auth-main">
-      <div class="lang-switch hide-m">${langSwitch()}</div>
+      <div class="auth-top"><a href="#" class="back-link" data-act="to-landing">${ic("left", 16)}${t("back_home")}</a><div class="lang-switch hide-m">${langSwitch()}</div></div>
       <div class="auth-box">
         <h2>${t("auth_title")}</h2>
         <p class="sub">${t("auth_sub")}</p>
@@ -214,6 +232,7 @@ function renderAuth() {
           <button class="demo-btn" data-act="demo" data-role="owner"><span class="ic">${ic("branch")}</span><span><b>${t("demo_owner")}</b><span>${t("demo_owner_sub")}</span></span></button>
           <button class="demo-btn" data-act="demo" data-role="specialist"><span class="ic">${ic("kids")}</span><span><b>${t("demo_spec")}</b><span>${t("demo_spec_sub")}</span></span></button>
         </div>
+        ${legalLinks()}
       </div>
     </main>
   </div>`;
@@ -234,11 +253,12 @@ FORMS.register = async (f, fd) => {
   if (full_name.length < 2) return showFormErr(f, t("err_name"));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return showFormErr(f, t("err_email"));
   if (password.length < 8) return showFormErr(f, t("err_weak"));
+  if (!fd.get("terms")) return showFormErr(f, t("err_terms"));
   await busy(btn, async () => {
-    const { data, error } = await sb.functions.invoke("pub", { body: { action: "register", email, password, full_name } });
+    const { data, error } = await sb.functions.invoke("pub", { body: { action: "register", email, password, full_name, terms: true } });
     if (error) {
       let code = ""; try { code = (await error.context.json()).error; } catch { /* ignore */ }
-      return showFormErr(f, code === "exists" ? t("err_exists") : code === "weak_password" ? t("err_weak") : code === "bad_email" ? t("err_email") : t("err"));
+      return showFormErr(f, code === "exists" ? t("err_exists") : code === "weak_password" ? t("err_weak") : code === "bad_email" ? t("err_email") : code === "terms_required" ? t("err_terms") : t("err"));
     }
     if (!data || !data.ok) return showFormErr(f, t("err"));
     const r = await sb.auth.signInWithPassword({ email, password });
@@ -261,11 +281,12 @@ ACT["demo"] = async (el) => {
 };
 async function onSignedIn() {
   const { data } = await sb.auth.getUser(); S.user = data.user || null;
+  if (S.user) LS.set("known", true);
   await afterAuth();
 }
 ACT["logout"] = async () => {
   await sb.auth.signOut(); S.user = null; S.members = []; S.org = null; S.me = null; S.kids = null;
-  LS.set("org", null); closeModal(); location.hash = ""; renderAuth();
+  LS.set("org", null); closeModal(); location.hash = ""; S.view = "auth"; renderAuth();
 };
 
 /* ---------- invite ---------- */
@@ -356,9 +377,14 @@ async function selectOrg(orgId) {
     sb.from("members").select("id, user_id, role, branch_id, full_name, specialty, created_at").eq("org_id", m.org_id).order("created_at"),
   ]);
   S.branches = b.data || []; S.staff = st.data || [];
+  await loadPlan();
+}
+async function loadPlan() {
+  const { data, error } = await sb.rpc("org_plan", { p_org: S.org.id });
+  S.plan = error ? null : data;
 }
 async function afterAuth() {
-  if (!S.user) return renderAuth();
+  if (!S.user) return authOrLanding();
   if (S.inviteToken) return renderInvite();
   try {
     await loadMemberships();
@@ -386,6 +412,7 @@ function navItems() {
   const net = [
     ...(m ? [{ href: "#/branches", key: "nav_branches", icon: "branch" }, { href: "#/team", key: "nav_team", icon: "team" }] : []),
     { href: "#/catalog", key: "nav_catalog", icon: "globe" },
+    ...(m ? [{ href: "#/billing", key: "nav_billing", icon: "card" }] : []),
     { href: "#/settings", key: "nav_settings", icon: "settings" },
   ];
   return { work, net };
@@ -420,6 +447,7 @@ function renderShell(active) {
         <button class="org-switch" style="margin:0;width:auto;max-width:55vw;padding:6px 10px" data-act="org-menu">
           <span class="t"><b>${esc(S.org.name)}</b></span></button>
       </header>
+      ${planBanner()}
       <main class="page" id="page"><div class="boot" style="min-height:50vh"><div class="spinner"></div></div></main>
     </div>
   </div>
@@ -428,8 +456,18 @@ function renderShell(active) {
     <a href="#/children" class="${active === "children" || active === "child" ? "active" : ""}">${ic("kids")}<span>${t("nav_children")}</span></a>
     <a href="#" class="fab" data-act="log-session"><span class="c">${ic("plus")}</span><span>${t("nav_session")}</span></a>
     <a href="#/reports" class="${active === "reports" ? "active" : ""}">${ic("report")}<span>${t("nav_reports")}</span></a>
-    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
+    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings", "billing"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
   </nav>`;
+}
+function planBanner() {
+  const p = S.plan; if (!p || p.is_demo) return "";
+  let cls = "", msg = "";
+  if (p.expired) { cls = p.writable ? "warn" : "danger"; msg = p.writable ? t("bn_grace") : t("bn_expired"); }
+  else if (p.plan === "trial" && p.days_left <= 10) { cls = "info"; msg = t("bn_trial", { n: p.days_left }); }
+  else if (p.plan !== "trial" && p.days_left <= 5) { cls = "warn"; msg = t("bn_ends", { n: p.days_left }); }
+  if (!msg) return "";
+  const btn = isManager() ? `<a class="btn sm ${cls === "info" ? "" : "primary"}" href="#/billing">${p.plan === "trial" ? t("bn_btn_choose") : t("bn_btn")}</a>` : "";
+  return `<div class="plan-banner ${cls}">${ic(cls === "info" ? "clock" : "alert", 16)}<span>${esc(msg)}</span>${btn}</div>`;
 }
 ACT["org-menu"] = () => {
   openModal(`${modalHead(t("switch_org"))}
@@ -465,11 +503,101 @@ async function route() {
 function rerender() {
   const params = new URLSearchParams(location.search);
   if (params.get("p")) return renderParent(params.get("p"));
-  if (!S.user) return renderAuth();
+  if (S.recovery) return renderNewPassword();
+  if (!S.user) return authOrLanding();
   if (S.inviteToken) return renderInvite();
   if (!S.org) return renderOnboarding();
   route();
 }
+function authOrLanding() {
+  const v = S.view || (LS.get("known", false) ? "auth" : "landing");
+  return v === "landing" && typeof renderLanding === "function" ? renderLanding() : renderAuth();
+}
+ACT["to-landing"] = () => { S.view = "landing"; history.replaceState(null, "", location.pathname); rerender(); window.scrollTo(0, 0); };
+ACT["to-auth"] = (el) => { S.view = "auth"; authTab = el.dataset.tab || "login"; renderAuth(); window.scrollTo(0, 0); };
+function legalLinks() {
+  const q = S.lang === "kk" ? "?lang=kk" : "";
+  return `<div class="legal-links"><a href="legal/offer.html${q}" target="_blank" rel="noopener">${t("lg_offer")}</a><a href="legal/privacy.html${q}" target="_blank" rel="noopener">${t("lg_privacy")}</a><a href="legal/consent.html${q}" target="_blank" rel="noopener">${t("lg_consent")}</a></div>`;
+}
+
+/* ---------- восстановление пароля ---------- */
+ACT["forgot"] = (el) => {
+  const box = el.closest("form"); const em = box ? (box.querySelector("[name=email]") || {}).value || "" : "";
+  openModal(`${modalHead(t("fp_title"), t("fp_sub"))}
+    <form data-form="forgot"><div class="modal-body form-grid">
+      <div class="field"><label>${t("email")}</label><input class="input" name="email" type="email" autocomplete="email" required value="${esc(em)}"></div>
+      <div class="error-text hidden" data-err></div>
+      <div class="alert info hidden" data-ok>${ic("info")}<div>${t("fp_sent")}</div></div>
+      <p class="hint">${t("fp_staff")}</p>
+      <a class="small" target="_blank" rel="noopener" data-wa href="${esc(waLink(t("fp_wa", { email: em || "—" }), SUPPORT_PHONE))}">${ic("chat", 14)} ${t("fp_help")}</a>
+    </div><div class="modal-foot"><button type="button" class="btn" data-act="close-modal">${t("close")}</button><button class="btn primary">${t("fp_send")}</button></div></form>`);
+};
+FORMS.forgot = async (f, fd) => {
+  const email = String(fd.get("email") || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return showFormErr(f, t("err_email"));
+  const wa = f.querySelector("[data-wa]"); if (wa) wa.href = waLink(t("fp_wa", { email }), SUPPORT_PHONE);
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname + "?reset=1" });
+    if (error && !/rate|seconds/i.test(error.message || "")) console.warn(error);
+    f.querySelector("[data-err]").classList.add("hidden");
+    f.querySelector("[data-ok]").classList.remove("hidden");
+  });
+};
+async function consumeRecoveryLink() {
+  // ссылка из письма: …/pro/?reset=1#access_token=…&refresh_token=…&type=recovery
+  const h = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const q = new URLSearchParams(location.search);
+  if (h.get("type") === "recovery" && h.get("access_token")) {
+    const { data, error } = await sb.auth.setSession({ access_token: h.get("access_token"), refresh_token: h.get("refresh_token") || "" });
+    history.replaceState(null, "", location.pathname);
+    if (error) { S.recovery = "bad"; return true; }
+    S.user = data.user || (data.session && data.session.user) || null; S.recovery = "ok"; return true;
+  }
+  if (q.get("reset") && (h.get("error") || h.get("error_code"))) { history.replaceState(null, "", location.pathname); S.recovery = "bad"; return true; }
+  if (q.get("reset") && q.get("code")) {
+    const { data, error } = await sb.auth.exchangeCodeForSession(q.get("code"));
+    history.replaceState(null, "", location.pathname);
+    if (error) { S.recovery = "bad"; return true; }
+    S.user = data.user || (data.session && data.session.user) || null; S.recovery = "ok"; return true;
+  }
+  if (q.get("reset")) history.replaceState(null, "", location.pathname);
+  return false;
+}
+function newPasswordForm(inModal) {
+  return `<form data-form="new-pass" data-modal="${inModal ? 1 : ""}" class="form-grid">
+      <div class="field"><label>${t("np_label")}</label><input class="input" name="p1" type="password" autocomplete="new-password" minlength="8" required><span class="hint">${t("pass_hint")}</span></div>
+      <div class="field"><label>${t("np_label2")}</label><input class="input" name="p2" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="error-text hidden" data-err></div>
+      <button class="btn primary lg block">${t("np_save")}</button>
+    </form>`;
+}
+function renderNewPassword() {
+  const bad = S.recovery === "bad";
+  $("#app").innerHTML = `
+  <div class="center-screen"><div class="center-card">
+    <div class="row" style="justify-content:space-between;margin-bottom:22px">${brand()}${langSwitch()}</div>
+    <div class="card card-pad">
+      <h2>${t("np_title")}</h2>
+      ${bad ? `<div class="alert" style="margin-top:14px">${ic("alert")}<div>${t("np_bad_link")}</div></div>
+        <div class="row" style="margin-top:16px"><button class="btn primary" data-act="np-cancel">${t("login_btn")}</button></div>`
+      : `<p class="muted" style="margin:6px 0 18px">${esc(t("np_sub", { email: (S.user && S.user.email) || "" }))}</p>${newPasswordForm(false)}`}
+    </div>
+  </div></div>`;
+}
+ACT["np-cancel"] = () => { S.recovery = null; S.view = "auth"; authTab = "login"; rerender(); };
+ACT["change-pass"] = () => openModal(`${modalHead(t("st_change_pass"))}<div class="modal-body">${newPasswordForm(true)}</div>`);
+FORMS["new-pass"] = async (f, fd) => {
+  const p1 = String(fd.get("p1") || ""), p2 = String(fd.get("p2") || "");
+  if (p1.length < 8) return showFormErr(f, t("err_weak"));
+  if (p1 !== p2) return showFormErr(f, t("np_mismatch"));
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if (error) return showFormErr(f, /different|same/i.test(error.message || "") ? t("np_mismatch") : /weak|short|least/i.test(error.message || "") ? t("err_weak") : t("err"));
+    toast(t("np_done"));
+    if (f.dataset.modal) return closeModal();
+    S.recovery = null; await onSignedIn();
+  });
+};
 window.addEventListener("hashchange", () => { if (S.user && S.org) route(); });
 
 async function boot() {
@@ -477,6 +605,8 @@ async function boot() {
   const params = new URLSearchParams(location.search);
   if (params.get("p")) return renderParent(params.get("p"));
   if (params.get("invite")) S.inviteToken = params.get("invite");
+  if (params.has("login") || params.has("register")) { S.view = "auth"; authTab = params.has("register") ? "register" : "login"; }
+  if (await consumeRecoveryLink()) { applyTheme(); return renderNewPassword(); }
   const { data } = await sb.auth.getSession();
   S.user = (data.session && data.session.user) || null;
   sb.auth.onAuthStateChange((ev, session) => {
