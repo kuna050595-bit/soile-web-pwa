@@ -1072,7 +1072,7 @@ PAGES.billing = async (el, args, alive) => {
   if (!isManager()) { el.innerHTML = `${pageHead(t("bl_title"))}<div class="card">${emptyState("card", t("bl_only_owner"), "")}</div>`; return; }
   const dfmt = { day: "numeric", month: "long", year: "numeric" };
   const until = fmtDate(p.paid_until, dfmt);
-  const status = p.is_demo ? `<span class="tag accent">${t("plan_network")}</span>`
+  const status = p.is_demo ? `<span class="tag accent">${S.lang === "kk" ? "Демо" : "Демо"}</span>`
     : p.expired ? `<span class="tag danger">${esc(t("bl_expired", { d: until }))}</span>`
     : `<span class="tag ${p.days_left <= 5 ? "warn" : "ok"}">${esc(t("bl_days_left", { n: p.days_left }))}</span>`;
   el.innerHTML = `${pageHead(t("bl_title"), t("bl_sub"))}
