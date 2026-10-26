@@ -46,6 +46,9 @@ function weeklyBars(weeks, series) {
 function emptyState(icon, title, sub, action) {
   return `<div class="empty"><div class="ico">${ic(icon)}</div><b>${esc(title)}</b>${sub ? `<div>${esc(sub)}</div>` : ""}${action || ""}</div>`;
 }
+function quickActions(items) {
+  return `<div class="qa">${items.map((x, i) => `<${x.href ? "a" : "button"} class="qa-item" ${x.href ? `href="${x.href}"` : `data-act="${x.act}"`}><span class="qa-ic ${i ? "c" + (i + 1) : ""}">${ic(x.icon)}</span>${esc(t(x.key))}</${x.href ? "a" : "button"}>`).join("")}</div>`;
+}
 function pageHead(title, sub, actions) {
   return `<div class="page-head"><div><h1>${esc(title)}</h1>${sub ? `<div class="sub">${esc(sub)}</div>` : ""}</div>${actions ? `<div class="actions">${actions}</div>` : ""}</div>`;
 }
@@ -69,7 +72,8 @@ PAGES.overview = async (el, args, alive) => {
   const att = (o.idle || []).length + (o.stuck || []).length + (o.unsent_reports ? 1 : 0);
 
   el.innerHTML = `
-  ${pageHead(t("ov_title"), t("ov_sub"), `<button class="btn" data-act="go" data-href="#/children">${ic("kids")}${t("nav_children")}</button><button class="btn primary" data-act="log-session">${ic("plus")}${t("quick_log")}</button>`)}
+  ${pageHead(t("ov_title"), t("ov_sub"), `<button class="btn primary hide-m" data-act="log-session">${ic("plus")}${t("quick_log")}</button>`)}
+  ${quickActions([{ act: "log-session", icon: "plus", key: "qa_session" }, { act: "child-new", icon: "kids", key: "qa_child" }, { href: "#/reports", icon: "report", key: "qa_reports" }, { href: "#/team", icon: "send", key: "qa_invite" }])}
   <div class="grid g-4">
     <div class="card kpi"><div class="label">${ic("kids")}${t("kpi_kids")}</div><div class="value num">${o.kids || 0}</div><div class="foot">${t("kpi_kids_foot", { n: (o.branches || []).length })}</div></div>
     <div class="card kpi"><div class="label">${ic("team")}${t("kpi_staff")}</div><div class="value num">${staffCount}</div><div class="foot">${t("kpi_staff_foot")}</div></div>
@@ -131,7 +135,8 @@ async function overviewSpecialist(el, alive) {
   const sess = active.reduce((a, k) => a + (k.sessions_28 || 0), 0);
   const first = (S.me.full_name || "").split(" ")[0];
   el.innerHTML = `
-  ${pageHead(t("ov_title_spec", { name: first }), t("ov_sub_spec"), `<button class="btn primary" data-act="log-session">${ic("plus")}${t("quick_log")}</button>`)}
+  ${pageHead(t("ov_title_spec", { name: first }), t("ov_sub_spec"), `<button class="btn primary hide-m" data-act="log-session">${ic("plus")}${t("quick_log")}</button>`)}
+  ${quickActions([{ act: "log-session", icon: "plus", key: "qa_session" }, { href: "#/children", icon: "kids", key: "qa_kids" }, { href: "#/reports", icon: "report", key: "qa_reports" }, { act: "child-new", icon: "user", key: "qa_child" }])}
   <div class="grid g-4">
     <div class="card kpi"><div class="label">${ic("kids")}${t("my_kids")}</div><div class="value num">${active.length}</div><div class="foot">${esc(branchName(S.me.branch_id) || "")}</div></div>
     <div class="card kpi"><div class="label">${ic("calendar")}${t("tab_sessions")}</div><div class="value num">${sess}</div><div class="foot">4 ${t("weeks")}</div></div>

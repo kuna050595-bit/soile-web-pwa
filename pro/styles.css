@@ -574,3 +574,139 @@ table.table { width: 100%; border-collapse: collapse; }
   .ld-steps { grid-template-columns: 1fr; }
   .ld-final h2 { font-size: 23px; }
 }
+
+/* ======================================================================
+   v5: «как в Kaspi» — белые карточки на сером, без рамок, крупные кнопки,
+   залитые поля, жирные цифры, иконки в цветных кружках. Цвет — Сөйле.
+   ====================================================================== */
+:root {
+  --bg: #F0F1F4; --surface-2: #F7F8FA; --surface-3: #F0F1F4;
+  --border: #ECEEF1; --border-strong: #DCDFE4;
+  --r-sm: 10px; --r: 14px; --r-lg: 20px;
+  --shadow-sm: none; --shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0B0F14; --surface: #151B23; --surface-2: #1A212B; --surface-3: #212A35; --border: #222B36; --border-strong: #2E3946; }
+}
+:root[data-theme="dark"] { --bg: #0B0F14; --surface: #151B23; --surface-2: #1A212B; --surface-3: #212A35; --border: #222B36; --border-strong: #2E3946; }
+
+body { font-size: 14.5px; }
+h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
+h2 { font-weight: 700; }
+h3 { font-weight: 700; }
+
+/* кнопки */
+.btn { height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--surface-3); font-weight: 600; box-shadow: none; }
+.btn:hover { background: color-mix(in srgb, var(--surface-3) 80%, var(--text) 6%); }
+.card .btn:not(.primary):not(.ghost), .modal .btn:not(.primary):not(.ghost) { background: var(--surface-3); }
+.btn.primary { box-shadow: none; }
+.btn.sm { height: 36px; padding: 0 12px; border-radius: 10px; font-size: 13.5px; }
+.btn.lg { height: 52px; padding: 0 24px; border-radius: 14px; font-size: 16px; }
+.btn.icon { width: 44px; } .btn.icon.sm { width: 36px; }
+.btn.ghost:hover { background: var(--surface-3); }
+
+/* поля — залитые, без рамки */
+.input, select.input, textarea.input { height: 48px; padding: 0 14px; border-radius: 12px; border: 1.5px solid transparent; background-color: var(--surface-3); box-shadow: none; font-size: 15px; }
+textarea.input { padding: 12px 14px; }
+.input:hover { border-color: var(--border-strong); }
+.input:focus { background-color: var(--surface); border-color: var(--accent); box-shadow: none; }
+.field > label, .label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.chip-toggle { height: 38px; padding: 0 14px; border: 0; background: var(--surface-3); font-weight: 600; }
+.chip-toggle.on, .chip-toggle:has(input:checked) { background: var(--accent); color: var(--accent-ink); }
+.seg { border-radius: 12px; padding: 4px; background: var(--surface-3); }
+.seg button { height: 34px; border-radius: 9px; font-weight: 600; padding: 0 14px; }
+.seg button.on { box-shadow: 0 1px 3px rgba(16,24,40,.12); }
+
+/* карточки */
+.card { border: 0; border-radius: var(--r-lg); box-shadow: var(--shadow); }
+.card-head { border-bottom: 0; padding: 18px 20px 8px; }
+.card-head h3 { font-size: 17px; }
+.card-body { padding: 10px 20px 20px; }
+.kpi { padding: 20px; }
+.kpi .label { font-weight: 600; }
+.kpi .label svg { width: 30px; height: 30px; padding: 7px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); }
+.g-4 > .kpi:nth-child(2) .label svg { background: var(--aba-soft); color: var(--aba); }
+.g-4 > .kpi:nth-child(3) .label svg { background: var(--afk-soft); color: var(--afk); }
+.g-4 > .kpi:nth-child(4) .label svg { background: var(--logo-soft); color: var(--logo); }
+.kpi .value { font-size: 34px; font-weight: 800; margin-top: 12px; }
+.tag { border-radius: 999px; height: 24px; padding: 0 10px; }
+.delta { font-weight: 700; }
+.bar { height: 8px; }
+
+/* списки и таблицы — тонкие внутренние разделители */
+.list-item { border-bottom: 0; position: relative; padding: 12px 20px; }
+.list-item + .list-item::before { content: ""; position: absolute; top: 0; left: 68px; right: 20px; height: 1px; background: var(--border); }
+.list-item.click:hover { background: var(--surface-2); }
+.list-item .t b { font-weight: 600; font-size: 15px; }
+.avatar { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.org-avatar { background: var(--accent-soft); color: var(--accent); border-radius: 12px; }
+.table th { background: transparent; text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--text-3); border-bottom: 1px solid var(--border); }
+.table td { border-bottom: 1px solid var(--border); }
+.table tbody tr.click:hover td { background: var(--surface-2); }
+.toolbar { border-bottom: 0; padding: 16px; }
+.tabs { border-bottom: 0; gap: 6px; background: var(--surface); padding: 6px; border-radius: 16px; box-shadow: var(--shadow); }
+.tabs a { border-bottom: 0; margin: 0; border-radius: 11px; padding: 9px 14px; font-weight: 600; }
+.tabs a.on { background: var(--accent); color: var(--accent-ink); }
+
+/* каркас */
+.sidebar { border-right: 0; padding: 18px 14px; }
+.org-switch { border: 0; background: var(--surface-3); border-radius: 16px; padding: 12px; }
+.nav a { height: 44px; border-radius: 12px; font-weight: 600; padding: 0 12px; }
+.nav a.active { background: var(--accent); color: var(--accent-ink); }
+.nav-sec { padding: 16px 12px 6px; }
+.sidebar-foot { border-top: 0; background: var(--surface-3); border-radius: 16px; padding: 10px; }
+.page-head { margin-bottom: 20px; }
+.page-head .sub { font-size: 14.5px; }
+.modal { border-radius: 24px; }
+.modal-head h2 { font-size: 20px; }
+.modal-foot { border-top: 0; }
+.alert { border-radius: 14px; padding: 14px 16px; }
+.plan-banner { border-bottom: 0; font-weight: 600; }
+.empty .ico { border-radius: 50%; background: var(--accent-soft); color: var(--accent); }
+.demo-btn { border: 0; background: var(--surface-3); border-radius: 16px; padding: 14px; }
+.demo-btn:hover { background: var(--accent-soft); }
+.demo-btn .ic { border-radius: 50%; background: var(--surface); }
+.auth-main { background: var(--surface); }
+.copy-box .input { background: var(--surface-3); }
+.hc-tile { border: 0; background: var(--surface-3); border-radius: 16px; }
+.counter { border: 0; background: var(--surface-3); border-radius: 12px; }
+.plan-card { border-radius: 24px; }
+.plan-card.popular { box-shadow: 0 0 0 2px var(--accent); }
+
+/* быстрые действия — как «сервисы» в Kaspi */
+.qa { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.qa-item { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px 16px; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); color: var(--text); font-weight: 600; font-size: 14px; text-align: center; cursor: pointer; border: 0; text-decoration: none !important; transition: transform .1s; }
+.qa-item:hover { transform: translateY(-1px); }
+.qa-item:active { transform: scale(.98); }
+.qa-ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.qa-ic svg { width: 24px; height: 24px; }
+.qa-ic.c2 { background: var(--aba); } .qa-ic.c3 { background: var(--logo); } .qa-ic.c4 { background: var(--afk); }
+
+/* лендинг */
+.ld-feat, .ld-who { border: 0; background: var(--bg); border-radius: 24px; }
+.ld-sec.alt { border: 0; background: var(--bg); }
+.ld-sec.alt .ld-feat, .ld-sec.alt .ld-who, .ld-steps li { border: 0; background: var(--surface); border-radius: 24px; }
+.ld-faq details { border: 0; background: var(--bg); border-radius: 16px; }
+.ld-mock-card { border: 0; border-radius: 28px; }
+.ld-mock-float { border: 0; border-radius: 18px; }
+.ld-stats { border: 0; }
+.ld-ico { border-radius: 50%; width: 48px; height: 48px; }
+.ld-head { border-bottom: 0; box-shadow: 0 1px 0 var(--border); }
+.ld-final { border-radius: 0; }
+
+@media (max-width: 860px) {
+  .topbar { border-bottom: 0; background: var(--bg); backdrop-filter: none; height: 60px; }
+  .page { padding-top: 6px; }
+  h1 { font-size: 26px; }
+  .bottom-nav { border-top: 0; box-shadow: 0 -1px 0 var(--border), 0 -6px 20px rgba(16,24,40,.05); }
+  .bottom-nav a { font-weight: 600; }
+  .qa { gap: 8px; }
+  .qa-item { padding: 14px 4px 12px; font-size: 12.5px; border-radius: 18px; gap: 8px; }
+  .qa-ic { width: 46px; height: 46px; }
+  .list-item + .list-item::before { left: 64px; right: 16px; }
+  .tabs { margin-left: -2px; margin-right: -2px; }
+  .card-head { padding: 16px 16px 6px; }
+  .card-body { padding: 8px 16px 16px; }
+}
+.table td .meter { min-width: 120px; }
+.plan-banner .btn:not(.primary) { background: var(--surface); }

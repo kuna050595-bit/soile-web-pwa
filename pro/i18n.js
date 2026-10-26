@@ -251,7 +251,7 @@ kk: {
 
 /* ---------- v4: тарифы, сброс пароля, документы, лендинг ---------- */
 Object.assign(window.I18N.ru, {
-  nav_billing: "Тариф",
+  nav_billing: "Тариф", qa_session: "Занятие", qa_child: "Ребёнок", qa_reports: "Отчёты", qa_invite: "Пригласить", qa_kids: "Мои дети",
   bl_title: "Тариф и оплата", bl_sub: "Все функции доступны на любом тарифе — отличаются только лимиты",
   plan_trial: "Пробный период", plan_start: "Старт", plan_center: "Центр", plan_network: "Сеть",
   bl_current: "Текущий тариф", bl_until: "Оплачен до {d}", bl_trial_until: "Бесплатно до {d}", bl_days_left: "осталось {n} дн.",
@@ -333,7 +333,7 @@ Object.assign(window.I18N.ru, {
   back_home: "На главную",
 });
 Object.assign(window.I18N.kk, {
-  nav_billing: "Тариф",
+  nav_billing: "Тариф", qa_session: "Сабақ", qa_child: "Бала", qa_reports: "Есептер", qa_invite: "Шақыру", qa_kids: "Балаларым",
   bl_title: "Тариф және төлем", bl_sub: "Барлық мүмкіндіктер кез келген тарифте бар — тек лимиттер ерекшеленеді",
   plan_trial: "Сынақ кезеңі", plan_start: "Старт", plan_center: "Орталық", plan_network: "Желі",
   bl_current: "Ағымдағы тариф", bl_until: "{d} дейін төленген", bl_trial_until: "{d} дейін тегін", bl_days_left: "{n} күн қалды",
