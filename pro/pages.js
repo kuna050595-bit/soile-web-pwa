@@ -282,7 +282,7 @@ async function loadChild(id) {
     sb.from("child_links").select("id, target_org_id, active, consent_note, created_at, tgt:orgs!child_links_target_org_id_fkey(name, city)").eq("child_id", id).eq("active", true),
     sb.from("parent_access").select("token").eq("child_id", id).maybeSingle(),
     sb.from("app_pairings").select("id, linked_at, active").eq("child_id", id).eq("active", true).order("linked_at", { ascending: false }),
-    sb.from("child_home_cards").select("card_ids, note, updated_at").eq("child_id", id).maybeSingle(),
+    sb.from("child_home_cards").select("card_ids, tech_ids, note, updated_at").eq("child_id", id).maybeSingle(),
   ]);
   if (c.error) throw c.error;
   if (!c.data) return null;
@@ -392,6 +392,7 @@ function childHome() {
       <div class="card-head"><h3>${t("hc_cards")} · ${ids.length}/${HOME_MAX}</h3>${h.updated_at ? `<span class="small faint">${esc(fmtDate(h.updated_at, { day: "numeric", month: "short" }))}</span>` : ""}</div>
       <div class="card-body">${ids.length ? `<div class="hc-grid">${ids.map((id) => cardTile(id)).join("")}</div>` : `<div class="empty" style="padding:20px">${t("hc_empty")}</div>`}</div>
     </div>
+    ${techCard(h.tech_ids || [], ed)}
     <div class="card">
       <div class="card-head"><h3>${t("hc_note")}</h3></div>
       <div class="card-body">${ed ? `<form data-form="hc-note" class="form-grid"><textarea class="input" name="note" maxlength="600" placeholder="${esc(t("hc_note_ph"))}">${esc(h.note || "")}</textarea><div><button class="btn">${t("save")}</button></div></form>` : `<p>${esc(h.note || "—")}</p>`}</div>
@@ -429,13 +430,78 @@ ACT["hc-toggle"] = (el) => {
   drawPicker();
 };
 async function saveHome(patch) {
-  const row = { child_id: CH.child.id, org_id: CH.child.org_id, card_ids: (CH.home && CH.home.card_ids) || [], note: (CH.home && CH.home.note) || null, updated_at: new Date().toISOString(), updated_by: S.user.id, ...patch };
+  const row = { child_id: CH.child.id, org_id: CH.child.org_id, card_ids: (CH.home && CH.home.card_ids) || [], tech_ids: (CH.home && CH.home.tech_ids) || [], note: (CH.home && CH.home.note) || null, updated_at: new Date().toISOString(), updated_by: S.user.id, ...patch };
   const { error } = await sb.from("child_home_cards").upsert(row, { onConflict: "child_id" });
   if (error) { toast(errMsg(error), true); return false; }
   return true;
 }
 ACT["hc-save"] = async (el) => {
   await busy(el, async () => { if (await saveHome({ card_ids: HC.sel })) { closeModal(); toast(t("hc_saved")); route(); } });
+};
+/* ---------- техники «Занятия дома» ---------- */
+const TECH_MAX = 8;
+const TECH = () => window.SOILE_TECH || [];
+const techById = (id) => TECH().find((x) => x.id === id);
+function techLang(x) { return x[S.lang === "kk" ? "kk" : "ru"]; }
+function techRow(x, opts = {}) {
+  const T = techLang(x);
+  return `<div class="tech-row ${opts.on ? "on" : ""} ${opts.act ? "click" : ""}" ${opts.act ? `data-act="${opts.act}" data-id="${x.id}"` : ""}>
+    <span class="tech-emo ${x.dir}">${esc(x.emoji || "•")}</span>
+    <span class="t"><b>${esc(T.t)}</b><span>${esc(T.goal)}</span><span class="tags" style="margin-top:6px">${dirTag(x.dir)}<span class="tag">${esc(x.age)}</span>${x.min ? `<span class="tag">${x.min} ${S.lang === "kk" ? "мин" : "мин"}</span>` : ""}</span></span>
+    ${opts.act ? `<span class="tech-check">${opts.on ? ic("check", 14) : ""}</span>` : opts.open !== false ? `<button class="btn ghost sm" data-act="tech-view" data-id="${x.id}">${t("ht_open")}</button>` : ""}
+  </div>`;
+}
+function techCard(ids, ed) {
+  const list = ids.map(techById).filter(Boolean);
+  return `<div class="card">
+    <div class="card-head"><div><h3>${t("ht_title")} · ${list.length}/${TECH_MAX}</h3><p class="muted small" style="margin-top:4px;max-width:620px">${t("ht_sub")}</p></div>
+      ${ed ? `<button class="btn ${list.length ? "" : "primary"}" data-act="tech-pick">${ic(list.length ? "edit" : "plus")}${list.length ? t("ht_change") : t("ht_pick")}</button>` : ""}</div>
+    <div class="card-body">${list.length ? `<div class="tech-list">${list.map((x) => techRow(x)).join("")}</div>` : `<div class="empty" style="padding:18px">${t("ht_empty")}</div>`}</div>
+  </div>`;
+}
+let TP = null;
+ACT["tech-pick"] = () => {
+  TP = { sel: ((CH.home && CH.home.tech_ids) || []).slice(), dir: "" };
+  openModal(`${modalHead(t("ht_pick"), t("ht_pick_sub", { n: TECH_MAX }))}
+    <div class="modal-body form-grid" style="padding-bottom:6px">
+      <div class="chips-select" id="tp-dirs" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">
+        <button type="button" class="chip-toggle on" data-act="tp-dir" data-v="">${t("all")}</button>
+        ${DIRS.map((d) => `<button type="button" class="chip-toggle" data-act="tp-dir" data-v="${d}">${esc(t("dir_" + d))}</button>`).join("")}
+      </div>
+      <div class="tech-list" id="tp-list"></div>
+    </div>
+    <div class="modal-foot"><span class="muted small" id="tp-count" style="margin-right:auto"></span><button class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary" data-act="tp-save">${t("save")}</button></div>`, { wide: true, noFocus: true });
+  drawTechPicker();
+};
+function drawTechPicker() {
+  const list = TECH().filter((x) => !TP.dir || x.dir === TP.dir);
+  const sel = list.filter((x) => TP.sel.includes(x.id)); const rest = list.filter((x) => !TP.sel.includes(x.id));
+  $("#tp-list").innerHTML = [...sel.map((x) => techRow(x, { on: true, act: "tp-toggle" })), ...rest.map((x) => techRow(x, { act: "tp-toggle" }))].join("");
+  $("#tp-count").textContent = t("ht_count", { n: TP.sel.length, m: TECH_MAX });
+}
+ACT["tp-dir"] = (el) => { TP.dir = el.dataset.v; $$("#tp-dirs .chip-toggle").forEach((b) => b.classList.toggle("on", b === el)); drawTechPicker(); };
+ACT["tp-toggle"] = (el) => {
+  const id = el.dataset.id; const i = TP.sel.indexOf(id);
+  if (i >= 0) TP.sel.splice(i, 1); else { if (TP.sel.length >= TECH_MAX) return toast(t("ht_max", { n: TECH_MAX }), true); TP.sel.push(id); }
+  drawTechPicker();
+};
+ACT["tp-save"] = async (el) => {
+  await busy(el, async () => { if (await saveHome({ tech_ids: TP.sel })) { closeModal(); toast(t("ht_saved")); route(); } });
+};
+function techDetailHtml(x) {
+  const T = techLang(x);
+  return `<div class="stack" style="gap:14px">
+    <div class="row">${dirTag(x.dir, true)}<span class="tag">${esc(x.age)}</span>${x.min ? `<span class="tag">${x.min} мин</span>` : ""}</div>
+    <div><div class="label">${t("ht_goal")}</div><p style="margin-top:4px">${esc(T.goal)}</p></div>
+    <div><div class="label">${t("ht_need")}</div><p style="margin-top:4px">${esc(T.need)}</p></div>
+    <div><div class="label">${t("ht_steps")}</div><ol class="tech-steps">${T.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol></div>
+    <div class="alert info">${ic("sparkle")}<div>${esc(T.tip)}</div></div>
+    ${T.care ? `<div class="alert">${ic("alert")}<div>${esc(T.care)}</div></div>` : ""}
+  </div>`;
+}
+ACT["tech-view"] = (el) => {
+  const x = techById(el.dataset.id); if (!x) return;
+  openModal(`${modalHead(x.emoji + " " + techLang(x).t)}<div class="modal-body">${techDetailHtml(x)}</div><div class="modal-foot"><button class="btn" data-act="close-modal">${t("close")}</button></div>`, { noFocus: true });
 };
 FORMS["hc-note"] = async (f, fd) => {
   await busy(f.querySelector(".btn"), async () => { if (await saveHome({ note: String(fd.get("note") || "").trim() || null })) { toast(t("saved")); route(); } });
@@ -1040,6 +1106,7 @@ async function renderParent(token) {
       <p>${esc(t("pv_center", { org: d.org || "", b: d.branch || "" }))}</p>
     </div>
     ${d.home && (d.home.cards || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("hc_title")}</h3></div><div class="card-body">${d.home.note ? `<p style="margin-bottom:12px">${esc(d.home.note)}</p>` : ""}<div class="hc-grid">${d.home.cards.map((id) => cardTile(id)).join("")}</div><p class="hint" style="margin-top:10px">${t("hc_parent_hint")}</p></div></div>` : ""}
+    ${d.home && (d.home.tech || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("ht_parent")}</h3></div><div class="card-body stack" style="gap:10px">${d.home.tech.map(techById).filter(Boolean).map((x) => `<details class="tech-det"><summary>${techRow(x, { open: false })}</summary><div style="padding:4px 4px 12px">${techDetailHtml(x)}</div></details>`).join("")}<p class="hint">${t("ht_parent_hint")}</p></div></div>` : ""}
     ${d.report ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("pv_report")}</h3><span class="small faint">${esc(fmtDate(d.report.sent_at, { day: "numeric", month: "long" }))}</span></div><div class="card-body report-body">${esc(d.report.body)}</div></div>` : ""}
     <div class="card" style="margin-top:16px">
       <div class="card-head"><h3>${t("pv_goals")}</h3><span class="small faint">${t("trend_8w")}</span></div>

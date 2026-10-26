@@ -710,3 +710,22 @@ textarea.input { padding: 12px 14px; }
 }
 .table td .meter { min-width: 120px; }
 .plan-banner .btn:not(.primary) { background: var(--surface); }
+/* техники «Занятия дома» */
+.tech-list { display: grid; gap: 10px; }
+.tech-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 16px; background: var(--surface-2); }
+.tech-row.click { cursor: pointer; }
+.tech-row.click:hover { background: var(--surface-3); }
+.tech-row.on { box-shadow: 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.tech-row .t { flex: 1; min-width: 0; display: grid; }
+.tech-row .t b { font-weight: 700; font-size: 15px; }
+.tech-row .t > span { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.tech-emo { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; flex: none; background: var(--surface); }
+.tech-emo.afk { background: var(--afk-soft); } .tech-emo.aba { background: var(--aba-soft); } .tech-emo.logo { background: var(--logo-soft); } .tech-emo.sens { background: var(--sens-soft); }
+.tech-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-strong); display: grid; place-items: center; flex: none; margin-top: 10px; }
+.tech-row.on .tech-check { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tech-steps { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.tech-steps li { line-height: 1.5; }
+.tech-det { border-radius: 16px; }
+.tech-det summary { list-style: none; cursor: pointer; }
+.tech-det summary::-webkit-details-marker { display: none; }
+.tech-det[open] summary .tech-row { background: var(--accent-soft); }

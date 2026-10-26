@@ -88,7 +88,9 @@
     }).join("");
     var key = c.pairing_id ? "pair:" + c.pairing_id : "tok:" + c.token;
     return '<div class="cp-card"><div class="cp-head"><div class="cp-ava">' + esc((c.first_name || "?")[0]) + "</div><div><b>" + esc(c.first_name) + "</b><span>Центр «" + esc(c.org || "") + "»" + (c.branch ? ", " + esc(c.branch) : "") + "</span></div></div>" +
-      (c.home && (c.home.cards || []).length ? '<div class="cp-sec">Задание на дом · Үй тапсырмасы</div><div class="cp-rep" style="background:var(--surface-2)">' + (c.home.note ? esc(c.home.note) + "<br><br>" : "") + "<b>" + c.home.cards.length + " карточек</b> — у ребёнка во вкладке «Задание» / «Тапсырма».</div>" : "") +
+      (c.home && ((c.home.cards || []).length || (c.home.tech || []).length) ? '<div class="cp-sec">Задание на дом · Үй тапсырмасы</div><div class="cp-rep" style="background:var(--surface-2)">' + (c.home.note ? esc(c.home.note) + "<br><br>" : "") +
+        ((c.home.cards || []).length ? "<b>" + c.home.cards.length + " карточек</b> — у ребёнка во вкладке «Задание» / «Тапсырма».<br>" : "") +
+        ((c.home.tech || []).length ? "<b>" + c.home.tech.length + " занятий для дома</b> — в разделе «🏠 Занятия дома» ниже." : "") + "</div>" : "") +
       (c.report ? '<div class="cp-sec">Отчёт специалиста · ' + esc(fmtDate(c.report.sent_at, true)) + '</div><div class="cp-rep">' + esc(c.report.body) + "</div>" : "") +
       (goals ? '<div class="cp-sec">Цели и прогресс за 8 недель · Мақсаттар</div>' + goals : '<p class="key-note" style="margin-top:8px">Специалист ещё не добавил цели.</p>') +
       (sess ? '<div class="cp-sec">Последние занятия · Сабақтар</div>' + sess : "") +
@@ -122,6 +124,13 @@
     if (JSON.stringify(ids) !== JSON.stringify(ls("soile_center_cards", []))) {
       lsSet("soile_center_cards", ids);
       try { window.dispatchEvent(new Event("soile-center-cards")); } catch (e) { /* old webview */ }
+    }
+    // техники «Занятия дома», которые назначил специалист (home.js слушает soile-center-tech)
+    var tech = [];
+    list.forEach(function (c) { ((c.home && c.home.tech) || []).forEach(function (id) { if (tech.indexOf(id) === -1) tech.push(id); }); });
+    if (JSON.stringify(tech) !== JSON.stringify(ls("soile_center_tech", []))) {
+      lsSet("soile_center_tech", tech);
+      try { window.dispatchEvent(new Event("soile-center-tech")); } catch (e) { /* old webview */ }
     }
   }
 
