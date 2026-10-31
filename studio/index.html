@@ -73,12 +73,12 @@ header h1{font-size:18px;margin:0;font-weight:900;flex:1}
 <div class="foot"><div class="in"><button class="btn" id="export">📦 Скачать архив этапа</button><button class="btn" id="share" hidden>Отправить</button></div></div>
 <div id="modal-root"></div>
 
-<script src="items.js?v=1"></script>
+<script src="items.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function(){
   var ITEMS = window.STUDIO_ITEMS || [];
-  var STAGES = [1,2,3];
+  var STAGES = [1,2,3,4];
   var LANGS = [['kk','Қазақша'],['ru','Русский']];
   function ls(k,d){ try{ var v=localStorage.getItem('studio_'+k); return v==null?d:JSON.parse(v);}catch(e){return d;} }
   function lsSet(k,v){ try{ localStorage.setItem('studio_'+k, JSON.stringify(v)); }catch(e){} }
@@ -172,7 +172,7 @@ header h1{font-size:18px;margin:0;font-weight:900;flex:1}
   function render(keepStatus){
     var L=list(); if(st.idx>=L.length) st.idx=Math.max(0,L.length-1);
     var it=L[st.idx];
-    document.getElementById('stage-seg').innerHTML = STAGES.map(function(s){ var n=ITEMS.filter(function(i){return i.s===s;}).length, d=ITEMS.filter(function(i){return i.s===s && st.done[i.k];}).length; return '<button data-stage="'+s+'" class="'+(st.stage===s?'on':'')+'">Этап '+s+' · '+d+'/'+n+'</button>'; }).join('');
+    document.getElementById('stage-seg').innerHTML = STAGES.map(function(s){ var n=ITEMS.filter(function(i){return i.s===s;}).length, d=ITEMS.filter(function(i){return i.s===s && st.done[i.k];}).length; return '<button data-stage="'+s+'" class="'+(st.stage===s?'on':'')+'">'+(s===4?'⭐ Новое':'Этап '+s)+' · '+d+'/'+n+'</button>'; }).join('');
     document.getElementById('lang-seg').innerHTML = LANGS.map(function(l){ return '<button data-lang="'+l[0]+'" class="'+(st.lang===l[0]?'on':'')+'">'+l[1]+'</button>'; }).join('');
     var dn=L.filter(function(i){return st.done[i.k];}).length;
     document.getElementById('prog-text').textContent = dn+' из '+L.length;

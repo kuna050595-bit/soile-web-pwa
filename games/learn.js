@@ -65,6 +65,13 @@
     return out;
   }
 
+  // Записи из «Сөйле Студии» (этап «Новое»): звуки букв, похвала. Если записи ещё нет — просто тишина.
+  var ALPHA = { kk:'АӘБВГҒДЕЁЖЗИЙКҚЛМНҢОӨПРСТУҰҮФХҺЦЧШЩЫІЭЮЯ', ru:'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ' };
+  function rec(key){
+    var m = SG.getLang() === 'kk' ? window.SOILE_VOICE_KK : window.SOILE_VOICE_RU;
+    return m && m[key] ? { id:key, kk:'', ru:'', audioData:m[key] } : null;
+  }
+  function letterRec(L){ var i = ALPHA[SG.getLang()].indexOf(L); return i < 0 ? null : rec('abc' + (i < 9 ? '0' : '') + (i + 1)); }
   function totalStars(p){ var n = 0; SECTIONS.forEach(function(s){ for (var l = 1; l <= 5; l++) n += (p[s.id] && p[s.id][l]) || 0; }); return n; }
   function friendCards(){ return FRIENDS.map(function(id){ for (var i = 0; i < SG.cards.length; i++) if (SG.cards[i].id === id && SG.cards[i].photo) return SG.cards[i]; return null; }).filter(Boolean); }
   function unlocked(p){ return Math.min(friendCards().length, Math.floor(totalStars(p || progress()) / 3)); }
@@ -204,7 +211,7 @@
         var heard = s.id === 'show' || s.id === 'verb' || s.id === 'emo' || !!s.cat;
         var hideWord = s.id === 'show' && lvl >= 4;          // старшие уровни — только на слух
 
-        function say(){ var r = rounds[i]; if (r && heard) SG.speak(r.target); }
+        function say(){ var r = rounds[i]; if (!r) return; if (heard) SG.speak(r.target); else if (s.id === 'letter'){ var a = letterRec(r.letter); if (a) SG.speak(a); } }
         function drawPrompt(){
           var r = rounds[i]; prompt.innerHTML = ''; if (!r) return;
           if (heard){
@@ -212,6 +219,7 @@
             prompt.appendChild(sp);
             prompt.appendChild(SG.el('div', 'g-word', SG.t(T.show) + (hideWord ? '' : ': ' + SG.name(r.target))));
           } else if (s.id === 'letter'){
+            if (letterRec(r.letter)){ var lsp = SG.el('button', 'g-speak l-lsp', SG.ICON_SPEAKER); lsp.type = 'button'; lsp.addEventListener('click', say); prompt.appendChild(lsp); }
             prompt.appendChild(SG.el('div', 'l-ask', SG.t(T.letter)));
             prompt.appendChild(SG.el('div', 'l-letter', r.letter + '<small>' + r.letter.toLowerCase() + '</small>'));
           } else {
@@ -228,7 +236,7 @@
           drawPrompt();
           board.innerHTML = '';
           board.appendChild(SG.choiceGrid(rounds[i].opts, pick, { reserve: Math.max(200, Math.round(prompt.getBoundingClientRect().bottom) + 40) }));
-          if (heard) later(say, 450);
+          if (heard || s.id === 'letter') later(say, 450);
         }
         function pick(btn, card){
           if (locked) return;
@@ -241,7 +249,7 @@
             i++; later(next, 1300);
           } else {
             errHere++; btn.classList.add('tried');
-            if (heard) later(say, 550);
+            if (heard || s.id === 'letter') later(say, 550);
           }
         }
         function finish(){
@@ -251,14 +259,16 @@
           later(function(){
             SG.chime('win'); SG.confetti();
             var ov = SG.el('div', 'g-overlay');
-            var pr = T.praise[Math.floor(Math.random() * T.praise.length)];
+            var pi = Math.floor(Math.random() * T.praise.length), pr = T.praise[pi], prA = rec('praise' + (pi + 1));
+            if (prA) later(function(){ SG.speak(prA); }, 700);
             ov.innerHTML = '<div class="l-buddywin">' + BUDDY + '<span class="l-bubble">' + SG.t(pr) + '</span></div>' + '<h2 class="g-win">' + SG.t(T.win) + '</h2>' +
               '<div class="l-res">' + starRow(got) + '</div><p class="l-score">' + clean + ' / ' + total + ' ' + SG.t(T.clean) + '</p>';
             if (fresh.length){
               var nf = SG.el('button', 'l-newf', '<span class="l-newft">🎉 ' + SG.t(T.newf) + '</span>' + fresh.map(function(c){ return '<span class="l-newfc"><img src="' + SG.photoURL(c) + '" alt=""><b>' + SG.name(c) + '</b></span>'; }).join(''));
               nf.type = 'button'; nf.addEventListener('click', function(){ SG.speak(fresh[fresh.length - 1]); });
               ov.appendChild(nf);
-              later(function(){ SG.speak(fresh[fresh.length - 1]); }, 900);
+              var nfA = rec('newfriend');
+              later(function(){ if (nfA) SG.speak(nfA, function(){ SG.speak(fresh[fresh.length - 1]); }); else SG.speak(fresh[fresh.length - 1]); }, prA ? 2000 : 900);
             }
             var act = SG.el('div', 'g-actions');
             function btn(txt, cls, fn){ var b = SG.el('button', 'g-big ' + cls, txt); b.type = 'button'; b.style.marginTop = '0'; b.addEventListener('click', fn); act.appendChild(b); }
@@ -301,6 +311,7 @@
     '.l-buddywin{position:relative;width:120px;height:120px;margin:0 auto;animation:l-jump .9s ease-out}.l-bubble{position:absolute;left:92px;top:-6px;background:#fff;border-radius:14px;padding:6px 10px;font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--ink);box-shadow:0 4px 12px -6px rgba(0,0,0,.35);white-space:nowrap}' +
     '.l-newf{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;border:0;border-radius:20px;padding:10px 14px;margin:0 0 10px;background:linear-gradient(135deg,#FFF4D6,#FFE3A3);cursor:pointer;animation:l-pop .6s .3s both;font-family:var(--font-display);color:#5A3B00}' +
     '.l-newft{width:100%;font-weight:900;font-size:18px}.l-newfc{display:flex;flex-direction:column;align-items:center;gap:4px}.l-newfc img{width:84px;height:84px;border-radius:18px;object-fit:cover;border:4px solid #fff;background:#fff}.l-newfc b{font-weight:900;font-size:15px}' +
+    '.l-lsp{width:56px;height:56px}.l-lsp svg{width:26px;height:26px}' +
     '.l-letter{font-family:var(--font-display);font-weight:900;font-size:clamp(64px,18vw,96px);line-height:1;color:#5B5BD6;display:flex;align-items:baseline;gap:10px}.l-letter small{font-size:.55em;opacity:.7}' +
     '.l-wordtag{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:#fff;border-radius:12px;padding:3px 10px;font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink);white-space:nowrap;box-shadow:0 4px 10px -6px rgba(0,0,0,.4)}.l-wordtag b{color:#5B5BD6;font-weight:900}' +
     '@keyframes l-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes l-pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}' +
