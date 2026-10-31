@@ -12,7 +12,8 @@
   };
   var SECS = [
     ['match','Сәйкестендіру','Сопоставление','#EF4C82'], ['show','Ажырату','Различение','#E07A34'], ['group','Санаттар','Категории','#E8A93B'],
-    ['verb','Етістіктер','Глаголы','#3FA35A'], ['emo','Сезімдер','Эмоции','#2D6CDF']
+    ['verb','Етістіктер','Глаголы','#3FA35A'], ['emo','Сезімдер','Эмоции','#2D6CDF'],
+    ['color','Түстер','Цвета','#B03FC2'], ['shape','Пішіндер','Фигуры','#0E9AA7'], ['num','Сандар','Цифры','#C92A2A'], ['letter','Әріптер','Буквы','#5B5BD6']
   ];
   function ls(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
@@ -61,7 +62,8 @@
     h += '<div class="gs-sum"><div><b>' + week.length + '</b><span>' + L('сабақ / 7 күн', 'занятий за 7 дней') + '</span></div>' +
       '<div><b>' + Math.round(time / 60) + '</b><span>' + L('минут', 'минут') + '</span></div>' +
       '<div><b>' + (tot ? Math.round(cl / tot * 100) + '%' : '—') + '</b><span>' + L('қатесіз', 'без ошибок') + '</span></div></div>';
-    h += '<div class="gs-sec">🧩 ' + L('Үйренеміз — деңгейлер', 'Учимся — уровни') + '</div>';
+    var stTot = 0; SECS.forEach(function(x){ for (var q = 1; q <= 5; q++) stTot += (prog[x[0]] && prog[x[0]][q]) || 0; });
+    h += '<div class="gs-sec">🧩 ' + L('Үйренеміз — деңгейлер', 'Учимся — уровни') + ' · ★ ' + stTot + ' · 🐾 ' + Math.min(22, Math.floor(stTot / 3)) + '/22 ' + L('дос', 'друзей') + '</div>';
     SECS.forEach(function(s){
       var p = prog[s[0]] || {}, dots = '';
       for (var l = 1; l <= 5; l++){ var v = p[l] || 0; dots += '<i style="' + (v ? 'background:' + s[3] + ';opacity:' + (0.35 + v * 0.22) : '') + '" title="' + l + '"></i>'; }
