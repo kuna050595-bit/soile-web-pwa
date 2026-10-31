@@ -25,6 +25,12 @@
   function L(kk, ru) { return S.lang === "kk" ? kk : ru; }
 
   var css =
+    /* Компактная строка над карточками: «Сөйлем құрау» + «Үйде жаттығу» рядом, чтобы карточки были видны сразу */
+    ".cq{display:flex;gap:8px;margin:8px 12px 4px}" +
+    ".cq #sb-open,.cq #hm-open{flex:1 1 0;min-width:0;width:auto;margin:0;padding:8px 10px;gap:8px;border-radius:14px;font-size:14px;line-height:1.15;min-height:50px}" +
+    ".cq #sb-open small,.cq #hm-open small{display:none}" +
+    ".cq #sb-open .ic,.cq #hm-open .ic{width:32px;height:32px;border-radius:10px;font-size:18px}" +
+    ".cq #hm-open .bd{padding:2px 7px;font-size:11px}" +
     "#hm-open{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:6px 12px 4px;padding:12px 16px;border:0;border-radius:18px;cursor:pointer;background:linear-gradient(135deg,#12A07F,#0D7466);color:#fff;font:800 16px var(--font-ui,system-ui);text-align:left;box-shadow:0 8px 20px -12px #0D7466}" +
     "#hm-open .ic{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:22px;flex:none}" +
     "#hm-open small{display:block;font-weight:700;font-size:12px;opacity:.88;margin-top:2px}" +
@@ -142,7 +148,10 @@
     var view = document.getElementById("view-child"); if (!view || document.getElementById("hm-open")) return;
     var btn = document.createElement("button"); btn.type = "button"; btn.id = "hm-open";
     var sb = document.getElementById("sb-open");
-    if (sb && sb.parentNode === view) view.insertBefore(btn, sb.nextSibling); else view.insertBefore(btn, view.firstChild);
+    if (sb && sb.parentNode === view) {
+      var row = document.createElement("div"); row.className = "cq";
+      view.insertBefore(row, sb); row.appendChild(sb); row.appendChild(btn);
+    } else view.insertBefore(btn, view.firstChild);
     var ov = document.createElement("div"); ov.id = "hm"; ov.hidden = true;
     ov.innerHTML = '<div class="hm-top"><button type="button" class="hm-x" data-hm="close" aria-label="Закрыть">✕</button><h2></h2><div class="hm-lang"><button type="button" data-hm="lang" data-l="kk">ҚАЗ</button><button type="button" data-hm="lang" data-l="ru">РУС</button></div></div><div class="hm-body"></div>';
     document.body.appendChild(ov);
