@@ -249,3 +249,61 @@
     g.mount(root, api || {});
   };
 })();
+
+/* ---------- статистика игр для родителя и центра ----------
+ * Без правок в самих играх: следим за экраном игры. Начало — появилась строка звёздочек (.g-progress),
+ * верный ответ — звёздочка стала .on, ошибка — картинка получила класс tried/nope/bad/wob,
+ * конец — экран победы (.g-overlay). Результат — в localStorage «soile_game_stats»
+ * (общий с приложением: игры открыты в iframe того же сайта). */
+(function(){
+  'use strict';
+  var SG = window.SoileGames, KEY = 'soile_game_stats', MAX = 600;
+  var ERR = /(^|\s)(tried|nope|bad|wob)(\s|$)/;
+  function today(){ return new Date().toISOString(); }
+  SG.statsAll = function(){ return SG.load(KEY, []); };
+  function push(rec){ var a = SG.load(KEY, []); a.push(rec); if (a.length > MAX) a = a.slice(-MAX); SG.save(KEY, a); }
+
+  SG.track = function(root, gameId){
+    if (root.__soileObs) root.__soileObs.disconnect();
+    var s = null;
+    function begin(prog){
+      var stars = prog.querySelectorAll('.g-star').length;
+      if (!stars) return;
+      var tag = (root.getAttribute('data-track') || '').split(':');      // уроки: «learn:раздел:уровень»
+      s = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), g: gameId, d: today(), t0: Date.now(), total: stars,
+            done: 0, err: 0, errRound: 0, clean: 0, lang: SG.getLang(),
+            sec: tag[0] === 'learn' ? tag[1] : null, lvl: tag[0] === 'learn' ? +tag[2] : null };
+    }
+    function finish(){
+      if (!s || s.saved) return;
+      s.saved = true;
+      push({ id: s.id, g: s.g, sec: s.sec, lvl: s.lvl, d: s.d, sec_t: Math.round((Date.now() - s.t0) / 1000),
+             total: s.total, done: s.done, clean: s.clean, err: s.err, lang: s.lang });
+      try{ window.dispatchEvent(new Event('soile-game-stats')); if (SG.embedded && window.parent) window.parent.dispatchEvent(new Event('soile-game-stats')); }catch(e){}
+    }
+    var obs = new MutationObserver(function(list){
+      list.forEach(function(m){
+        if (m.type === 'childList'){
+          Array.prototype.forEach.call(m.addedNodes, function(n){
+            if (n.nodeType !== 1) return;
+            var p = n.classList.contains('g-progress') ? n : n.querySelector && n.querySelector('.g-progress');
+            if (p){ if (s && !s.saved && s.done) finish(); begin(p); }
+            if (n.classList.contains('g-overlay') || (n.querySelector && n.querySelector('.g-overlay'))) finish();
+          });
+        } else if (m.type === 'attributes' && s && !s.saved){
+          var el = m.target, now = el.className || '', was = m.oldValue || '';
+          if (typeof now !== 'string') return;
+          if (el.classList.contains('g-star') && /(^|\s)on(\s|$)/.test(now) && !/(^|\s)on(\s|$)/.test(was)){
+            s.done++; if (!s.errRound) s.clean++; s.errRound = 0;
+          } else if (ERR.test(now) && !ERR.test(was)){
+            s.err++; s.errRound++;
+          }
+        }
+      });
+    });
+    obs.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+    root.__soileObs = obs;
+  };
+  var open0 = SG.open;
+  SG.open = function(id, root, api){ SG.track(root, id); return open0(id, root, api); };
+})();

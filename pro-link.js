@@ -134,6 +134,17 @@
     }
   }
 
+  // Результаты игр (games/engine.js → «soile_game_stats») уходят специалисту, если приложение подключено к центру
+  function pushGames() {
+    var all = ls("soile_game_stats", []), last = ls("soile_game_pushed", "");
+    var items = all.filter(function (r) { return !last || r.d > last; }).slice(-300);
+    if (!items.length) return;
+    rpc("app_push_games", { p_device_key: deviceKey(), p_items: items }).then(function () {
+      lsSet("soile_game_pushed", items[items.length - 1].d);
+    }).catch(function () { /* нет сети — отправим в следующий раз */ });
+  }
+  window.addEventListener("soile-game-stats", function () { if (state.children.some(function (c) { return c.pairing_id; })) pushGames(); });
+
   function load() {
     state.loading = true; render();
     var tokens = ls("soile_pro_tokens", []);
@@ -148,7 +159,7 @@
       if (list.length || res[0] !== null) state.children = list;
       if (list.some(function (c) { return c.pairing_id; })) state.code = null;
       lsSet("soile_pro_cache", state.children);
-      if (res[0] !== null) syncCenterCards(list);
+      if (res[0] !== null) syncCenterCards(list); if (list.some(function (c) { return c.pairing_id; })) pushGames();
       render();
     });
   }

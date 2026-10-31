@@ -273,7 +273,7 @@ FORMS["child-save"] = async (f, fd) => {
 let CH = null; // current child bundle
 async function loadChild(id) {
   const since = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
-  const [c, g, p, s, r, l, pa, ap, hc] = await Promise.all([
+  const [c, g, p, s, r, l, pa, ap, hc, gr] = await Promise.all([
     sb.from("children").select("*").eq("id", id).maybeSingle(),
     sb.from("goals").select("*").eq("child_id", id).order("created_at"),
     sb.rpc("child_progress", { p_child: id, p_weeks: 8 }),
@@ -283,12 +283,13 @@ async function loadChild(id) {
     sb.from("parent_access").select("token").eq("child_id", id).maybeSingle(),
     sb.from("app_pairings").select("id, linked_at, active").eq("child_id", id).eq("active", true).order("linked_at", { ascending: false }),
     sb.from("child_home_cards").select("card_ids, tech_ids, note, updated_at").eq("child_id", id).maybeSingle(),
+    sb.from("game_results").select("game, sec, lvl, played_at, dur_s, total, clean, err").eq("child_id", id).order("played_at", { ascending: false }).limit(200),
   ]);
   if (c.error) throw c.error;
   if (!c.data) return null;
   let srcOrg = null;
   if (c.data.org_id !== S.org.id) { const o = await sb.from("orgs").select("name").eq("id", c.data.org_id).maybeSingle(); srcOrg = o.data ? o.data.name : ""; }
-  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, apps: ap.data || [], home: hc.data || null, editable: c.data.org_id === S.org.id, srcOrg };
+  return { child: c.data, goals: g.data || [], prog: p.data || [], sessions: s.data || [], reports: r.data || [], links: l.data || [], token: pa.data ? pa.data.token : null, apps: ap.data || [], home: hc.data || null, games: (gr && gr.data) || [], editable: c.data.org_id === S.org.id, srcOrg };
 }
 function goalStats(goalId) {
   const weeks = weekStarts(8);
@@ -339,10 +340,45 @@ function drawChildTab(tab) {
   else if (tab === "info") box.innerHTML = childInfo();
   else box.innerHTML = childProgress();
 }
+const GAME_NAMES = {
+  learn: ["Үйренеміз", "Учимся"], memory: ["Жұбын тап", "Найди пару"], find: ["Көрсет", "Покажи"], sort: ["Сұрыпта", "Сортировка"],
+  odd: ["Артығы қайсы?", "Что лишнее?"], puzzle: ["Пазл", "Пазл"], shadow: ["Көлеңке", "Тень"], bubbles: ["Көпіршік", "Пузыри"],
+  count: ["Санайық", "Сколько?"], missing: ["Не жоғалды?", "Что исчезло?"], zoom: ["Лупа", "Лупа"], words: ["Сөз бен сурет", "Слово и картинка"],
+  simon: ["Қайтала", "Повтори"], sentence: ["Сөйлем құра", "Составь предложение"], colors: ["Түсі қайсы?", "Какого цвета?"],
+};
+const LEARN_SECS = [["match", "Сәйкестендіру", "Сопоставление"], ["show", "Ажырату", "Различение"], ["group", "Санаттар", "Категории"], ["verb", "Етістіктер", "Глаголы"], ["emo", "Сезімдер", "Эмоции"]];
+function gameName(r) {
+  const i = S.lang === "kk" ? 0 : 1;
+  if (r.game === "learn" && r.sec) { const s = LEARN_SECS.find((x) => x[0] === r.sec); return (s ? s[i + 1] : r.sec) + " · " + r.lvl + " " + t("lvl_short"); }
+  return GAME_NAMES[r.game] ? GAME_NAMES[r.game][i] : r.game;
+}
+function childGames() {
+  const all = CH.games || [];
+  if (!all.length) return `<div class="card card-pad"><div class="row" style="gap:10px">${ic("sparkle", 18)}<h3>${t("gm_title")}</h3></div><p class="muted small" style="margin-top:6px">${t(CH.apps.length ? "gm_empty_app" : "gm_empty_noapp")}</p></div>`;
+  const week = all.filter((r) => Date.now() - new Date(r.played_at).getTime() < 7 * 864e5);
+  const tot = week.reduce((a, r) => a + (r.total || 0), 0), cl = week.reduce((a, r) => a + (r.clean || 0), 0), mins = Math.round(week.reduce((a, r) => a + (r.dur_s || 0), 0) / 60);
+  const best = {}; all.filter((r) => r.game === "learn" && r.sec).forEach((r) => { const k = r.sec; const ok = r.total && r.clean >= r.total - 1; if (ok) best[k] = Math.max(best[k] || 0, r.lvl || 0); });
+  const lvlRows = LEARN_SECS.map((s) => `<div class="row" style="justify-content:space-between;padding:6px 0"><span>${esc(S.lang === "kk" ? s[1] : s[2])}</span><span class="tags">${[1, 2, 3, 4, 5].map((l) => `<span class="tag ${best[s[0]] >= l ? "ok" : ""}" style="min-width:26px;justify-content:center">${l}</span>`).join("")}</span></div>`).join("");
+  return `<div class="card">
+    <div class="card-head"><h3>${t("gm_title")}</h3><span class="small faint">${t("gm_sub")}</span></div>
+    <div class="card-body stack" style="gap:14px">
+      <div class="grid g-3" style="gap:10px">
+        <div class="kpi" style="padding:12px;background:var(--surface-2);border-radius:14px"><div class="label">${t("gm_sessions")}</div><div class="value num" style="font-size:24px;margin-top:4px">${week.length}</div></div>
+        <div class="kpi" style="padding:12px;background:var(--surface-2);border-radius:14px"><div class="label">${t("gm_minutes")}</div><div class="value num" style="font-size:24px;margin-top:4px">${mins}</div></div>
+        <div class="kpi" style="padding:12px;background:var(--surface-2);border-radius:14px"><div class="label">${t("gm_clean")}</div><div class="value num" style="font-size:24px;margin-top:4px">${tot ? Math.round((cl / tot) * 100) + "<small>%</small>" : "—"}</div></div>
+      </div>
+      <div><div class="label" style="margin-bottom:4px">${t("gm_levels")}</div>${lvlRows}<p class="hint" style="margin-top:4px">${t("gm_levels_hint")}</p></div>
+      <div><div class="label" style="margin-bottom:4px">${t("gm_recent")}</div>
+        <div class="table-wrap"><table class="table"><tbody>${all.slice(0, 10).map((r) => `<tr><td><b>${esc(gameName(r))}</b><div class="small faint">${esc(fmtDate(r.played_at, { day: "numeric", month: "short" }))} · ${esc(new Date(r.played_at).toTimeString().slice(0, 5))}</div></td><td class="r"><b class="num">${r.clean}/${r.total}</b><div class="small faint">${t("gm_noerr")}</div></td></tr>`).join("")}</tbody></table></div>
+      </div>
+    </div>
+  </div>`;
+}
 function childProgress() {
   const ed = CH.editable;
   const goals = CH.goals;
-  if (!goals.length) return `<div class="card">${emptyState("target", t("no_goals"), t("no_goals_sub"), ed ? `<button class="btn primary" style="margin-top:14px" data-act="goal-new">${ic("plus")}${t("goal_add")}</button>` : "")}</div>`;
+  if (!goals.length) return `<div class="stack"><div class="card">${emptyState("target", t("no_goals"), t("no_goals_sub"), ed ? `<button class="btn primary" style="margin-top:14px" data-act="goal-new">${ic("plus")}${t("goal_add")}</button>` : "")}</div>${childGames()}</div>`;
+  if (false) return `<div class="card">${emptyState("target", t("no_goals"), t("no_goals_sub"), ed ? `<button class="btn primary" style="margin-top:14px" data-act="goal-new">${ic("plus")}${t("goal_add")}</button>` : "")}</div>`;
   const dirs = DIRS.filter((d) => goals.some((g) => g.direction === d));
   return `<div class="stack">${dirs.map((d) => `
     <div class="card">
@@ -365,6 +401,7 @@ function childProgress() {
       }).join("")}
     </div>`).join("")}
     ${ed ? `<div><button class="btn" data-act="goal-new">${ic("plus")}${t("goal_add")}</button></div>` : ""}
+    ${childGames()}
   </div>`;
 }
 /* ---------- home cards (задание на дом в Сөйле) ---------- */

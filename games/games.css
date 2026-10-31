@@ -361,3 +361,4 @@ body.g-body{
 .g-cupbin{ background:color-mix(in srgb, var(--bin) 10%, #fff); border-radius:26px; padding:10px 8px 8px; gap:4px; }
 .g-cupbin svg{ width:70%; max-width:150px; height:auto; pointer-events:none; }
 .g-cupbin .g-binlabel{ color:var(--bin); }
+.g-learn{ margin-bottom:clamp(8px,2.4vw,16px); display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,var(--c1),var(--c2)); min-height:96px; }

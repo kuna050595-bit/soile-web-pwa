@@ -37,6 +37,7 @@
 <script src="simon.js"></script>
 <script src="sentence.js"></script>
 <script src="colors.js"></script>
+<script src="learn.js"></script>
 <script>
 (function(){
   var SG = window.SoileGames, shell = document.getElementById('shell');
@@ -45,7 +46,7 @@
   function ordered(){
     var by = {}; SG.games.forEach(function(g){ by[g.id] = g; });
     var list = SG.ORDER.filter(function(id){ return by[id]; }).map(function(id){ return by[id]; });
-    SG.games.forEach(function(g){ if (list.indexOf(g) < 0 && FEATURED.indexOf(g.id) < 0) list.push(g); });
+    SG.games.forEach(function(g){ if (list.indexOf(g) < 0 && FEATURED.indexOf(g.id) < 0 && g.id !== 'learn') list.push(g); });
     return list;
   }
   function hub(){
@@ -64,6 +65,14 @@
     left.appendChild(SG.el('h1','g-h1', SG.t(HUB.title))); left.appendChild(SG.el('p','g-sub', SG.t(HUB.sub)));
     head.appendChild(left); head.appendChild(SG.el('span','g-count', SG.games.length + ' ' + SG.t({kk:'ойын',ru:'игр'})));
     main.appendChild(head);
+    var lg = SG.games.filter(function(g){ return g.id === 'learn'; })[0];
+    if (lg){      // «Учимся» — отдельной широкой плиткой: программа по разделам и уровням
+      var lt = SG.el('button','g-feature g-learn', (SG.ICONS.learn || '') +
+        '<span class="ft"><b>' + SG.t(lg) + '</b><small>' + SG.t(lg.sub) + '</small></span>');
+      lt.type = 'button'; lt.style.setProperty('--c1', '#1F8F86'); lt.style.setProperty('--c2', '#62D0C4'); lt.setAttribute('data-game', 'learn');
+      lt.addEventListener('click', function(){ SG.open('learn', shell, { onExit: hub }); });
+      main.appendChild(lt);
+    }
     var fgs = FEATURED.map(function(id){ return SG.games.filter(function(g){ return g.id === id; })[0]; }).filter(Boolean);
     if (fgs.length){
       var frow = SG.el('div','g-featrow'); frow.style.setProperty('--k', fgs.length);
