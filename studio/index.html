@@ -107,14 +107,20 @@ header h1{font-size:18px;margin:0;font-weight:900;flex:1}
     chunks=[]; recorder=new MediaRecorder(stream);
     recorder.ondataavailable=function(e){ if(e.data && e.data.size) chunks.push(e.data); };
     recorder.onstop=onStop;
-    recorder.start();
-    st.recording=true; renderRecBtn(); setStatus('Говорите… нажмите ещё раз, когда закончите');
+    st.recording=true; st.ready=false; renderRecBtn(); setStatus('Подождите…');
+    // микрофон включается не мгновенно: просим говорить только когда запись реально идёт
+    recorder.onstart=function(){ setTimeout(function(){ if(st.recording){ st.ready=true; setStatus('🔴 Говорите… нажмите ещё раз, когда закончите'); } }, 350); };
+    recorder.start(100);
     var a=getAC(); if(a.state==='suspended') a.resume();
     var src=a.createMediaStreamSource(stream); analyser=a.createAnalyser(); analyser.fftSize=512; src.connect(analyser);
     var buf=new Uint8Array(analyser.fftSize);
     (function tick(){ analyser.getByteTimeDomainData(buf); var m=0; for(var i=0;i<buf.length;i++){ var v=Math.abs(buf[i]-128)/128; if(v>m)m=v; } var el=document.getElementById('meter-i'); if(el) el.style.width=Math.min(100,m*140)+'%'; raf=requestAnimationFrame(tick); })();
   }
-  function stopRec(){ if(recorder && recorder.state!=='inactive') recorder.stop(); st.recording=false; cancelAnimationFrame(raf); renderRecBtn(); setStatus('Обрабатываю…'); }
+  function stopRec(){
+    // дописываем ещё 0.5 с после нажатия, чтобы не обрезать конец слова
+    if(st.stopping) return; st.stopping=true; setStatus('Сохраняю…');
+    setTimeout(function(){ if(recorder && recorder.state!=='inactive') recorder.stop(); st.recording=false; st.stopping=false; cancelAnimationFrame(raf); renderRecBtn(); setStatus('Обрабатываю…'); }, 500);
+  }
   async function onStop(){
     try{
       var blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
@@ -127,8 +133,8 @@ header h1{font-size:18px;margin:0;font-weight:900;flex:1}
       await put(it.k,{wav:wav,text:textOf(it),ts:Date.now(),dur:out.data.length/out.rate});
       st.done[it.k]=1;
       play(wav);
-      var msg = out.quiet ? 'Тихо получилось — лучше перезаписать чуть громче.' : out.clip ? 'Слишком громко, звук хрипит — отодвиньте телефон.' : 'Готово ✓ Если всё хорошо — «Дальше».';
-      setStatus(msg, out.quiet||out.clip);
+      var msg = out.cut ? 'Похоже, слово обрезалось — нажмите запись, подождите «Говорите», скажите слово и только потом остановите.' : out.quiet ? 'Тихо получилось — лучше перезаписать чуть громче.' : out.clip ? 'Слишком громко, звук хрипит — отодвиньте телефон.' : 'Готово ✓ Если всё хорошо — «Дальше».';
+      setStatus(msg, out.quiet||out.clip||out.cut);
       render(true);
     }catch(e){ console.error(e); setStatus('Не получилось обработать запись — попробуйте ещё раз.', true); }
   }
@@ -138,16 +144,17 @@ header h1{font-size:18px;margin:0;font-weight:900;flex:1}
     var win=Math.floor(rate*0.01), peak=0, rms=[];
     for(var s=0;s<n;s+=win){ var sum=0,e=Math.min(n,s+win); for(var j=s;j<e;j++){ sum+=ch[j]*ch[j]; var a=Math.abs(ch[j]); if(a>peak)peak=a; } rms.push(Math.sqrt(sum/(e-s))); }
     if(peak<0.01) return null;
-    var maxR=Math.max.apply(null,rms), thr=Math.max(0.008, maxR*0.12), first=-1, last=-1;
+    var maxR=Math.max.apply(null,rms), thr=Math.max(0.004, maxR*0.06), first=-1, last=-1;
     for(var k=0;k<rms.length;k++){ if(rms[k]>thr){ if(first<0)first=k; last=k; } }
     if(first<0) return null;
-    var startS=Math.max(0,(first-6)*win), endS=Math.min(n,(last+14)*win);
-    var seg=ch.slice(startS,endS), gain=Math.min(4, 0.9/peak), fade=Math.floor(rate*0.012);
+    var startS=Math.max(0,(first-15)*win), endS=Math.min(n,(last+25)*win);
+    var cutStart=first<3, cutEnd=last>rms.length-4;
+    var seg=ch.slice(startS,endS), gain=Math.min(12, 0.89/peak), fade=Math.floor(rate*0.008);
     for(var q=0;q<seg.length;q++){ var g=gain; if(q<fade) g*=q/fade; if(seg.length-q<fade) g*=(seg.length-q)/fade; seg[q]=Math.max(-1,Math.min(1,seg[q]*g)); }
     // downsample to 22050 for smaller files
     var target=22050, ratio=rate/target, outLen=Math.floor(seg.length/ratio), out=new Float32Array(outLen);
     for(var t=0;t<outLen;t++){ var x=t*ratio, i0=Math.floor(x), f=x-i0; out[t]=seg[i0]*(1-f)+(seg[i0+1]||0)*f; }
-    return {data:out, rate:target, quiet:peak<0.06, clip:peak>0.995};
+    return {data:out, rate:target, quiet:peak<0.03, clip:peak>0.995, cut:cutStart||cutEnd};
   }
   function encodeWav(data,rate){
     var buf=new ArrayBuffer(44+data.length*2), v=new DataView(buf);
