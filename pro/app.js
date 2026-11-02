@@ -407,6 +407,8 @@ function navItems() {
   const work = [
     { href: "#/overview", key: "nav_overview", icon: "home" },
     { href: "#/children", key: "nav_children", icon: "kids" },
+    { href: "#/schedule", key: "nav_schedule", icon: "calendar" },
+    ...(m ? [{ href: "#/cash", key: "nav_cash", icon: "wallet" }] : []),
     { href: "#/reports", key: "nav_reports", icon: "report" },
   ];
   const net = [
@@ -455,8 +457,8 @@ function renderShell(active) {
     <a href="#/overview" class="${active === "overview" ? "active" : ""}">${ic("home")}<span>${t("nav_overview")}</span></a>
     <a href="#/children" class="${active === "children" || active === "child" ? "active" : ""}">${ic("kids")}<span>${t("nav_children")}</span></a>
     <a href="#" class="fab" data-act="log-session"><span class="c">${ic("plus")}</span><span>${t("nav_session")}</span></a>
-    <a href="#/reports" class="${active === "reports" ? "active" : ""}">${ic("report")}<span>${t("nav_reports")}</span></a>
-    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings", "billing"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
+    <a href="#/schedule" class="${active === "schedule" ? "active" : ""}">${ic("calendar")}<span>${t("nav_schedule")}</span></a>
+    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings", "billing", "reports", "cash"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
   </nav>`;
 }
 function planBanner() {
@@ -492,7 +494,7 @@ async function route() {
   if (!S.user || !S.org) return;
   const { name, args } = parseHash();
   const page = PAGES[name] ? name : "overview";
-  if ((page === "team" || page === "branches") && !isManager()) { location.hash = "#/overview"; return; }
+  if ((page === "team" || page === "branches" || page === "cash") && !isManager()) { location.hash = "#/overview"; return; }
   renderShell(page);
   const seq = ++S.navSeq;
   const el = $("#page");

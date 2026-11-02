@@ -308,7 +308,7 @@ PAGES.child = async (el, args, alive) => {
   CH = data; const c = data.child;
   document.title = childName(c) + " · Сөйле Pro";
   const ed = data.editable;
-  const tabs = ["progress", "home", "sessions", "reports", "info"];
+  const tabs = ["progress", "home", "sessions", "pay", "reports", "info"];
   const tabHref = (x) => `#/child/${id}/${x}`;
   el.innerHTML = `
   <a class="back" href="#/children">${ic("left")}${t("nav_children")}</a>
@@ -328,7 +328,7 @@ PAGES.child = async (el, args, alive) => {
     </div>
   </div>
   ${!ed ? `<div class="alert info" style="margin-bottom:16px">${ic("info")}<div>${esc(t("readonly_linked", { org: data.srcOrg || "" }))}</div></div>` : ""}
-  <nav class="tabs">${tabs.filter((x) => ed || x !== "reports").map((x) => `<a href="${tabHref(x)}" class="${tab === x ? "on" : ""}">${t("tab_" + x)}</a>`).join("")}</nav>
+  <nav class="tabs">${tabs.filter((x) => ed || (x !== "reports" && x !== "pay")).map((x) => `<a href="${tabHref(x)}" class="${tab === x ? "on" : ""}">${t("tab_" + x)}</a>`).join("")}</nav>
   <div id="child-tab"></div>`;
   drawChildTab(tab);
 };
@@ -338,6 +338,7 @@ function drawChildTab(tab) {
   else if (tab === "sessions") box.innerHTML = childSessions();
   else if (tab === "reports") box.innerHTML = childReports();
   else if (tab === "info") box.innerHTML = childInfo();
+  else if (tab === "pay" && typeof childPay === "function") childPay(box);
   else box.innerHTML = childProgress();
 }
 const GAME_NAMES = {
@@ -1103,9 +1104,10 @@ FORMS["org-save"] = async (f, fd) => {
 
 /* ---------- more (mobile) ---------- */
 PAGES.more = async (el) => {
-  const { net } = navItems();
+  const { work, net } = navItems();
+  const extra = work.filter((i) => !["#/overview", "#/children", "#/schedule"].includes(i.href));
   el.innerHTML = `${pageHead(t("nav_more"))}<div class="card"><div class="list">
-    ${net.map((i) => `<a class="list-item click" href="${i.href}" style="color:inherit;text-decoration:none">${ic(i.icon, 20)}<span class="t"><b style="font-weight:500">${t(i.key)}</b></span>${ic("right", 16)}</a>`).join("")}
+    ${extra.concat(net).map((i) => `<a class="list-item click" href="${i.href}" style="color:inherit;text-decoration:none">${ic(i.icon, 20)}<span class="t"><b style="font-weight:500">${t(i.key)}</b></span>${ic("right", 16)}</a>`).join("")}
     <div class="list-item click" data-act="org-menu">${ic("branch", 20)}<span class="t"><b style="font-weight:500">${t("switch_org")}</b><span>${esc(S.org.name)}</span></span>${ic("right", 16)}</div>
     <div class="list-item click" data-act="logout" style="color:var(--danger)">${ic("logout", 20)}<span class="t"><b style="font-weight:500">${t("logout")}</b></span></div>
   </div></div>`;
