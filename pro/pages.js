@@ -1144,6 +1144,7 @@ async function renderParent(token) {
       <h1>${esc(d.first_name)}${d.birth_year ? `<span style="font-weight:500;opacity:.75;font-size:18px"> · ${esc(t("age", { n: ageOf(d.birth_year) }))}</span>` : ""}</h1>
       <p>${esc(t("pv_center", { org: d.org || "", b: d.branch || "" }))}</p>
     </div>
+    ${typeof pvLessons === "function" ? pvLessons(d) : ""}
     ${d.home && (d.home.cards || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("hc_title")}</h3></div><div class="card-body">${d.home.note ? `<p style="margin-bottom:12px">${esc(d.home.note)}</p>` : ""}<div class="hc-grid">${d.home.cards.map((id) => cardTile(id)).join("")}</div><p class="hint" style="margin-top:10px">${t("hc_parent_hint")}</p></div></div>` : ""}
     ${d.home && (d.home.tech || []).length ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("ht_parent")}</h3></div><div class="card-body stack" style="gap:10px">${d.home.tech.map(techById).filter(Boolean).map((x) => `<details class="tech-det"><summary>${techRow(x, { open: false })}</summary><div style="padding:4px 4px 12px">${techDetailHtml(x)}</div></details>`).join("")}<p class="hint">${t("ht_parent_hint")}</p></div></div>` : ""}
     ${d.report ? `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("pv_report")}</h3><span class="small faint">${esc(fmtDate(d.report.sent_at, { day: "numeric", month: "long" }))}</span></div><div class="card-body report-body">${esc(d.report.body)}</div></div>` : ""}

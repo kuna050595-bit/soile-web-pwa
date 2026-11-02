@@ -35,6 +35,9 @@
     var d = new Date(String(iso).slice(0, 10) + "T00:00:00");
     return d.toLocaleDateString("ru-RU", long ? { day: "numeric", month: "long" } : { day: "numeric", month: "short", weekday: "short" });
   }
+  function hhmm(ts) { var d = new Date(ts); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function dayDiff(ts) { var a = new Date(); a.setHours(0, 0, 0, 0); var b = new Date(ts); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); }
+  function lessonDay(ts) { var dd = dayDiff(ts); if (dd === 0) return "Сегодня"; if (dd === 1) return "Завтра"; var d = new Date(ts); return ["вс", "пн", "вт", "ср", "чт", "пт", "сб"][d.getDay()] + ", " + d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }
   function weekStarts(n) {
     var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
     var out = []; for (var i = n - 1; i >= 0; i--) { var x = new Date(d); x.setDate(d.getDate() - 7 * i); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); out.push(x.toISOString().slice(0, 10)); }
@@ -87,10 +90,16 @@
       return '<div class="cp-sess"><i>' + esc(fmtDate(s.date)) + " · " + esc(dir[0]) + "</i>" + (s.note ? "<br>" + esc(s.note) : "") + "</div>";
     }).join("");
     var key = c.pairing_id ? "pair:" + c.pairing_id : "tok:" + c.token;
+    var les = (c.lessons || []).slice(0, 3).map(function (l) {
+      var dir = DIRS[l.direction] || [""];
+      return '<div class="cp-sess"><b style="color:var(--ink)">' + esc(lessonDay(l.at)) + " · " + hhmm(l.at) + "</b>" + (dir[0] ? " · " + esc(dir[0]) : "") + (l.specialist ? '<br><i>' + esc(l.specialist) + (l.room ? ", каб. " + esc(l.room) : "") + "</i>" : "") + "</div>";
+    }).join("");
     return '<div class="cp-card"><div class="cp-head"><div class="cp-ava">' + esc((c.first_name || "?")[0]) + "</div><div><b>" + esc(c.first_name) + "</b><span>Центр «" + esc(c.org || "") + "»" + (c.branch ? ", " + esc(c.branch) : "") + "</span></div></div>" +
       (c.home && ((c.home.cards || []).length || (c.home.tech || []).length) ? '<div class="cp-sec">Задание на дом · Үй тапсырмасы</div><div class="cp-rep" style="background:var(--surface-2)">' + (c.home.note ? esc(c.home.note) + "<br><br>" : "") +
         ((c.home.cards || []).length ? "<b>" + c.home.cards.length + " карточек</b> — у ребёнка во вкладке «Задание» / «Тапсырма».<br>" : "") +
         ((c.home.tech || []).length ? "<b>" + c.home.tech.length + " занятий для дома</b> — в разделе «🏠 Занятия дома» ниже." : "") + "</div>" : "") +
+      (les ? '<div class="cp-sec">Ближайшие занятия · Сабақ кестесі</div>' + les : "") +
+      (c.lessons_left != null ? '<p class="key-note" style="margin-top:4px">Осталось занятий по абонементу: <b>' + c.lessons_left + "</b></p>" : "") +
       (c.report ? '<div class="cp-sec">Отчёт специалиста · ' + esc(fmtDate(c.report.sent_at, true)) + '</div><div class="cp-rep">' + esc(c.report.body) + "</div>" : "") +
       (goals ? '<div class="cp-sec">Цели и прогресс за 8 недель · Мақсаттар</div>' + goals : '<p class="key-note" style="margin-top:8px">Специалист ещё не добавил цели.</p>') +
       (sess ? '<div class="cp-sec">Последние занятия · Сабақтар</div>' + sess : "") +
@@ -102,6 +111,11 @@
 
   function render() {
     var h = "<h3>🏫 Центр развития · Даму орталығы</h3>";
+    // напоминание: занятие сегодня или завтра
+    var soon = [];
+    state.children.forEach(function (c) { (c.lessons || []).forEach(function (l) { var dd = dayDiff(l.at); if (dd === 0 || dd === 1) soon.push({ c: c, l: l, dd: dd }); }); });
+    soon.sort(function (a, b) { return new Date(a.l.at) - new Date(b.l.at); });
+    if (soon.length) { var x = soon[0]; h += '<div class="cp-card" style="border:2px solid var(--accent,#EF4C82)"><b style="color:var(--ink)">📅 ' + (x.dd === 0 ? "Сегодня · Бүгін" : "Завтра · Ертең") + " в " + hhmm(x.l.at) + " — занятие у " + esc(x.c.first_name) + "</b>" + (x.l.specialist ? '<p class="key-note" style="margin-top:4px">' + esc(x.l.specialist) + (x.l.room ? ", каб. " + esc(x.l.room) : "") + " · «" + esc(x.c.org || "") + "»</p>" : "") + "</div>"; }
     h += '<p class="key-note">Если ребёнок занимается в центре на Сөйле Pro — здесь видно цели, прогресс и отчёты специалистов. <span style="opacity:.8">Орталықтағы мақсаттар, прогресс пен маман есептері осында көрінеді.</span></p>';
     if (state.loading && !state.children.length) h += '<p class="key-note" style="margin-top:10px">Загружаем…</p>';
     h += state.children.map(childCard).join("");

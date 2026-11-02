@@ -408,7 +408,8 @@ function navItems() {
     { href: "#/overview", key: "nav_overview", icon: "home" },
     { href: "#/children", key: "nav_children", icon: "kids" },
     { href: "#/schedule", key: "nav_schedule", icon: "calendar" },
-    ...(m ? [{ href: "#/cash", key: "nav_cash", icon: "wallet" }] : []),
+    { href: "#/leads", key: "nav_leads", icon: "send" },
+    ...(m ? [{ href: "#/cash", key: "nav_cash", icon: "wallet" }, { href: "#/salary", key: "nav_salary", icon: "card" }] : []),
     { href: "#/reports", key: "nav_reports", icon: "report" },
   ];
   const net = [
@@ -458,7 +459,7 @@ function renderShell(active) {
     <a href="#/children" class="${active === "children" || active === "child" ? "active" : ""}">${ic("kids")}<span>${t("nav_children")}</span></a>
     <a href="#" class="fab" data-act="log-session"><span class="c">${ic("plus")}</span><span>${t("nav_session")}</span></a>
     <a href="#/schedule" class="${active === "schedule" ? "active" : ""}">${ic("calendar")}<span>${t("nav_schedule")}</span></a>
-    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings", "billing", "reports", "cash"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
+    <a href="#/more" class="${["more", "team", "branches", "catalog", "settings", "billing", "reports", "cash", "leads", "salary"].includes(active) ? "active" : ""}">${ic("menu")}<span>${t("nav_more")}</span></a>
   </nav>`;
 }
 function planBanner() {
@@ -494,7 +495,7 @@ async function route() {
   if (!S.user || !S.org) return;
   const { name, args } = parseHash();
   const page = PAGES[name] ? name : "overview";
-  if ((page === "team" || page === "branches" || page === "cash") && !isManager()) { location.hash = "#/overview"; return; }
+  if ((page === "team" || page === "branches" || page === "cash" || page === "salary") && !isManager()) { location.hash = "#/overview"; return; }
   renderShell(page);
   const seq = ++S.navSeq;
   const el = $("#page");
@@ -505,6 +506,7 @@ async function route() {
 function rerender() {
   const params = new URLSearchParams(location.search);
   if (params.get("p")) return renderParent(params.get("p"));
+  if (params.get("lead") && typeof renderLeadForm === "function") return renderLeadForm(params.get("lead"));
   if (S.recovery) return renderNewPassword();
   if (!S.user) return authOrLanding();
   if (S.inviteToken) return renderInvite();
@@ -606,6 +608,7 @@ async function boot() {
   applyTheme();
   const params = new URLSearchParams(location.search);
   if (params.get("p")) return renderParent(params.get("p"));
+  if (params.get("lead")) { const go = () => renderLeadForm(params.get("lead")); if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go(); return; }
   if (params.get("invite")) S.inviteToken = params.get("invite");
   if (params.has("login") || params.has("register")) { S.view = "auth"; authTab = params.has("register") ? "register" : "login"; }
   if (await consumeRecoveryLink()) { applyTheme(); return renderNewPassword(); }

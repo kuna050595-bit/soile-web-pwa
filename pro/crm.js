@@ -495,3 +495,333 @@ PAGES.cash = async (el, args, alive) => {
   @media (max-width:700px){.sc-week{grid-template-columns:minmax(0,1fr)}.sc-day.empty{display:none}.sc-day.today.empty{display:block}}`;
   const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 })();
+
+/* =====================================================================
+ * Часть 2: заявки, напоминания родителям, зарплата, «Сегодня» на главной
+ * ===================================================================== */
+Object.assign(I18N.ru, {
+  nav_leads: "Заявки", nav_salary: "Зарплата",
+  ld_title: "Заявки", ld_add: "Заявка", ld_link: "Ссылка на онлайн-заявку", ld_link_hint: "Поставьте ссылку в шапку Instagram, на сайт и в 2ГИС — заявки будут падать сюда сами.",
+  ld_new: "Новая заявка", ld_edit: "Заявка", ld_parent: "Имя родителя", ld_phone: "Телефон", ld_child: "Имя ребёнка", ld_age: "Возраст ребёнка", ld_source: "Откуда пришёл",
+  ld_note: "Комментарий", ld_dirs: "Что интересует", ld_trial: "Пробное занятие", ld_saved: "Заявка сохранена", ld_empty: "Пока пусто",
+  ld_s_new: "Новые", ld_s_contacted: "Связались", ld_s_trial: "Пробное", ld_s_won: "Клиенты", ld_s_lost: "Отказ",
+  src_instagram: "Instagram", src_whatsapp: "WhatsApp", src_site: "Сайт", src_form: "Онлайн-заявка", src_2gis: "2ГИС", src_referral: "Рекомендация", src_call: "Звонок", src_other: "Другое",
+  ld_to_trial: "Записать на пробное", ld_convert: "Оформить ребёнка", ld_lost_reason: "Причина отказа", ld_call: "Позвонить", ld_wa: "WhatsApp",
+  ld_converted: "Ребёнок оформлен — заявка в «Клиентах»", ld_open_child: "Открыть карточку", ld_del_q: "Удалить заявку?", ld_age_y: "{n} лет",
+  ld_wa_text: "Здравствуйте{p}! Это «{o}». Вы оставляли заявку — удобно сейчас поговорить?",
+  lf_title: "Запись в центр", lf_sub: "Оставьте контакты — администратор перезвонит и подберёт время.", lf_send: "Отправить заявку", lf_done: "Спасибо! Заявка отправлена — с вами свяжутся в ближайшее время.",
+  lf_bad_phone: "Проверьте номер телефона", lf_name_req: "Укажите имя", lf_nf: "Ссылка недействительна", lf_note_ph: "Например: сыну 3 года, пока не говорит",
+  rm_btn: "Напомнить на завтра", rm_title: "Напоминания на завтра", rm_sub: "Нажмите «WhatsApp» — откроется чат с родителем с готовым текстом.", rm_none: "На завтра занятий нет",
+  rm_text: "Здравствуйте{p}! Напоминаем: завтра, {d}, в {t} занятие у {c} в «{o}»{s}. Ждём вас!", rm_nophone: "нет телефона", rm_sent: "отправлено",
+  td_title: "Сегодня по расписанию", td_none: "Сегодня занятий нет", td_all: "Всё расписание", td_marked: "отмечено {a} из {b}",
+  sl_title: "Зарплата", sl_staff: "Специалист", sl_done: "Проведено", sl_missed: "Пропуски", sl_rate: "Ставка", sl_sum: "К выплате", sl_total: "Итого к выплате",
+  sl_mode_lesson: "₸ за занятие", sl_mode_percent: "% от абонемента", sl_set: "Настроить ставку", sl_count_missed: "Оплачивать и пропуски без причины",
+  sl_no_rate: "ставка не задана", sl_csv: "Скачать CSV", sl_hint: "Считаются занятия из расписания с отметкой «Был». Ставки видит только руководство.", sl_rev: "Выручка по занятиям",
+  pv_next: "Ближайшие занятия", pv_left: "Осталось занятий по абонементу: {n}", pv_tomorrow: "Завтра", pv_today: "Сегодня",
+});
+Object.assign(I18N.kk, {
+  nav_leads: "Өтінімдер", nav_salary: "Жалақы",
+  ld_title: "Өтінімдер", ld_add: "Өтінім", ld_link: "Онлайн-өтінім сілтемесі", ld_link_hint: "Сілтемені Instagram, сайт және 2ГИС-ке қойыңыз — өтінімдер осында өздігінен түседі.",
+  ld_new: "Жаңа өтінім", ld_edit: "Өтінім", ld_parent: "Ата-ананың аты", ld_phone: "Телефон", ld_child: "Баланың аты", ld_age: "Баланың жасы", ld_source: "Қайдан келді",
+  ld_note: "Түсініктеме", ld_dirs: "Не қызықтырады", ld_trial: "Сынақ сабақ", ld_saved: "Өтінім сақталды", ld_empty: "Әзірге бос",
+  ld_s_new: "Жаңа", ld_s_contacted: "Хабарласты", ld_s_trial: "Сынақ", ld_s_won: "Клиенттер", ld_s_lost: "Бас тартты",
+  src_instagram: "Instagram", src_whatsapp: "WhatsApp", src_site: "Сайт", src_form: "Онлайн-өтінім", src_2gis: "2ГИС", src_referral: "Ұсыныс", src_call: "Қоңырау", src_other: "Басқа",
+  ld_to_trial: "Сынаққа жазу", ld_convert: "Баланы тіркеу", ld_lost_reason: "Бас тарту себебі", ld_call: "Қоңырау", ld_wa: "WhatsApp",
+  ld_converted: "Бала тіркелді — өтінім «Клиенттерде»", ld_open_child: "Карточканы ашу", ld_del_q: "Өтінімді жою керек пе?", ld_age_y: "{n} жас",
+  ld_wa_text: "Сәлеметсіз бе{p}! Бұл — «{o}». Сіз өтінім қалдырған едіңіз — қазір сөйлесуге ыңғайлы ма?",
+  lf_title: "Орталыққа жазылу", lf_sub: "Байланысыңызды қалдырыңыз — әкімші хабарласып, уақыт таңдайды.", lf_send: "Өтінім жіберу", lf_done: "Рақмет! Өтінім жіберілді — жақын арада хабарласады.",
+  lf_bad_phone: "Телефон нөмірін тексеріңіз", lf_name_req: "Атыңызды жазыңыз", lf_nf: "Сілтеме жарамсыз", lf_note_ph: "Мысалы: ұлым 3 жаста, әлі сөйлемейді",
+  rm_btn: "Ертеңгіге еске салу", rm_title: "Ертеңгі сабақтар туралы еске салу", rm_sub: "«WhatsApp» батырмасын басыңыз — ата-анамен чат дайын мәтінмен ашылады.", rm_none: "Ертеңге сабақ жоқ",
+  rm_text: "Сәлеметсіз бе{p}! Еске саламыз: ертең, {d}, сағат {t}-да «{o}» орталығында {c} сабағы бар{s}. Күтеміз!", rm_nophone: "телефон жоқ", rm_sent: "жіберілді",
+  td_title: "Бүгінгі кесте", td_none: "Бүгін сабақ жоқ", td_all: "Толық кесте", td_marked: "{b}-дан {a} белгіленді",
+  sl_title: "Жалақы", sl_staff: "Маман", sl_done: "Өткізілді", sl_missed: "Келмеді", sl_rate: "Мөлшерлеме", sl_sum: "Төлеуге", sl_total: "Барлығы төлеуге",
+  sl_mode_lesson: "₸ әр сабаққа", sl_mode_percent: "абонементтен %", sl_set: "Мөлшерлемені баптау", sl_count_missed: "Себепсіз келмегенін де төлеу",
+  sl_no_rate: "мөлшерлеме жоқ", sl_csv: "CSV жүктеу", sl_hint: "Кестедегі «Келді» белгісі бар сабақтар есептеледі. Мөлшерлемелерді тек басшылық көреді.", sl_rev: "Сабақтар бойынша түсім",
+  pv_next: "Алдағы сабақтар", pv_left: "Абонемент бойынша қалған сабақ: {n}", pv_tomorrow: "Ертең", pv_today: "Бүгін",
+});
+const LEAD_STAGES = ["new", "contacted", "trial", "won", "lost"];
+const LEAD_SOURCES = ["instagram", "whatsapp", "2gis", "site", "referral", "call", "form", "other"];
+const LEAD_TAG = { new: "accent", contacted: "", trial: "warn", won: "ok", lost: "danger" };
+const leadLink = () => location.origin + location.pathname + "?lead=" + S.org.id;
+function agoText(iso) { const d = daysSince(iso); return d === 0 ? hhmm(iso) : relDay(isoLocal(iso)); }
+
+/* ---------- 1. Заявки ---------- */
+PAGES.leads = async (el, args, alive) => {
+  document.title = t("nav_leads") + " · Сөйле Pro";
+  const { data, error } = await sb.from("leads").select("*").eq("org_id", S.org.id).order("created_at", { ascending: false }).limit(500);
+  if (!alive()) return; if (error) throw error;
+  CRM.leads = data || []; if (!CRM.leadStage) CRM.leadStage = "new";
+  el.innerHTML = `
+  ${pageHead(t("ld_title"), "", `<button class="btn" data-act="lead-link">${ic("link")}<span>${t("ld_link")}</span></button><button class="btn primary" data-act="lead-new">${ic("plus")}${t("ld_add")}</button>`)}
+  <div class="seg ld-seg" style="margin-bottom:12px">${LEAD_STAGES.map((s) => `<button data-act="lead-stage" data-v="${s}" class="${CRM.leadStage === s ? "on" : ""}">${t("ld_s_" + s)} <b>${CRM.leads.filter((x) => x.stage === s).length}</b></button>`).join("")}</div>
+  <div class="ld-board" id="ld-board"></div>`;
+  drawLeads();
+};
+function drawLeads() {
+  const box = $("#ld-board"); if (!box) return;
+  box.innerHTML = LEAD_STAGES.map((s) => {
+    const items = CRM.leads.filter((x) => x.stage === s);
+    return `<div class="ld-col ${CRM.leadStage === s ? "on" : ""}"><div class="ld-ch"><span class="tag ${LEAD_TAG[s]}">${t("ld_s_" + s)}</span><b>${items.length}</b></div>
+      ${items.length ? items.map((x) => `<button class="ld-card" data-act="lead-open" data-id="${x.id}">
+        <b>${esc(x.parent_name || x.phone || "—")}</b>
+        <span>${esc(x.child_name || "")}${x.child_age != null ? " · " + esc(t("ld_age_y", { n: x.child_age })) : ""}</span>
+        <span class="ld-meta"><span class="tag">${esc(t("src_" + x.source))}</span>${(x.directions || []).map((d) => dirTag(d)).join("")}${x.trial_at && s === "trial" ? `<span class="tag warn">${esc(fmtDate(isoLocal(x.trial_at)))} ${hhmm(x.trial_at)}</span>` : ""}<span class="ld-ago">${esc(agoText(x.created_at))}</span></span>
+      </button>`).join("") : `<div class="sc-none">${t("ld_empty")}</div>`}</div>`;
+  }).join("");
+}
+ACT["lead-stage"] = (el) => { CRM.leadStage = el.dataset.v; $$(".ld-seg button").forEach((b) => b.classList.toggle("on", b === el)); drawLeads(); };
+ACT["lead-link"] = () => {
+  openModal(`${modalHead(t("ld_link"), t("ld_link_hint"))}<div class="modal-body"><div class="copy-box"><code>${esc(leadLink())}</code></div></div>
+    <div class="modal-foot"><a class="btn" href="${esc(leadLink())}" target="_blank" rel="noopener">${ic("globe")}${t("open")}</a><span class="spacer"></span><button class="btn primary" data-act="lead-copy">${ic("copy")}${t("copy")}</button></div>`);
+};
+ACT["lead-copy"] = () => copyText(leadLink());
+ACT["lead-new"] = () => leadForm(null);
+ACT["lead-open"] = (el) => { const x = (CRM.leads || []).find((l) => l.id === el.dataset.id); if (x) leadView(x); };
+function leadForm(x) {
+  x = x || { source: "instagram", directions: [] };
+  openModal(`${modalHead(x.id ? t("ld_edit") : t("ld_new"))}
+    <form data-form="lead-save" data-id="${x.id || ""}"><div class="modal-body form-grid">
+      <div class="form-row">
+        <div class="field"><label>${t("ld_parent")}</label><input class="input" name="parent_name" maxlength="80" value="${esc(x.parent_name || "")}"></div>
+        <div class="field"><label>${t("ld_phone")}</label><input class="input" name="phone" type="tel" maxlength="30" value="${esc(x.phone || "")}" placeholder="+7 7__ ___ __ __"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>${t("ld_child")}</label><input class="input" name="child_name" maxlength="80" value="${esc(x.child_name || "")}"></div>
+        <div class="field"><label>${t("ld_age")}</label><input class="input" name="child_age" type="number" min="0" max="25" value="${x.child_age != null ? x.child_age : ""}"></div>
+      </div>
+      <div class="field"><label>${t("ld_source")}</label><select class="input" name="source">${LEAD_SOURCES.map((s) => `<option value="${s}" ${s === x.source ? "selected" : ""}>${esc(t("src_" + s))}</option>`).join("")}</select></div>
+      <div class="field"><span class="label">${t("ld_dirs")}</span><div class="chips-select">${DIRS.map((d) => `<label class="chip-toggle"><input type="checkbox" name="dirs" value="${d}" ${(x.directions || []).includes(d) ? "checked" : ""}>${esc(t("dirf_" + d))}</label>`).join("")}</div></div>
+      <div class="field"><label>${t("ld_note")}</label><textarea class="input" name="note" maxlength="600">${esc(x.note || "")}</textarea></div>
+      <div class="error-text hidden" data-err></div>
+    </div>
+    <div class="modal-foot">${x.id && isManager() ? `<button type="button" class="btn ghost" data-act="lead-del" data-id="${x.id}" style="color:var(--danger)">${t("del")}</button>` : ""}<span class="spacer"></span><button type="button" class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary">${ic("check")}${t("save")}</button></div></form>`);
+}
+FORMS["lead-save"] = async (f, fd) => {
+  const row = {
+    parent_name: String(fd.get("parent_name") || "").trim() || null, phone: String(fd.get("phone") || "").trim() || null,
+    child_name: String(fd.get("child_name") || "").trim() || null, child_age: fd.get("child_age") !== "" ? Number(fd.get("child_age")) : null,
+    source: String(fd.get("source") || "other"), directions: fd.getAll("dirs"), note: String(fd.get("note") || "").trim() || null,
+  };
+  if (!row.parent_name && !row.phone) return showFormErr(f, t("lf_name_req"));
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const id = f.dataset.id;
+    const { error } = id ? await sb.from("leads").update(row).eq("id", id) : await sb.from("leads").insert({ ...row, org_id: S.org.id, branch_id: S.me.branch_id || null, member_id: S.me.id });
+    if (error) return showFormErr(f, crmErr(error));
+    closeModal(); toast(t("ld_saved")); if (!id) CRM.leadStage = "new"; route();
+  });
+};
+ACT["lead-del"] = async (el) => {
+  if (!window.confirm(t("ld_del_q"))) return;
+  const { error } = await sb.from("leads").delete().eq("id", el.dataset.id); if (error) return toast(crmErr(error), true);
+  closeModal(); route();
+};
+function leadView(x) {
+  const p = x.parent_name ? ", " + x.parent_name.split(" ")[0] : "";
+  const dt0 = x.trial_at ? isoLocal(x.trial_at) : addDays(todayISO(), 1), tm0 = x.trial_at ? hhmm(x.trial_at) : "11:00";
+  openModal(`${modalHead(x.parent_name || x.phone || t("ld_edit"), (x.child_name || "") + (x.child_age != null ? " · " + t("ld_age_y", { n: x.child_age }) : ""))}
+    <div class="modal-body">
+      <div class="row wrap" style="gap:6px;margin-bottom:10px"><span class="tag">${esc(t("src_" + x.source))}</span>${(x.directions || []).map((d) => dirTag(d, true)).join("")}<span class="tag">${esc(fmtDate(isoLocal(x.created_at), { day: "numeric", month: "long" }))} ${hhmm(x.created_at)}</span></div>
+      ${x.note ? `<p class="small" style="margin-bottom:12px;white-space:pre-wrap">${esc(x.note)}</p>` : ""}
+      ${x.phone ? `<div class="row wrap" style="gap:8px;margin-bottom:14px"><a class="btn" href="tel:${esc(phoneDigits(x.phone) ? "+" + phoneDigits(x.phone) : x.phone)}">${ic("phone")}${t("ld_call")} ${esc(x.phone)}</a>
+        <a class="btn" target="_blank" rel="noopener" href="${waLink(t("ld_wa_text", { p, o: S.org.name }), x.phone)}">${ic("chat")}${t("ld_wa")}</a></div>` : ""}
+      <div class="label small muted" style="margin-bottom:6px">${t("ls_status")}</div>
+      <div class="seg" style="flex-wrap:wrap">${LEAD_STAGES.map((s) => `<button data-act="lead-set" data-id="${x.id}" data-v="${s}" class="${x.stage === s ? "on" : ""}">${t("ld_s_" + s)}</button>`).join("")}</div>
+      <div class="card-body" style="padding:14px 0 0">
+        <div class="label small muted" style="margin-bottom:6px">${t("ld_trial")}</div>
+        <div class="row wrap" style="gap:8px"><input class="input" type="date" id="ld-td" value="${dt0}" style="max-width:170px"><input class="input" type="time" id="ld-tt" value="${tm0}" step="300" style="max-width:120px">
+        <button class="btn" data-act="lead-trial" data-id="${x.id}">${ic("calendar")}${t("ld_to_trial")}</button></div>
+      </div>
+      ${x.stage === "lost" || x.lost_reason ? `<div class="field" style="margin-top:12px"><label>${t("ld_lost_reason")}</label><input class="input" id="ld-lr" maxlength="200" value="${esc(x.lost_reason || "")}" data-id="${x.id}"></div>` : ""}
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-act="lead-edit" data-id="${x.id}">${ic("edit")}${t("edit")}</button><span class="spacer"></span>
+      ${x.child_id ? `<button class="btn primary" data-act="close-modal-go" data-href="#/child/${x.child_id}">${t("ld_open_child")}</button>` : `<button class="btn primary" data-act="lead-convert" data-id="${x.id}">${ic("plus")}${t("ld_convert")}</button>`}</div>`, { noFocus: true });
+  const lr = $("#ld-lr"); if (lr) lr.addEventListener("change", () => sb.from("leads").update({ lost_reason: lr.value.trim() || null }).eq("id", x.id).then(() => { x.lost_reason = lr.value.trim(); }));
+}
+ACT["lead-edit"] = (el) => { const x = CRM.leads.find((l) => l.id === el.dataset.id); if (x) leadForm(x); };
+ACT["lead-set"] = async (el) => {
+  const { data, error } = await sb.from("leads").update({ stage: el.dataset.v }).eq("id", el.dataset.id).select().single();
+  if (error) return toast(crmErr(error), true);
+  const i = CRM.leads.findIndex((l) => l.id === data.id); CRM.leads[i] = data; CRM.leadStage = data.stage;
+  closeModal(); route(); if (data.stage === "lost") setTimeout(() => leadView(data), 400);
+};
+ACT["lead-trial"] = async (el) => {
+  const d = $("#ld-td").value, tm = $("#ld-tt").value || "11:00"; if (!d) return;
+  const { error } = await sb.from("leads").update({ stage: "trial", trial_at: new Date(d + "T" + tm).toISOString() }).eq("id", el.dataset.id);
+  if (error) return toast(crmErr(error), true);
+  CRM.leadStage = "trial"; closeModal(); toast(t("ld_saved")); route();
+};
+ACT["lead-convert"] = (el) => {
+  const x = CRM.leads.find((l) => l.id === el.dataset.id); if (!x) return;
+  CRM.pendingLead = x.id;
+  openModal(childFormHtml({ first_name: (x.child_name || "").split(" ")[0], birth_year: x.child_age != null ? new Date().getFullYear() - x.child_age : null,
+    parent_name: x.parent_name || "", parent_phone: x.phone || "", directions: x.directions || [], branch_id: x.branch_id || S.me.branch_id || (S.branches[0] && S.branches[0].id) }),
+    { onClose: () => setTimeout(() => { if (!/^#\/child\//.test(location.hash)) CRM.pendingLead = null; }, 50) });
+};
+window.addEventListener("hashchange", async () => {
+  const m = /^#\/child\/([0-9a-f-]{36})$/.exec(location.hash);
+  if (!m || !CRM.pendingLead) return;
+  const id = CRM.pendingLead; CRM.pendingLead = null;
+  const { error } = await sb.from("leads").update({ stage: "won", child_id: m[1] }).eq("id", id);
+  if (!error) toast(t("ld_converted"));
+});
+
+/* --- публичная форма онлайн-заявки: ?lead=<org_id> --- */
+async function renderLeadForm(orgId) {
+  applyTheme();
+  $("#app").innerHTML = `<div class="boot"><div class="spinner"></div></div>`;
+  const { data } = await sb.rpc("lead_form_info", { p_org: orgId });
+  if (!data) { $("#app").innerHTML = `<div class="center-screen"><div class="center-card card">${emptyState("link", t("lf_nf"), "")}</div></div>`; return; }
+  document.title = data.name + " · " + t("lf_title");
+  const dirs = (data.directions || []).filter((d) => DIRS.includes(d));
+  $("#app").innerHTML = `<div class="center-screen"><div class="center-card card card-pad" style="max-width:480px">
+    <div class="row" style="justify-content:space-between;margin-bottom:14px">${brand()}<div>${langSwitch()}</div></div>
+    <h1 style="font-size:24px">${esc(data.name)}</h1><p class="muted" style="margin:4px 0 16px">${data.city ? esc(data.city) + " · " : ""}${esc(t("lf_sub"))}</p>
+    <form data-form="lead-public" data-org="${esc(orgId)}" class="form-grid">
+      <div class="field"><label>${t("ld_parent")}</label><input class="input" name="parent" required maxlength="80" autocomplete="name"></div>
+      <div class="field"><label>${t("ld_phone")}</label><input class="input" name="phone" type="tel" required maxlength="30" placeholder="+7 7__ ___ __ __" autocomplete="tel"></div>
+      <div class="form-row"><div class="field"><label>${t("ld_child")}</label><input class="input" name="child" maxlength="80"></div>
+        <div class="field"><label>${t("ld_age")}</label><input class="input" name="age" type="number" min="0" max="25"></div></div>
+      ${dirs.length ? `<div class="field"><span class="label">${t("ld_dirs")}</span><div class="chips-select">${dirs.map((d) => `<label class="chip-toggle"><input type="checkbox" name="dirs" value="${d}">${esc(t("dirf_" + d))}</label>`).join("")}</div></div>` : ""}
+      <div class="field"><label>${t("ld_note")} <span class="hint">${t("optional")}</span></label><textarea class="input" name="note" maxlength="600" placeholder="${esc(t("lf_note_ph"))}"></textarea></div>
+      <div class="error-text hidden" data-err></div>
+      <button class="btn primary" style="width:100%;justify-content:center">${t("lf_send")}</button>
+    </form>
+    <p class="hint" style="margin-top:12px;text-align:center">Сөйле Pro</p></div></div>`;
+}
+FORMS["lead-public"] = async (f, fd) => {
+  const phone = String(fd.get("phone") || ""); if (phoneDigits(phone).length < 10) return showFormErr(f, t("lf_bad_phone"));
+  const src = new URLSearchParams(location.search).get("src") || "form";
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const { error } = await sb.rpc("submit_lead", { p_org: f.dataset.org, p_parent: String(fd.get("parent") || ""), p_phone: phone, p_child: String(fd.get("child") || ""),
+      p_age: fd.get("age") !== "" ? Number(fd.get("age")) : null, p_note: String(fd.get("note") || ""), p_dirs: fd.getAll("dirs"), p_source: src });
+    if (error) { const m = String(error.message || ""); return showFormErr(f, m.includes("bad_phone") ? t("lf_bad_phone") : m.includes("name_required") ? t("lf_name_req") : t("err")); }
+    f.outerHTML = `<div class="alert info" style="margin-top:8px">${ic("check")}<div>${esc(t("lf_done"))}</div></div>`;
+  });
+};
+
+/* ---------- 2. Напоминания родителям о завтрашних занятиях ---------- */
+ACT["remind-tomorrow"] = async () => {
+  const d = addDays(todayISO(), 1);
+  const [kids, r] = await Promise.all([getKids(), sb.from("lessons").select("*").eq("org_id", S.org.id).eq("status", "planned")
+    .gte("starts_at", new Date(d + "T00:00:00").toISOString()).lt("starts_at", new Date(addDays(d, 1) + "T00:00:00").toISOString()).order("starts_at")]);
+  if (r.error) return toast(crmErr(r.error), true);
+  const sent = LS.get("rm_sent_" + d, []);
+  const L = (r.data || []).filter((l) => S.me.role !== "specialist" || l.member_id === S.me.id);
+  const dLong = fmtDate(d, { weekday: "long", day: "numeric", month: "long" });
+  openModal(`${modalHead(t("rm_title"), dLong)}<div class="modal-body">
+    ${L.length ? `<p class="hint" style="margin-bottom:10px">${t("rm_sub")}</p><div class="list" style="margin:0 -20px">${L.map((l) => {
+      const k = kidById(l.child_id) || {}; const sp = staffName(l.member_id);
+      const txt = t("rm_text", { p: k.parent_name ? ", " + k.parent_name.split(" ")[0] : "", d: dLong, t: hhmm(l.starts_at), c: k.first_name || "", o: S.org.name, s: sp ? " (" + sp + (l.room ? ", " + t("sc_room_s") + " " + l.room : "") + ")" : "" });
+      return `<div class="list-item"><span class="t"><b>${hhmm(l.starts_at)} · ${esc(childName(k))}</b><span>${esc(k.parent_name || "")}${sp ? " · " + esc(sp) : ""}</span></span>
+        ${sent.includes(l.id) ? `<span class="tag ok">${ic("check", 12)}${t("rm_sent")}</span>` : ""}
+        ${k.parent_phone ? `<a class="btn sm ${sent.includes(l.id) ? "" : "primary"}" target="_blank" rel="noopener" data-rm="${l.id}" href="${waLink(txt, k.parent_phone)}">${ic("chat", 14)}WhatsApp</a>` : `<span class="tag warn">${t("rm_nophone")}</span>`}</div>`;
+    }).join("")}</div>` : emptyState("calendar", t("rm_none"), "")}
+  </div><div class="modal-foot"><span class="spacer"></span><button class="btn" data-act="close-modal">${t("close")}</button></div>`);
+  $$("[data-rm]").forEach((a) => a.addEventListener("click", () => { const s = LS.get("rm_sent_" + d, []); if (!s.includes(a.dataset.rm)) s.push(a.dataset.rm); LS.set("rm_sent_" + d, s); a.classList.remove("primary"); }));
+};
+
+/* --- для родителя: ближайшие занятия на его странице (?p=...) --- */
+function pvLessons(d) {
+  const L = d.lessons || []; if (!L.length && d.lessons_left == null) return "";
+  const today = todayISO(), tom = addDays(today, 1);
+  const lbl = (iso) => { const x = isoLocal(iso); return x === today ? t("pv_today") : x === tom ? t("pv_tomorrow") : fmtDate(x, { weekday: "short", day: "numeric", month: "short" }); };
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><h3>${t("pv_next")}</h3></div>
+    ${L.length ? `<div class="list">${L.slice(0, 6).map((l) => `<div class="list-item"><span class="sc-dot" style="background:${l.direction ? DIR_COLORS[l.direction] : "var(--border-strong)"}"></span>
+      <span class="t"><b>${esc(lbl(l.at))} · ${hhmm(l.at)}</b><span>${l.direction ? esc(t("dirf_" + l.direction)) : ""}${l.specialist ? " · " + esc(l.specialist) : ""}${l.room ? " · " + esc(t("sc_room_s")) + " " + esc(l.room) : ""}</span></span></div>`).join("")}</div>` : ""}
+    ${d.lessons_left != null ? `<div class="card-body hint">${esc(t("pv_left", { n: d.lessons_left }))}</div>` : ""}</div>`;
+}
+
+/* ---------- 3. Зарплата специалистов ---------- */
+PAGES.salary = async (el, args, alive) => {
+  document.title = t("nav_salary") + " · Сөйле Pro";
+  const month = args[0] && /^\d{4}-\d{2}$/.test(args[0]) ? args[0] : todayISO().slice(0, 7);
+  const m1 = month + "-01"; const n = new Date(m1 + "T00:00:00"); n.setMonth(n.getMonth() + 1); const m2 = isoLocal(n);
+  const p = new Date(m1 + "T00:00:00"); p.setMonth(p.getMonth() - 1); const prev = isoLocal(p).slice(0, 7);
+  const { data, error } = await sb.rpc("crm_salary", { p_org: S.org.id, p_from: m1, p_to: addDays(m2, -1) });
+  if (!alive()) return; if (error) throw error;
+  const rows = (data || []).map((r) => ({ ...r, m: S.staff.find((x) => x.id === r.member_id) })).filter((r) => r.m).sort((a, b) => b.done - a.done);
+  CRM.salary = rows; CRM.salaryMonth = month;
+  const total = rows.reduce((a, r) => a + r.salary, 0), rev = rows.reduce((a, r) => a + r.revenue, 0);
+  const monthName = new Date(m1 + "T00:00:00").toLocaleDateString(locale(), { month: "long", year: "numeric" });
+  const rateTxt = (r) => !r.amount ? `<span class="tag warn">${t("sl_no_rate")}</span>` : r.mode === "percent" ? r.amount + "%" : money(r.amount);
+  el.innerHTML = `
+  ${pageHead(t("sl_title"), monthName, `<div class="row" style="gap:6px">
+      <button class="btn icon" data-act="go" data-href="#/salary/${prev}" aria-label="‹">${ic("left")}</button>
+      <button class="btn" data-act="go" data-href="#/salary">${t("sc_today")}</button>
+      <button class="btn icon" data-act="go" data-href="#/salary/${m2.slice(0, 7)}" aria-label="›">${ic("right")}</button></div>
+      <button class="btn" data-act="salary-csv">${ic("report")}${t("sl_csv")}</button>`)}
+  <div class="grid g-3" style="margin-bottom:16px">
+    <div class="card kpi"><div class="label">${ic("wallet")}${t("sl_total")}</div><div class="value num">${money(total)}</div><div class="foot"></div></div>
+    <div class="card kpi"><div class="label">${ic("calendar")}${t("sl_done")}</div><div class="value num">${rows.reduce((a, r) => a + r.done, 0)}</div><div class="foot">${t("sl_missed")}: ${rows.reduce((a, r) => a + r.missed, 0)}</div></div>
+    <div class="card kpi"><div class="label">${ic("trend")}${t("sl_rev")}</div><div class="value num">${money(rev)}</div><div class="foot"></div></div>
+  </div>
+  <div class="card"><div class="table-wrap"><table class="table">
+    <thead><tr><th>${t("sl_staff")}</th><th class="r">${t("sl_done")}</th><th class="r hide-m">${t("sl_missed")}</th><th class="hide-m">${t("sl_rate")}</th><th class="r">${t("sl_sum")}</th><th></th></tr></thead>
+    <tbody>${rows.map((r) => `<tr><td><div class="person"><span class="avatar">${esc(initials(r.m.full_name))}</span><div><b>${esc(r.m.full_name || roleName(r.m.role))}</b><span>${esc(r.m.specialty || roleName(r.m.role))}</span></div></div></td>
+      <td class="r num">${r.done}</td><td class="r num hide-m">${r.missed}</td><td class="hide-m">${rateTxt(r)}${r.count_missed ? ` <span class="faint small">+${t("st_missed").toLowerCase()}</span>` : ""}</td>
+      <td class="r num"><b>${fmtMoney(r.salary)}</b></td><td class="r"><button class="btn ghost sm" data-act="rate-edit" data-id="${r.member_id}">${ic("edit", 14)}</button></td></tr>`).join("")}</tbody></table></div>
+    <div class="card-body hint">${t("sl_hint")}</div></div>`;
+};
+ACT["rate-edit"] = (el) => {
+  const r = (CRM.salary || []).find((x) => x.member_id === el.dataset.id); if (!r) return;
+  openModal(`${modalHead(t("sl_set"), r.m.full_name || "")}
+    <form data-form="rate-save" data-id="${r.member_id}"><div class="modal-body form-grid">
+      <div class="seg" id="rt-mode"><button type="button" data-v="lesson" class="${r.mode !== "percent" ? "on" : ""}">${t("sl_mode_lesson")}</button><button type="button" data-v="percent" class="${r.mode === "percent" ? "on" : ""}">${t("sl_mode_percent")}</button></div>
+      <input type="hidden" name="mode" value="${r.mode === "percent" ? "percent" : "lesson"}">
+      <div class="field"><label id="rt-lbl">${r.mode === "percent" ? "%" : "₸"}</label><input class="input" type="number" name="amount" min="0" max="${r.mode === "percent" ? 100 : 1000000}" step="1" value="${r.amount || ""}" required></div>
+      <label class="check"><input type="checkbox" name="count_missed" ${r.count_missed ? "checked" : ""}> ${t("sl_count_missed")}</label>
+      <div class="error-text hidden" data-err></div></div>
+    <div class="modal-foot"><button type="button" class="btn" data-act="close-modal">${t("cancel")}</button><button class="btn primary">${ic("check")}${t("save")}</button></div></form>`);
+  $("#rt-mode").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; $$("#rt-mode button").forEach((x) => x.classList.toggle("on", x === b)); $("[name=mode]").value = b.dataset.v; $("#rt-lbl").textContent = b.dataset.v === "percent" ? "%" : "₸"; $("[name=amount]").max = b.dataset.v === "percent" ? 100 : 1000000; });
+};
+FORMS["rate-save"] = async (f, fd) => {
+  await busy(f.querySelector(".btn.primary"), async () => {
+    const { error } = await sb.from("staff_rates").upsert({ member_id: f.dataset.id, org_id: S.org.id, mode: String(fd.get("mode")), amount: Math.round(+fd.get("amount") || 0), count_missed: !!fd.get("count_missed"), updated_at: new Date().toISOString() });
+    if (error) return showFormErr(f, crmErr(error));
+    closeModal(); toast(t("saved")); route();
+  });
+};
+ACT["salary-csv"] = () => {
+  const rows = CRM.salary || [];
+  const head = [t("sl_staff"), t("sl_done"), t("sl_missed"), t("st_excused"), t("st_cancelled"), t("sl_rate"), t("sl_sum")];
+  const lines = [head].concat(rows.map((r) => [r.m.full_name || "", r.done, r.missed, r.excused, r.cancelled, r.mode === "percent" ? r.amount + "%" : r.amount, r.salary]));
+  const csv = "﻿" + lines.map((l) => l.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(";")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "zarplata-" + (CRM.salaryMonth || "") + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+};
+
+/* ---------- 4. «Сегодня по расписанию» на главной ---------- */
+const _overview = PAGES.overview;
+PAGES.overview = async (el, args, alive) => {
+  await _overview(el, args, alive);
+  if (!alive()) return;
+  const d = todayISO();
+  const [kids, r] = await Promise.all([getKids(), sb.from("lessons").select("*").eq("org_id", S.org.id)
+    .gte("starts_at", new Date(d + "T00:00:00").toISOString()).lt("starts_at", new Date(addDays(d, 1) + "T00:00:00").toISOString()).order("starts_at")]);
+  if (!alive() || r.error) return;
+  const mine = S.me.role === "specialist";
+  const L = (r.data || []).filter((l) => !mine || l.member_id === S.me.id);
+  CRM.lessons = L;
+  const marked = L.filter((l) => l.status !== "planned").length;
+  const card = document.createElement("div"); card.className = "card"; card.style.marginBottom = "16px"; card.id = "today-card";
+  card.innerHTML = `<div class="card-head"><h3>${t("td_title")}</h3><div class="row wrap" style="gap:6px">${L.length ? `<span class="small muted">${esc(t("td_marked", { a: marked, b: L.length }))}</span>` : ""}
+      <button class="btn ghost sm" data-act="remind-tomorrow">${ic("chat", 14)}${t("rm_btn")}</button><a class="btn ghost sm" href="#/schedule">${t("td_all")}${ic("right", 14)}</a></div></div>
+    ${L.length ? `<div class="td-list">${L.map(lessonTile).join("")}</div>` : `<div class="card-body faint">${t("td_none")}</div>`}`;
+  const head = el.querySelector(".page-head");
+  if (head && head.nextSibling) head.parentNode.insertBefore(card, head.nextSibling); else el.prepend(card);
+};
+
+(function () {
+  const css = `
+  .ld-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:start}
+  .ld-col{background:var(--surface-3);border-radius:var(--r-lg);padding:10px;min-height:120px}
+  .ld-ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.ld-ch b{font-size:13px;color:var(--text-3)}
+  .ld-card{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;border:0;background:var(--surface);border-radius:12px;padding:10px 11px;margin-bottom:8px;cursor:pointer;font:inherit;color:var(--text);box-shadow:var(--shadow)}
+  .ld-card:hover{box-shadow:var(--shadow-lg)}.ld-card b{font-size:14px;font-weight:600}.ld-card>span{font-size:12.5px;color:var(--text-2)}
+  .ld-meta{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px;width:100%}.ld-ago{margin-left:auto;font-size:11.5px;color:var(--text-3)}
+  .ld-seg{display:none;flex-wrap:wrap}.ld-seg b{font-weight:700;color:var(--text-3);margin-left:2px}
+  .td-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;padding:4px 16px 16px}.td-list .sc-l{margin:0}
+  .copy-box code{word-break:break-all}
+  @media (max-width:1100px){.ld-board{grid-template-columns:minmax(0,1fr)}.ld-col{display:none;background:none;padding:0}.ld-col.on{display:block}.ld-ch{display:none}.ld-seg{display:inline-flex}}`;
+  const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+})();
